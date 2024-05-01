@@ -26,7 +26,7 @@ class Hauptfenster():
 
         self.__root = Tk()
         self.__root.title("KuppelStopper 3.0")
-        self.__root.minsize(700, 400)
+        self.__root.minsize(1000, 700)
 
         self.icon = PhotoImage(file='./Resources/Kuppelstopper.png')
         self.__root.iconphoto(False, self.icon)
@@ -44,19 +44,41 @@ class Hauptfenster():
         self.style.configure('TNotebook.Tab', relief=SOLID, borderwidth=0, bordercolor=COLOR_TAB_INACTIVE, darkcolor=COLOR_TAB_INACTIVE, lightcolor=COLOR_TAB_INACTIVE, padding=[10,5], background=COLOR_TAB_INACTIVE)
         self.style.map('TNotebook.Tab', background=[("selected",COLOR_TAB_ACTIVE),("active",COLOR_TAB_ACTIVE)])
         self.style.configure('TButton', relief=SOLID, borderwidth=0, bordercolor=COLOR_BUTTON_ACTIVE, darkcolor=COLOR_BUTTON_ACTIVE, lightcolor=COLOR_BUTTON_ACTIVE, padding=[10,5], background=COLOR_BUTTON_ACTIVE)
-        self.style.map('TButton',
-                       background=[("active",COLOR_BUTTON_HOVER),("disabled",COLOR_BUTTON_DISABLED)],
-                       foreground=[("disabled",COLOR_BUTTON_DISABLED)])
+        self.style.map('TButton', background=[("active",COLOR_BUTTON_HOVER),("disabled",COLOR_BUTTON_DISABLED)], foreground=[("disabled",COLOR_BUTTON_DISABLED)])
 
         # Menü
         self.__root.tabControl = Notebook(self.__root, padding='0')
         self.__root.tab1 = Frame(self.__root.tabControl, padding='5')
         self.__root.tab2 = Frame(self.__root.tabControl, padding='5')
         self.__root.tab3 = Frame(self.__root.tabControl, padding='5')
-        self.__root.tabControl.add(self.__root.tab1, text='Zeitnehmung')
-        self.__root.tabControl.add(self.__root.tab2, text='Wettkampfgruppen')
+        self.__root.tabControl.add(self.__root.tab1, text='Anmeldung')
+        self.__root.tabControl.add(self.__root.tab2, text='Übersicht - Zeitnehmung')
         self.__root.tabControl.add(self.__root.tab3, text='Einstellungen')
         self.__root.tabControl.pack(expand=1, fill="both")
+   
+        # Tab Wettkampfgruppen
+        self.config = IntVar()
+        self.config.set(1)
+
+        self.__root.Entry = Entry(self.__root.tab1, takefocus = 0)
+        self.__root.Entry.pack(side='top', fill='x')
+        self.__root.Entry.bind("<Return>", self.addWettkampfgruppe)
+        self.var = StringVar(value=self.Wettkampfgruppen)
+        self.__root.ListBox = Listbox(self.__root.tab1, listvariable=self.var, activestyle='none', selectmode=SINGLE, takefocus = 0)
+        self.__root.ListBox.pack(expand=1, side='top', fill='both')
+        self.__root.ListBox.bind("<Delete>", self.deleteWettkampfgruppe)
+        self.__root.ListBox.bind('<<ListboxSelect>>', self.itemSelected)
+
+        self.__root.setupBewerb = LabelFrame(self.__root.tab1, text="Bewerb Konfigration", borderwidth=1, relief=SOLID)
+        self.__root.setupBewerb.pack(side='top', fill='x', padx='10', pady='10')
+        self.__root.config1 = Radiobutton(self.__root.setupBewerb, text="GR:2x AF:1x VF:1x HB:1x KF:1x GF:2x", variable=self.config, value=1, takefocus=0)
+        self.__root.config1.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+        self.__root.config2 = Radiobutton(self.__root.setupBewerb, text="GR:2x VF:2x HB:2x KF:2x GF:2x", variable=self.config, value=2, takefocus=0)
+        self.__root.config2.grid(row=1, column=0, sticky=(W), padx='10', pady='5')
+        legende = "GR.....Grunddurchgang\nAF.....Achtelfinale(16)\nVF.....Viertelfinale(8)\nHF.....Halbfinale(4)\nKF.....Kleines Finale(2)\nAF.....Große Finale(2)\n1x.....1 Bahn\n2x.....Beide Bahnen"
+        self.__root.configLegende = Label(self.__root.setupBewerb, text=legende, takefocus = 0)
+        self.__root.configLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
+
 
         # Tab Zeitnehmung
         self.checked_Bahn_1 = BooleanVar()
@@ -64,65 +86,72 @@ class Hauptfenster():
         self.checked_Bahn_1.set(True)
         self.checked_Bahn_2.set(True)
 
-        self.__root.allgemein = LabelFrame(self.__root.tab1, text="Allgemein", borderwidth=1, relief=SOLID)
-        self.__root.allgemein.pack(side='top', fill='x', padx='10')
+        self.__root.dg = LabelFrame(self.__root.tab2, text="Durchgänge", borderwidth=1, relief=SOLID)
+        self.__root.dg.pack(side='top', fill='both', padx='10')
 
-        self.__root.BtnStart = Button(self.__root.allgemein, text="Start", width=10, padding=10, command=self.start, takefocus = 0)
+        # Content automatisch erzeugen nach Anmeldungen erzeugen
+
+        self.__root.test = Combobox(self.__root.dg, textvariable=StringVar(), state="readonly", takefocus = 0)
+        self.__root.test.grid(row=0, column=0, pady='10', padx='10')
+
+        self.__root.test2 = Combobox(self.__root.dg, textvariable=StringVar(), state="readonly", takefocus = 0)
+        self.__root.test2.grid(row=1, column=0)
+
+        self.__root.test3 = Combobox(self.__root.dg, textvariable=StringVar(), state="readonly", takefocus = 0)
+        self.__root.test3.grid(row=2, column=0, pady='10')
+
+        self.__root.test4= Combobox(self.__root.dg, textvariable=StringVar(), state="readonly", takefocus = 0)
+        self.__root.test4.grid(row=3, column=0)
+
+
+        self.__root.zeitnehmung = LabelFrame(self.__root.tab2, text="Aktueller Durchgang", borderwidth=1, relief=SOLID)
+        self.__root.zeitnehmung.pack(side='left', padx='10')
+
+        self.__root.BtnStart = Button(self.__root.zeitnehmung, text="Start", width=10, padding=10, command=self.start, takefocus = 0)
         self.__root.BtnStart.pack(side='left', padx='10', pady='10')
-        self.__root.BtnAllesStop = Button(self.__root.allgemein, text="Alles Stop", width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
+        self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text="Alles Stop", width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
         self.__root.BtnAllesStop.pack(side='left', pady='10')
-        self.__root.BtnReset = Button(self.__root.allgemein, text="Reset", width=10, padding=10, command=self.reset, takefocus = 0, state=DISABLED)
+        self.__root.BtnReset = Button(self.__root.zeitnehmung, text="Reset", width=10, padding=10, command=self.reset, takefocus = 0, state=DISABLED)
         self.__root.BtnReset.pack(side='right', padx='10', pady='10') 
-        self.__root.BtnLoeschen = Button(self.__root.allgemein, text="Löschen", width=10, padding=10, command=self.loeschen, takefocus = 0)
+        self.__root.BtnLoeschen = Button(self.__root.zeitnehmung, text="Löschen", width=10, padding=10, command=self.loeschen, takefocus = 0, state=DISABLED)
         self.__root.BtnLoeschen.pack(side='right', padx='10', pady='10')        
-        self.__root.BtnWechsel = Button(self.__root.allgemein, text="Bahn Wechsel", width=15, padding=10, command=self.bahnWechsel, takefocus = 0)
+        self.__root.BtnWechsel = Button(self.__root.zeitnehmung, text="Bahn Wechsel", width=15, padding=10, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
         self.__root.BtnWechsel.pack(side='right', padx='10', pady='10')
 
-        self.__root.hauptbewerb = LabelFrame(self.__root.tab1, text="Hauptbewerb", borderwidth=1, relief=SOLID)
-        self.__root.hauptbewerb.pack(expand=1, side='top', fill='both', padx='10', pady='5')
+        self.__root.bahnen = LabelFrame(self.__root.tab2, text="Zeitnehmung", borderwidth=1, relief=SOLID)
+        self.__root.bahnen.pack(side='left', padx='10')
 
-        self.__root.CB1 = Checkbutton(self.__root.hauptbewerb, text="Bahn 1", variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
+        self.__root.CB1 = Checkbutton(self.__root.bahnen, text="Bahn 1", variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
         self.__root.CB1.grid(row=0, column=0, padx='10')
-        self.__root.G1 = Combobox(self.__root.hauptbewerb, textvariable=StringVar(), state="readonly", takefocus = 0)
+        self.__root.G1 = Combobox(self.__root.bahnen, textvariable=StringVar(), state="readonly", takefocus = 0)
         self.__root.G1.bind('<<ComboboxSelected>>',self.updateGruppe1)
         self.__root.G1.grid(row=0, column=1, padx='10')
-        self.__root.T1 = Label(self.__root.hauptbewerb, text="00:00:00", font=("Helvetica", 20), takefocus = 0)
+        self.__root.T1 = Label(self.__root.bahnen, text="00:00:00", font=("Helvetica", 20), takefocus = 0)
         self.__root.T1.grid(row=0, column=2, padx='10')
-        self.__root.B1 = Button(self.__root.hauptbewerb, text="Stop", width=10, command=self.stop_1, takefocus = 0)
+        self.__root.B1 = Button(self.__root.bahnen, text="Stop", width=10, command=self.stop_1, takefocus = 0)
         self.__root.B1.grid(row=0, column=3)
 
-        self.__root.CB2 = Checkbutton(self.__root.hauptbewerb, text="Bahn 2", variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
+        self.__root.CB2 = Checkbutton(self.__root.bahnen, text="Bahn 2", variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
         self.__root.CB2.grid(row=1, column=0, padx='10')
-        self.__root.G2 = Combobox(self.__root.hauptbewerb, textvariable=StringVar(), state="readonly", takefocus = 0)
+        self.__root.G2 = Combobox(self.__root.bahnen, textvariable=StringVar(), state="readonly", takefocus = 0)
         self.__root.G2.bind('<<ComboboxSelected>>',self.updateGruppe2)
         self.__root.G2.grid(row=1, column=1, padx='10')
-        self.__root.T2 = Label(self.__root.hauptbewerb, text="00:00:00", font=("Helvetica", 20), takefocus = 0)
+        self.__root.T2 = Label(self.__root.bahnen, text="00:00:00", font=("Helvetica", 20), takefocus = 0)
         self.__root.T2.grid(row=1, column=2, padx='10')
-        self.__root.B2 = Button(self.__root.hauptbewerb, text="Stop", width=10, command=self.stop_2, takefocus = 0)
+        self.__root.B2 = Button(self.__root.bahnen, text="Stop", width=10, command=self.stop_2, takefocus = 0)
         self.__root.B2.grid(row=1, column=3)
 
-        # Tab Wettkampfgruppen
-        self.__root.Entry = Entry(self.__root.tab2, takefocus = 0)
-        self.__root.Entry.pack(side='top', fill='x')
-        self.__root.Entry.bind("<Return>", self.addWettkampfgruppe)
-        self.var = StringVar(value=self.Wettkampfgruppen)
-        self.__root.ListBox = Listbox(self.__root.tab2, listvariable=self.var, activestyle='none', selectmode=SINGLE, takefocus = 0)
-        self.__root.ListBox.pack(expand=1, side='top', fill='both')
-        self.__root.ListBox.bind("<Delete>", self.deleteWettkampfgruppe)
-        self.__root.ListBox.bind('<<ListboxSelect>>', self.itemSelected)
 
         # Tab Einstellungen
         self.checked_Tastatur = BooleanVar()
         self.checked_GPIO = BooleanVar()
         self.checked_Rahmen = BooleanVar()
         self.checked_Konsole = BooleanVar()
-        self.config = IntVar()
 
-        self.checked_Tastatur.set(False)
+        self.checked_Tastatur.set(True)
         self.checked_GPIO.set(False)
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(False)
-        self.config.set(1)
 
         self.__root.setupEingabe = LabelFrame(self.__root.tab3, text="Eingabe", borderwidth=1, relief=SOLID)
         self.__root.setupEingabe.pack(side='top', fill='x', padx='10', pady='5')
@@ -195,16 +224,6 @@ class Hauptfenster():
         self.__root.SGG = Spinbox(self.__root.setupStyle, width=3, from_=1, to=500, command=self.updateFontSizeGruppe, takefocus = 0)
         self.__root.SGG.grid(row=0, column=3, padx='10', pady='10')
         self.__root.SGG.set(30)
-
-        self.__root.setupBewerb = LabelFrame(self.__root.tab3, text="Bewerb Konfigration", borderwidth=1, relief=SOLID)
-        self.__root.setupBewerb.pack(side='top', fill='x', padx='10', pady='10')
-        self.__root.config1 = Radiobutton(self.__root.setupBewerb, text="GR:2x AF:1x VF:1x HB:1x KF:1x GF:2x", variable=self.config, value=1, takefocus=0)
-        self.__root.config1.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
-        self.__root.config2 = Radiobutton(self.__root.setupBewerb, text="GR:2x VF:2x HB:2x KF:2x GF:2x", variable=self.config, value=2, takefocus=0)
-        self.__root.config2.grid(row=1, column=0, sticky=(W), padx='10', pady='5')
-        legende = "GR.....Grunddurchgang\nAF.....Achtelfinale(16)\nVF.....Viertelfinale(8)\nHF.....Halbfinale(4)\nKF.....Kleines Finale(2)\nAF.....Große Finale(2)\n1x.....1 Bahn\n2x.....Beide Bahnen"
-        self.__root.configLegende = Label(self.__root.setupBewerb, text=legende, takefocus = 0)
-        self.__root.configLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
 
         self.__root.Konsole = Label(self.__root, takefocus = 0, foreground='#8f8e8c')
         self.__root.Konsole.pack(expand=1, side='top', fill='both')
@@ -358,7 +377,9 @@ class Hauptfenster():
     def start(self):   
         self.__root.BtnStart["state"] = DISABLED
         self.__root.BtnAllesStop["state"] = NORMAL
-        self.__root.BtnReset["state"] = NORMAL
+        self.__root.BtnWechsel["state"] = DISABLED
+        self.__root.BtnLoeschen["state"] = DISABLED
+        self.__root.BtnReset["state"] = DISABLED
 
         self.writeKonsole("Der Angriffbefehl wurde erteilt!")
         self.wechselAnsichtZurZeit()
@@ -392,6 +413,11 @@ class Hauptfenster():
                 self.writeKonsole("Zeit 1 mit Taste '" + event.char + "' angehalten!")
         if self.checked_GPIO.get() == True and event == None:
             self.writeKonsole("Zeit 1 mit Buzzer bzw Button angehalten!")
+        if self.time_is_running_1 == False and self.time_is_running_2 == False:
+            self.__root.BtnAllesStop["state"] = DISABLED
+            self.__root.BtnWechsel["state"] = NORMAL
+            self.__root.BtnLoeschen["state"] = NORMAL
+            self.__root.BtnReset["state"] = NORMAL
 
     def stop_2(self, event=None):
         self.time_is_running_2 = False
@@ -401,6 +427,11 @@ class Hauptfenster():
                 self.writeKonsole("Zeit 2 mit Taste '" + event.char + "' angehalten!")
         if self.checked_GPIO.get() == True and event == None:
             self.writeKonsole("Zeit 1 mit Buzzer bzw Button angehalten!")
+        if self.time_is_running_1 == False and self.time_is_running_2 == False:
+            self.__root.BtnAllesStop["state"] = DISABLED
+            self.__root.BtnWechsel["state"] = NORMAL
+            self.__root.BtnLoeschen["state"] = NORMAL
+            self.__root.BtnReset["state"] = NORMAL
 
     def reset(self):
         self.__root.T1.config(text="00:00:00")
@@ -408,7 +439,6 @@ class Hauptfenster():
         self.anzeige.Z1.config(text="00:00:00")
         self.anzeige.Z2.config(text="00:00:00")
         self.__root.BtnStart["state"] = NORMAL
-        self.__root.BtnAllesStop["state"] = DISABLED
         self.__root.BtnReset["state"] = DISABLED
         self.writeKonsole("Zeit und Button zurückgesetzt!")
         self.wechselAnsichtZurAuswertung()
@@ -418,6 +448,7 @@ class Hauptfenster():
         self.__root.G2.set("")
         self.anzeige.G1.config(text="")
         self.anzeige.G2.config(text="")
+        # self.__root.BtnLoeschen["state"] = DISABLED
         self.writeKonsole("Gruppenauswahl gelöscht!")
 
     def update_time_1(self):
@@ -462,5 +493,3 @@ class Hauptfenster():
 
 Hauptfenster()
 
-if __name__ == '__main__':
-    mainloop()
