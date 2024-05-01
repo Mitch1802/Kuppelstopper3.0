@@ -56,7 +56,7 @@ class Hauptfenster():
         self.__root.tabControl.add(self.__root.tab3, text='Einstellungen')
         self.__root.tabControl.pack(expand=1, fill="both")
    
-        # Tab Wettkampfgruppen
+        # Tab Anmeldung
         self.config = IntVar()
         self.config.set(1)
 
@@ -80,7 +80,7 @@ class Hauptfenster():
         self.__root.configLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
 
 
-        # Tab Zeitnehmung
+        # Tab Übersicht - Zeitnehmung
         self.checked_Bahn_1 = BooleanVar()
         self.checked_Bahn_2 = BooleanVar()
         self.checked_Bahn_1.set(True)
