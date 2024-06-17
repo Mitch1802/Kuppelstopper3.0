@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter.ttk import *
 from datetime import datetime
 import time
-import os
 from gpiozero import Button as GPIO_Button
 
 
@@ -31,7 +30,9 @@ class Hauptfenster():
         self.__root.minsize(1000, 700)
 
         self.icon = PhotoImage(file='./Resources/Kuppelstopper.png')
-        self.__root.iconphoto(False, self.icon)        
+        self.__root.iconphoto(False, self.icon)       
+
+        self.iconDelete = PhotoImage(file='./Resources/delete.png')
         
         COLOR_FTab_INACTIVE = '#FFFFFF'
         COLOR_FTab_ACTIVE = '#D3C9C6'
@@ -75,7 +76,6 @@ class Hauptfenster():
             self.__root.LNoGroups = Label(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!', takefocus = 0)
             self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
 
-
         # self.var = Stringvar(value=self.Wettkampfgruppen)
         # self.__root.ListBox = Listbox(self.__root.anmeldungWettkampfgruppen, listvariable=self.var, activestyle='none', selectmode=SINGLE, takefocus = 0)
         # self.__root.ListBox.pack(expand=1, side='top', fill='both', padx='10', pady='10')
@@ -92,6 +92,9 @@ class Hauptfenster():
         self.__root.LConfigLegende = Label(self.__root.LfSetupBewerb, text=legende, takefocus = 0)
         self.__root.LConfigLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
 
+        self.__root.BtnStart = Button(self.__root.FTab1, text='Start', width=10, padding=10, command=self.uebernahmeGruppen, takefocus = 0)
+        self.__root.BtnStart.pack(side='left', padx='10', pady='10')
+
 
         # FTab Übersicht - Zeitnehmung
         self.checked_Bahn_1 = BooleanVar()
@@ -103,18 +106,6 @@ class Hauptfenster():
         self.__root.dg.pack(side='top', fill='both', padx='10')
 
         # Content automatisch erzeugen nach Anmeldungen erzeugen
-
-        self.__root.test = Combobox(self.__root.dg, textvariable=StringVar(), state='readonly', takefocus = 0)
-        self.__root.test.grid(row=0, column=0, pady='10', padx='10')
-
-        self.__root.test2 = Combobox(self.__root.dg, textvariable=StringVar(), state='readonly', takefocus = 0)
-        self.__root.test2.grid(row=1, column=0)
-
-        self.__root.test3 = Combobox(self.__root.dg, textvariable=StringVar(), state='readonly', takefocus = 0)
-        self.__root.test3.grid(row=2, column=0, pady='10')
-
-        self.__root.test4= Combobox(self.__root.dg, textvariable=StringVar(), state='readonly', takefocus = 0)
-        self.__root.test4.grid(row=3, column=0)
 
 
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
@@ -352,29 +343,37 @@ class Hauptfenster():
         self.writeKonsole(name + ' wurde hinzugefügt!')
 
     def zeichneAngemeldeteGruppen(self):
-        self.__root.LNoGroups.grid_remove()
+        for widgets in self.__root.LfReihenfolge.winfo_children():
+            widgets.grid_remove()
+        
+        if len(self.Wettkampfgruppen) == 0:
+            self.__root.LNoGroups = Label(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!', takefocus = 0)
+            self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+
         validate_numbers = (self.__root.register(self.validate_only_numbers), '%d', '%P')
         for index, i in enumerate(self.Wettkampfgruppen):
             row = index + 1
             gruppenname = i['gruppenname']
             reihenfolge = i['reihenfolge']
+
             w = Label(self.__root.LfReihenfolge, text=gruppenname, takefocus = 0)
             w.grid(row=row, column=0, sticky=(W), padx='10', pady='5')
+
             e = Entry(self.__root.LfReihenfolge, width=5, validate='key', validatecommand=validate_numbers, takefocus = 0)
             e.grid(row=row, column=1, sticky=(W), padx='10', pady='5')
             e.insert(0, reihenfolge)
             e.bind('<KeyRelease>', lambda event, name=gruppenname: self.reihenfolgeSpeichern(event, name))
 
-    # def deleteWettkampfgruppe(self, event=None):
-    #     index = self.__root.ListBox.curselection()[0]
-    #     name = self.Wettkampfgruppen[index]
-    #     self.Wettkampfgruppen.remove(name)
-    #     self.var.set(self.Wettkampfgruppen)
-    #     self.__root.G1.config(values=self.Wettkampfgruppen)
-    #     self.__root.G2.config(values=self.Wettkampfgruppen)
-    #     self.__root.Entry.delete(0, END)
-    #     self.__root.Entry.insert(0, '')
-    #     self.writeKonsole(name + ' wurde gelöscht!')
+            x = Label(self.__root.LfReihenfolge, image=self.iconDelete, takefocus = 0)
+            x.grid(row=row, column=2, sticky=(W), padx='10', pady='5')
+            x.bind('<Button>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
+
+    def deleteWettkampfgruppe(self, event, name):
+        for i in self.Wettkampfgruppen:
+            if i['gruppenname'] == name:
+                self.Wettkampfgruppen.remove(i)
+        self.zeichneAngemeldeteGruppen()
+        self.writeKonsole(name + ' wurde gelöscht!')
 
     def reihenfolgeSpeichern(self, event, name):
         reihenfolge = event.widget.get()
@@ -382,6 +381,14 @@ class Hauptfenster():
             if i['gruppenname'] == name:
                 i['reihenfolge'] = reihenfolge
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
+
+    def uebernahmeGruppen(self):
+        sorted_list = sorted( self.Wettkampfgruppen, key=lambda x: x['reihenfolge'], reverse=True)
+        for i in sorted_list:
+            txt = i['reihenfolge'] + ' - ' + i['gruppenname']
+            text = Label(self.__root.dg, text=txt, takefocus = 0)
+            row = int(i['reihenfolge']) - 1
+            text.grid(row=row, column=0, sticky=(W), pady='2', padx='10')
 
     def switchBahn1State(self):
         if (self.checked_Bahn_1.get() == False):
