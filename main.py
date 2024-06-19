@@ -19,7 +19,15 @@ class Hauptfenster():
         self.Taste_Start_2 = 's'
         self.Taste_Stop_2 = 'w'
 
-        self.Wettkampfgruppen = []
+        # self.Wettkampfgruppen = []
+        self.Wettkampfgruppen = [
+            {'gruppenname': 'Gruppe1','reihenfolge': '5'},
+            {'gruppenname': 'Gruppe2','reihenfolge': '1'},
+            {'gruppenname': 'Gruppe3','reihenfolge': '2'},
+            {'gruppenname': 'Gruppe4','reihenfolge': '6'},
+            {'gruppenname': 'Gruppe5','reihenfolge': '3'},
+            {'gruppenname': 'Gruppe6','reihenfolge': '4'}
+        ]
         self.time_is_running_1 = False
         self.time_is_running_2 = False
         self.start_time_1 = ''
@@ -75,14 +83,10 @@ class Hauptfenster():
         if len(self.Wettkampfgruppen) == 0:
             self.__root.LNoGroups = Label(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!', takefocus = 0)
             self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+        else:
+            self.zeichneAngemeldeteGruppen()
 
-        # self.var = Stringvar(value=self.Wettkampfgruppen)
-        # self.__root.ListBox = Listbox(self.__root.anmeldungWettkampfgruppen, listvariable=self.var, activestyle='none', selectmode=SINGLE, takefocus = 0)
-        # self.__root.ListBox.pack(expand=1, side='top', fill='both', padx='10', pady='10')
-        # self.__root.ListBox.bind('<Delete>', self.deleteWettkampfgruppe)
-        # self.__root.ListBox.bind('<<ListboxSelect>>', self.itemSelected)
-
-        self.__root.LfSetupBewerb = LabelFrame(self.__root.FTab1, text='Bewerb Konfigration', borderwidth=1, relief=SOLID)
+        self.__root.LfSetupBewerb = LabelFrame(self.__root.FTab1, text='Bewerb Konfiguration', borderwidth=1, relief=SOLID)
         self.__root.LfSetupBewerb.pack(side='top', fill='x', padx='10', pady='10')
         self.__root.RbConfig1 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x AF:1x VF:1x HB:1x KF:1x GF:2x', variable=self.config, value=1, takefocus=0)
         self.__root.RbConfig1.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
@@ -92,8 +96,8 @@ class Hauptfenster():
         self.__root.LConfigLegende = Label(self.__root.LfSetupBewerb, text=legende, takefocus = 0)
         self.__root.LConfigLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
 
-        self.__root.BtnStart = Button(self.__root.FTab1, text='Start', width=10, padding=10, command=self.uebernahmeGruppen, takefocus = 0)
-        self.__root.BtnStart.pack(side='left', padx='10', pady='10')
+        self.__root.BtnStart = Button(self.__root.FTab1, text='Gruppen übernehmen', width=10, padding=10, command=self.uebernahmeGruppen, takefocus = 0)
+        self.__root.BtnStart.pack(side='top', fill='x', padx='10', pady='10')
 
 
         # FTab Übersicht - Zeitnehmung
@@ -257,10 +261,10 @@ class Hauptfenster():
         self.anzeige.mainloop()
 
     
-    # Validateion Functions
+    # Validation Functions
     def validate_only_numbers(self, action, value_if_allowed):
         try:
-            if action == '1': 
+            if action == '1' and int(value_if_allowed) > 0 and int(value_if_allowed) <= len(self.Wettkampfgruppen): 
                 float(value_if_allowed)
                 return True
         except ValueError:
@@ -308,12 +312,6 @@ class Hauptfenster():
         self.stop_2('')
         self.writeKonsole('Beide Zeiten mit Button angehalten!')
 
-    def itemSelected(self, event=None):
-        index = self.__root.ListBox.curselection()[0]
-        name = self.Wettkampfgruppen[index]
-        self.__root.Entry.delete(0, END)
-        self.__root.Entry.insert(0, name)
-
     def addWettkampfgruppe(self, event=None):
         name = self.__root.Entry.get()
 
@@ -350,7 +348,6 @@ class Hauptfenster():
             self.__root.LNoGroups = Label(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!', takefocus = 0)
             self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
 
-        validate_numbers = (self.__root.register(self.validate_only_numbers), '%d', '%P')
         for index, i in enumerate(self.Wettkampfgruppen):
             row = index + 1
             gruppenname = i['gruppenname']
@@ -359,7 +356,7 @@ class Hauptfenster():
             w = Label(self.__root.LfReihenfolge, text=gruppenname, takefocus = 0)
             w.grid(row=row, column=0, sticky=(W), padx='10', pady='5')
 
-            e = Entry(self.__root.LfReihenfolge, width=5, validate='key', validatecommand=validate_numbers, takefocus = 0)
+            e = Entry(self.__root.LfReihenfolge, width=5, takefocus = 0)
             e.grid(row=row, column=1, sticky=(W), padx='10', pady='5')
             e.insert(0, reihenfolge)
             e.bind('<KeyRelease>', lambda event, name=gruppenname: self.reihenfolgeSpeichern(event, name))
@@ -383,12 +380,32 @@ class Hauptfenster():
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
 
     def uebernahmeGruppen(self):
-        sorted_list = sorted( self.Wettkampfgruppen, key=lambda x: x['reihenfolge'], reverse=True)
+        sorted_list = sorted(self.Wettkampfgruppen, key=lambda x: x['reihenfolge'], reverse=False)
+        dg = 1
         for i in sorted_list:
-            txt = i['reihenfolge'] + ' - ' + i['gruppenname']
-            text = Label(self.__root.dg, text=txt, takefocus = 0)
-            row = int(i['reihenfolge']) - 1
-            text.grid(row=row, column=0, sticky=(W), pady='2', padx='10')
+            if int(i['reihenfolge']) % 2 and int(i['reihenfolge']) > 2:
+                txt = i['reihenfolge'] + ' - ' + i['gruppenname']
+                text = Label(self.__root.dg, text=txt, takefocus = 0, borderwidth=1, relief="solid")
+                row = int(i['reihenfolge']) - 1
+                text.grid(row=row, column=1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+            else:
+                row = int(i['reihenfolge']) - 1
+
+                durchgang = Label(self.__root.dg, text=dg, takefocus = 0, borderwidth=0, relief="solid", background='#98CF8B')
+                if int(i['reihenfolge']) == 1:
+                    durchgang.grid(row=row, column=0, rowspan=2, sticky=(W+E+N+S), padx=(5,0), ipadx='5')
+                else:
+                    durchgang.grid(row=int(i['reihenfolge']), column=0, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='10')
+                
+                dg += 1
+                
+
+                txt = i['reihenfolge'] + ' - ' + i['gruppenname']
+                text = Label(self.__root.dg, text=txt, takefocus = 0, borderwidth=1, relief="solid")
+                text.grid(row=row, column=1, sticky=(W), pady='0', ipady='5', ipadx='10')
+           
+        
+        self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
     def switchBahn1State(self):
         if (self.checked_Bahn_1.get() == False):
