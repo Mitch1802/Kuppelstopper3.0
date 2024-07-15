@@ -21,12 +21,26 @@ class Hauptfenster():
 
         # self.Wettkampfgruppen = []
         self.Wettkampfgruppen = [
-            {'gruppenname': 'Gruppe1','reihenfolge': '5'},
-            {'gruppenname': 'Gruppe2','reihenfolge': '1'},
-            {'gruppenname': 'Gruppe3','reihenfolge': '2'},
-            {'gruppenname': 'Gruppe4','reihenfolge': '6'},
-            {'gruppenname': 'Gruppe5','reihenfolge': '3'},
-            {'gruppenname': 'Gruppe6','reihenfolge': '4'}
+            {'gruppenname': 'Gruppe1','reihenfolge': '1'},
+            {'gruppenname': 'Gruppe2','reihenfolge': '2'},
+            {'gruppenname': 'Gruppe3','reihenfolge': '3'},
+            {'gruppenname': 'Gruppe4','reihenfolge': '4'},
+            {'gruppenname': 'Gruppe5','reihenfolge': '5'},
+            {'gruppenname': 'Gruppe6','reihenfolge': '6'},
+            {'gruppenname': 'Gruppe7','reihenfolge': '7'},
+            {'gruppenname': 'Gruppe8','reihenfolge': '8'},
+            {'gruppenname': 'Gruppe9','reihenfolge': '9'},
+            {'gruppenname': 'Gruppe10','reihenfolge': '10'},
+            {'gruppenname': 'Gruppe11','reihenfolge': '11'},
+            {'gruppenname': 'Gruppe12','reihenfolge': '12'},
+            {'gruppenname': 'Gruppe13','reihenfolge': '13'},
+            {'gruppenname': 'Gruppe14','reihenfolge': '14'},
+            {'gruppenname': 'Gruppe15','reihenfolge': '15'},
+            {'gruppenname': 'Gruppe16','reihenfolge': '16'},
+            {'gruppenname': 'Gruppe17','reihenfolge': '17'},
+            {'gruppenname': 'Gruppe18','reihenfolge': '18'},
+            {'gruppenname': 'Gruppe19','reihenfolge': '19'},
+            {'gruppenname': 'Gruppe20','reihenfolge': '20'}
         ]
         self.time_is_running_1 = False
         self.time_is_running_2 = False
@@ -380,31 +394,22 @@ class Hauptfenster():
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
 
     def uebernahmeGruppen(self):
-        sorted_list = sorted(self.Wettkampfgruppen, key=lambda x: x['reihenfolge'], reverse=False)
+        self.__root.NbFTabControl.select(self.__root.FTab2)
+        sorted_list = sorted(self.Wettkampfgruppen, key=lambda x : int(x['reihenfolge']), reverse=False)
         dg = 1
         for i in sorted_list:
-            if int(i['reihenfolge']) % 2 and int(i['reihenfolge']) > 2:
-                txt = i['reihenfolge'] + ' - ' + i['gruppenname']
-                text = Label(self.__root.dg, text=txt, takefocus = 0, borderwidth=1, relief="solid")
-                row = int(i['reihenfolge']) - 1
+            row = int(i['reihenfolge']) - 1
+            txt = i['reihenfolge'] + ' - ' + i['gruppenname']
+            durchgang = Label(self.__root.dg, text=dg, takefocus = 0, borderwidth=1, background='#98CF8B')
+            text = Label(self.__root.dg, text=txt, takefocus = 0, borderwidth=1)
+
+            if int(i['reihenfolge']) % 2:
+                durchgang.grid(row=row, column=0, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
                 text.grid(row=row, column=1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-            else:
-                row = int(i['reihenfolge']) - 1
-
-                durchgang = Label(self.__root.dg, text=dg, takefocus = 0, borderwidth=0, relief="solid", background='#98CF8B')
-                if int(i['reihenfolge']) == 1:
-                    durchgang.grid(row=row, column=0, rowspan=2, sticky=(W+E+N+S), padx=(5,0), ipadx='5')
-                else:
-                    durchgang.grid(row=int(i['reihenfolge']), column=0, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='10')
-                
                 dg += 1
-                
-
-                txt = i['reihenfolge'] + ' - ' + i['gruppenname']
-                text = Label(self.__root.dg, text=txt, takefocus = 0, borderwidth=1, relief="solid")
+            else:    
                 text.grid(row=row, column=1, sticky=(W), pady='0', ipady='5', ipadx='10')
-           
-        
+
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
     def switchBahn1State(self):
