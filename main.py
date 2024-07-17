@@ -40,7 +40,17 @@ class Hauptfenster():
             {'gruppenname': 'Gruppe17','reihenfolge': '17'},
             {'gruppenname': 'Gruppe18','reihenfolge': '18'},
             {'gruppenname': 'Gruppe19','reihenfolge': '19'},
-            {'gruppenname': 'Gruppe20','reihenfolge': '20'}
+            {'gruppenname': 'Gruppe20','reihenfolge': '20'},
+            {'gruppenname': 'Gruppe21','reihenfolge': '21'},
+            {'gruppenname': 'Gruppe22','reihenfolge': '22'},
+            {'gruppenname': 'Gruppe23','reihenfolge': '23'},
+            {'gruppenname': 'Gruppe24','reihenfolge': '24'},
+            {'gruppenname': 'Gruppe25','reihenfolge': '25'},
+            {'gruppenname': 'Gruppe26','reihenfolge': '26'},
+            {'gruppenname': 'Gruppe27','reihenfolge': '27'},
+            {'gruppenname': 'Gruppe28','reihenfolge': '28'},
+            {'gruppenname': 'Gruppe29','reihenfolge': '29'},
+            {'gruppenname': 'Gruppe30','reihenfolge': '30'}
         ]
         self.time_is_running_1 = False
         self.time_is_running_2 = False
@@ -121,10 +131,10 @@ class Hauptfenster():
         self.checked_Bahn_2.set(True)
 
         self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
-        self.__root.dg.pack(side='top', fill='both', padx='10')
+        self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
 
         # Content automatisch erzeugen nach Anmeldungen erzeugen
-
+        self.zeichneAnsicht()
 
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
         self.__root.zeitnehmung.pack(side='left', padx='10')
@@ -368,15 +378,15 @@ class Hauptfenster():
             reihenfolge = i['reihenfolge']
 
             w = Label(self.__root.LfReihenfolge, text=gruppenname, takefocus = 0)
-            w.grid(row=row, column=0, sticky=(W), padx='10', pady='5')
+            w.grid(row=row, column=0, sticky=(W), padx='10', pady='2')
 
             e = Entry(self.__root.LfReihenfolge, width=5, takefocus = 0)
-            e.grid(row=row, column=1, sticky=(W), padx='10', pady='5')
+            e.grid(row=row, column=1, sticky=(W), padx='10', pady='2')
             e.insert(0, reihenfolge)
             e.bind('<KeyRelease>', lambda event, name=gruppenname: self.reihenfolgeSpeichern(event, name))
 
             x = Label(self.__root.LfReihenfolge, image=self.iconDelete, takefocus = 0)
-            x.grid(row=row, column=2, sticky=(W), padx='10', pady='5')
+            x.grid(row=row, column=2, sticky=(W), padx='10', pady='2')
             x.bind('<Button>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
 
     def deleteWettkampfgruppe(self, event, name):
@@ -396,21 +406,64 @@ class Hauptfenster():
     def uebernahmeGruppen(self):
         self.__root.NbFTabControl.select(self.__root.FTab2)
         sorted_list = sorted(self.Wettkampfgruppen, key=lambda x : int(x['reihenfolge']), reverse=False)
-        dg = 1
         for i in sorted_list:
-            row = int(i['reihenfolge']) - 1
+            row = int(i['reihenfolge'])
             txt = i['reihenfolge'] + ' - ' + i['gruppenname']
-            durchgang = Label(self.__root.dg, text=dg, takefocus = 0, borderwidth=1, background='#98CF8B')
-            text = Label(self.__root.dg, text=txt, takefocus = 0, borderwidth=1)
+            text = Label(self.__root.dg, text=txt, takefocus = 0)
 
             if int(i['reihenfolge']) % 2:
-                durchgang.grid(row=row, column=0, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
                 text.grid(row=row, column=1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-                dg += 1
             else:    
                 text.grid(row=row, column=1, sticky=(W), pady='0', ipady='5', ipadx='10')
 
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
+
+    def zeichneAnsicht(self):
+        space = Label(self.__root.dg, text='')
+        space.grid(row=0, column=5, rowspan=31, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+
+        txt = '.....'
+        time = '00:00:00'
+
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', 0, 0, txt, time, 30, 1)
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', 7, 0, txt, time, 8, 16)
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', 7, 10, txt, time, 4, 20)
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', 7, 16, txt, time, 2, 22)
+        self.zeichneZeitTable('Finale (T1/T2/B)', 7, 20, txt, time, 2, 23)
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', 7, 26, txt, time, 4, 24)
+
+    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, anzahl_gruppen, dg_start):
+        title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 16))
+        title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
+        dg = dg_start
+        col1 = startcolumn + 1
+        col2 = startcolumn + 2
+        col3 = startcolumn + 3
+        col4 = startcolumn + 4
+        for i in range(anzahl_gruppen):
+            row = startrow + i + 1
+            durchgang = Label(self.__root.dg, text=dg, takefocus = 0, background='#98CF8B', anchor="center")
+            # text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0, borderwidth=1, relief="solid")
+            # time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, borderwidth=1, relief="solid", anchor="e")
+            # time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, borderwidth=1, relief="solid", anchor="e")
+            # time3 = Label(self.__root.dg, text=time_txt, takefocus = 0, borderwidth=1, relief="solid", anchor="e")
+            text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0)
+            time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
+            time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
+            time3 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
+            rh = i + 1
+            if rh % 2:
+                durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
+                text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                time1.grid(row=row, column=col2, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                time2.grid(row=row, column=col3, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                time3.grid(row=row, column=col4, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                dg += 1
+            else:    
+                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10') 
+                time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='5', ipadx='10') 
+                time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='5', ipadx='10')
+                time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='5', ipadx='10')
 
     def switchBahn1State(self):
         if (self.checked_Bahn_1.get() == False):
