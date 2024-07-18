@@ -52,6 +52,26 @@ class Hauptfenster():
             {'gruppenname': 'Gruppe29','reihenfolge': '29'},
             {'gruppenname': 'Gruppe30','reihenfolge': '30'}
         ]
+        self.Grunddurchgang = []
+        self.Viertelfinale = []
+        self.Halbfinale = []
+        self.KleinesFinale = []
+        self.Finale = []
+        self.Damenwertung = []
+
+        self.AnzeigeGDStartRow = 0
+        self.AnzeigeGDStartColumn = 0
+        self.AnzeigeVFStartRow = 0
+        self.AnzeigeVFStartColumn = 8
+        self.AnzeigeHFStartRow = 10
+        self.AnzeigeHFStartColumn = 8
+        self.AnzeigeKFStartRow = 16
+        self.AnzeigeKFStartColumn = 8
+        self.AnzeigeFStartRow = 20
+        self.AnzeigeFStartColumn = 8
+        self.AnzeigeDWStartRow = 26
+        self.AnzeigeDWStartColumn = 8
+
         self.time_is_running_1 = False
         self.time_is_running_2 = False
         self.start_time_1 = ''
@@ -284,7 +304,6 @@ class Hauptfenster():
 
         self.anzeige.mainloop()
 
-    
     # Validation Functions
     def validate_only_numbers(self, action, value_if_allowed):
         try:
@@ -294,7 +313,6 @@ class Hauptfenster():
         except ValueError:
             return False
     
-
     # Functions    
     def updateRahmenAnzeige(self):
         if self.checked_Rahmen.get() == True:
@@ -420,19 +438,20 @@ class Hauptfenster():
 
     def zeichneAnsicht(self):
         space = Label(self.__root.dg, text='')
-        space.grid(row=0, column=5, rowspan=31, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+        space.grid(row=0, column=7, rowspan=31, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
 
-        txt = '.....'
-        time = '00:00:00'
+        txt = '...'
+        time = '##:##:##'
+        rh = '#'
 
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', 0, 0, txt, time, 30, 1)
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', 7, 0, txt, time, 8, 16)
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', 7, 10, txt, time, 4, 20)
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', 7, 16, txt, time, 2, 22)
-        self.zeichneZeitTable('Finale (T1/T2/B)', 7, 20, txt, time, 2, 23)
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', 7, 26, txt, time, 4, 24)
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, 30, 1, True)
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, 16, True)
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, 20, True)
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, 22, True)
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, 23, True)
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, 24, True)
 
-    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, anzahl_gruppen, dg_start):
+    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, dg_start, show_rh):
         title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 16))
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
         dg = dg_start
@@ -440,17 +459,16 @@ class Hauptfenster():
         col2 = startcolumn + 2
         col3 = startcolumn + 3
         col4 = startcolumn + 4
+        col5 = startcolumn + 5
         for i in range(anzahl_gruppen):
             row = startrow + i + 1
             durchgang = Label(self.__root.dg, text=dg, takefocus = 0, background='#98CF8B', anchor="center")
-            # text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0, borderwidth=1, relief="solid")
-            # time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, borderwidth=1, relief="solid", anchor="e")
-            # time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, borderwidth=1, relief="solid", anchor="e")
-            # time3 = Label(self.__root.dg, text=time_txt, takefocus = 0, borderwidth=1, relief="solid", anchor="e")
             text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0)
             time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
             time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
             time3 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
+            if show_rh == True:
+                lrh = Label(self.__root.dg, text=rh_text, takefocus = 0, anchor="center")
             rh = i + 1
             if rh % 2:
                 durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
@@ -458,12 +476,16 @@ class Hauptfenster():
                 time1.grid(row=row, column=col2, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 time2.grid(row=row, column=col3, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 time3.grid(row=row, column=col4, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                if show_rh == True:
+                    lrh.grid(row=row, column=col5, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 dg += 1
             else:    
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='5', ipadx='10')
                 time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='5', ipadx='10')
+                if show_rh == True:
+                    lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='5', ipadx='10')
 
     def switchBahn1State(self):
         if (self.checked_Bahn_1.get() == False):
