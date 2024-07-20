@@ -52,12 +52,11 @@ class Hauptfenster():
             {'gruppenname': 'Gruppe29','reihenfolge': '29'},
             {'gruppenname': 'Gruppe30','reihenfolge': '30'}
         ]
-        self.Grunddurchgang = []
-        self.Viertelfinale = []
-        self.Halbfinale = []
-        self.KleinesFinale = []
-        self.Finale = []
-        self.Damenwertung = []
+
+        self.Durchgänge = []
+        self.DGNumbers = []
+        self.DurchgangNummer = 1
+        self.AnzahlGrunddurchgänge = 0
 
         self.AnzeigeGDStartRow = 0
         self.AnzeigeGDStartColumn = 0
@@ -69,7 +68,7 @@ class Hauptfenster():
         self.AnzeigeKFStartColumn = 8
         self.AnzeigeFStartRow = 20
         self.AnzeigeFStartColumn = 8
-        self.AnzeigeDWStartRow = 26
+        self.AnzeigeDWStartRow = 24
         self.AnzeigeDWStartColumn = 8
 
         self.time_is_running_1 = False
@@ -130,15 +129,15 @@ class Hauptfenster():
         else:
             self.zeichneAngemeldeteGruppen()
 
-        self.__root.LfSetupBewerb = LabelFrame(self.__root.FTab1, text='Bewerb Konfiguration', borderwidth=1, relief=SOLID)
-        self.__root.LfSetupBewerb.pack(side='top', fill='x', padx='10', pady='10')
-        self.__root.RbConfig1 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x AF:1x VF:1x HB:1x KF:1x GF:2x', variable=self.config, value=1, takefocus=0)
-        self.__root.RbConfig1.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
-        self.__root.RbConfig2 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x VF:2x HB:2x KF:2x GF:2x', variable=self.config, value=2, takefocus=0)
-        self.__root.RbConfig2.grid(row=1, column=0, sticky=(W), padx='10', pady='5')
-        legende = 'GR.....Grunddurchgang\nAF.....Achtelfinale(16)\nVF.....Viertelfinale(8)\nHF.....Halbfinale(4)\nKF.....Kleines Finale(2)\nAF.....Große Finale(2)\n1x.....1 Bahn\n2x.....Beide Bahnen'
-        self.__root.LConfigLegende = Label(self.__root.LfSetupBewerb, text=legende, takefocus = 0)
-        self.__root.LConfigLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
+        # self.__root.LfSetupBewerb = LabelFrame(self.__root.FTab1, text='Bewerb Konfiguration', borderwidth=1, relief=SOLID)
+        # self.__root.LfSetupBewerb.pack(side='top', fill='x', padx='10', pady='10')
+        # self.__root.RbConfig1 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x AF:1x VF:1x HB:1x KF:1x GF:2x', variable=self.config, value=1, takefocus=0)
+        # self.__root.RbConfig1.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+        # self.__root.RbConfig2 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x VF:2x HB:2x KF:2x GF:2x', variable=self.config, value=2, takefocus=0)
+        # self.__root.RbConfig2.grid(row=1, column=0, sticky=(W), padx='10', pady='5')
+        # legende = 'GR.....Grunddurchgang\nAF.....Achtelfinale(16)\nVF.....Viertelfinale(8)\nHF.....Halbfinale(4)\nKF.....Kleines Finale(2)\nAF.....Große Finale(2)\n1x.....1 Bahn\n2x.....Beide Bahnen'
+        # self.__root.LConfigLegende = Label(self.__root.LfSetupBewerb, text=legende, takefocus = 0)
+        # self.__root.LConfigLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
 
         self.__root.BtnStart = Button(self.__root.FTab1, text='Gruppen übernehmen', width=10, padding=10, command=self.uebernahmeGruppen, takefocus = 0)
         self.__root.BtnStart.pack(side='top', fill='x', padx='10', pady='10')
@@ -153,13 +152,14 @@ class Hauptfenster():
         self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
         self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
 
-        # Content automatisch erzeugen nach Anmeldungen erzeugen
-        self.zeichneAnsicht()
-
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
         self.__root.zeitnehmung.pack(side='left', padx='10')
 
-        self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0)
+        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', takefocus = 0)
+        self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
+        self.__root.CBDG.pack(side='left', padx='10', pady='10')
+
+        self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx='10', pady='10')
         self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text='Alles Stop', width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
         self.__root.BtnAllesStop.pack(side='left', pady='10')
@@ -175,9 +175,11 @@ class Hauptfenster():
 
         self.__root.CB1 = Checkbutton(self.__root.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
         self.__root.CB1.grid(row=0, column=0, padx='10')
-        self.__root.G1 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
-        self.__root.G1.bind('<<ComboboxSelected>>',self.updateGruppe1)
-        self.__root.G1.grid(row=0, column=1, padx='10')
+        # self.__root.G1 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
+        # self.__root.G1.bind('<<ComboboxSelected>>',self.updateGruppe1)
+        # self.__root.G1.grid(row=0, column=1, padx='10')
+        self.__root.G1 = Label(self.__root.LfBahnen, text='###', font=('Helvetica', 20), takefocus = 0)
+        self.__root.G1 .grid(row=0, column=1, padx='10')
         self.__root.T1 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0)
         self.__root.T1.grid(row=0, column=2, padx='10')
         self.__root.B1 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_1, takefocus = 0)
@@ -185,9 +187,11 @@ class Hauptfenster():
 
         self.__root.CB2 = Checkbutton(self.__root.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
         self.__root.CB2.grid(row=1, column=0, padx='10')
-        self.__root.G2 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
-        self.__root.G2.bind('<<ComboboxSelected>>',self.updateGruppe2)
-        self.__root.G2.grid(row=1, column=1, padx='10')
+        self.__root.G2 = Label(self.__root.LfBahnen, text='###', font=('Helvetica', 20), takefocus = 0)
+        self.__root.G2 .grid(row=0, column=1, padx='10')
+        # self.__root.G2 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
+        # self.__root.G2.bind('<<ComboboxSelected>>',self.updateGruppe2)
+        # self.__root.G2.grid(row=1, column=1, padx='10')
         self.__root.T2 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0)
         self.__root.T2.grid(row=1, column=2, padx='10')
         self.__root.B2 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_2, takefocus = 0)
@@ -422,6 +426,47 @@ class Hauptfenster():
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
 
     def uebernahmeGruppen(self):
+        self.__root.dg.pack_forget()
+        self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
+        self.__root.zeitnehmung.pack_forget()
+        self.__root.zeitnehmung.pack(side='left', padx='10')
+        self.__root.LfBahnen.pack_forget()
+        self.__root.LfBahnen.pack(side='left', padx='10')
+        self.Durchgänge = []
+
+        anzahl_gruppen = 0
+        if len(self.Wettkampfgruppen) % 2:
+            anzahl_gruppen = len(self.Wettkampfgruppen) + 1
+        else: 
+            anzahl_gruppen = len(self.Wettkampfgruppen)
+
+        if anzahl_gruppen < 15:
+            self.AnzeigeVFStartRow = 0
+            self.AnzeigeVFStartColumn = 8
+            self.AnzeigeHFStartRow = 10
+            self.AnzeigeHFStartColumn = 8
+            self.AnzeigeKFStartRow = 0
+            self.AnzeigeKFStartColumn = 17
+            self.AnzeigeFStartRow = 4
+            self.AnzeigeFStartColumn = 17
+            self.AnzeigeDWStartRow = 8
+            self.AnzeigeDWStartColumn = 17
+
+            self.AnzahlGrunddurchgänge = 14
+
+            max_rows = self.AnzahlGrunddurchgänge
+            space = Label(self.__root.dg, text='')
+            space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+            space = Label(self.__root.dg, text='')
+            space.grid(row=0, column=16, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+        else:
+            self.AnzahlGrunddurchgänge = anzahl_gruppen
+            max_rows = self.AnzahlGrunddurchgänge
+            space = Label(self.__root.dg, text='')
+            space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+
+        self.zeichneGrundansicht()
+
         self.__root.NbFTabControl.select(self.__root.FTab2)
         sorted_list = sorted(self.Wettkampfgruppen, key=lambda x : int(x['reihenfolge']), reverse=False)
         for i in sorted_list:
@@ -433,28 +478,47 @@ class Hauptfenster():
                 text.grid(row=row, column=1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
             else:    
                 text.grid(row=row, column=1, sticky=(W), pady='0', ipady='5', ipadx='10')
+            
+            for widget in self.__root.dg.grid_slaves(row, 0):
+                if type(widget) != Label:
+                    continue
+                if not widget['text'] in self.DGNumbers:
+                    self.DGNumbers.append(widget['text'])
+
+                groupdict = {
+                    'wettkampfgruppe': i['gruppenname'],
+                    'zeit1': '',
+                    'fehler1': '',
+                    'zeit2': '',
+                    'fehler2': '',
+                    'bestzeit': '',
+                    'fehlerbest': '',
+                    'typ': 'gd',            # Art  (Grunddurchgang, Viertelfinale, ...)
+                    'dg': widget['text'],   # Nummer des Durchganges
+                    'row': row,             # Reihe von Name
+                    'column': 1             # Spalte von Name
+                }
+                self.Durchgänge.append(groupdict)
+            
+            
 
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
-    def zeichneAnsicht(self):
-        space = Label(self.__root.dg, text='')
-        space.grid(row=0, column=7, rowspan=31, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
-
+    def zeichneGrundansicht(self):
         txt = '...'
         time = '##:##:##'
         rh = '#'
+        self.DurchgangNummer = 1
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True)
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True)
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True)
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True)
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True)
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True)
 
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, 30, 1, True)
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, 16, True)
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, 20, True)
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, 22, True)
-        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, 23, True)
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, 24, True)
-
-    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, dg_start, show_rh):
+    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh):
         title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 16))
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
-        dg = dg_start
         col1 = startcolumn + 1
         col2 = startcolumn + 2
         col3 = startcolumn + 3
@@ -462,7 +526,7 @@ class Hauptfenster():
         col5 = startcolumn + 5
         for i in range(anzahl_gruppen):
             row = startrow + i + 1
-            durchgang = Label(self.__root.dg, text=dg, takefocus = 0, background='#98CF8B', anchor="center")
+            durchgang = Label(self.__root.dg, text=self.DurchgangNummer, takefocus = 0, background='#98CF8B', anchor="center")
             text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0)
             time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
             time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
@@ -478,7 +542,7 @@ class Hauptfenster():
                 time3.grid(row=row, column=col4, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-                dg += 1
+                self.DurchgangNummer += 1
             else:    
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='5', ipadx='10') 
@@ -486,6 +550,18 @@ class Hauptfenster():
                 time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='5', ipadx='10')
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='5', ipadx='10')
+
+    def ladeZeitnehmungsDaten(self):
+        count = 1
+        for dg in self.Durchgänge:
+            if dg['typ'] == 'gd':
+                if count == 1:
+                    self.__root.G1.config(text=dg['wettkampfgruppe'])
+                elif count == 2:
+                    self.__root.G2.config(text=dg['wettkampfgruppe'])
+        
+        # Atkivere Buttons
+
 
     def switchBahn1State(self):
         if (self.checked_Bahn_1.get() == False):
