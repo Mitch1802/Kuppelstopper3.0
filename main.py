@@ -34,23 +34,23 @@ class Hauptfenster():
             {'gruppenname': 'Gruppe11','reihenfolge': '11'},
             {'gruppenname': 'Gruppe12','reihenfolge': '12'},
             {'gruppenname': 'Gruppe13','reihenfolge': '13'},
-            {'gruppenname': 'Gruppe14','reihenfolge': '14'},
-            {'gruppenname': 'Gruppe15','reihenfolge': '15'},
-            {'gruppenname': 'Gruppe16','reihenfolge': '16'},
-            {'gruppenname': 'Gruppe17','reihenfolge': '17'},
-            {'gruppenname': 'Gruppe18','reihenfolge': '18'},
-            {'gruppenname': 'Gruppe19','reihenfolge': '19'},
-            {'gruppenname': 'Gruppe20','reihenfolge': '20'},
-            {'gruppenname': 'Gruppe21','reihenfolge': '21'},
-            {'gruppenname': 'Gruppe22','reihenfolge': '22'},
-            {'gruppenname': 'Gruppe23','reihenfolge': '23'},
-            {'gruppenname': 'Gruppe24','reihenfolge': '24'},
-            {'gruppenname': 'Gruppe25','reihenfolge': '25'},
-            {'gruppenname': 'Gruppe26','reihenfolge': '26'},
-            {'gruppenname': 'Gruppe27','reihenfolge': '27'},
-            {'gruppenname': 'Gruppe28','reihenfolge': '28'},
-            {'gruppenname': 'Gruppe29','reihenfolge': '29'},
-            {'gruppenname': 'Gruppe30','reihenfolge': '30'}
+            # {'gruppenname': 'Gruppe14','reihenfolge': '14'},
+            # {'gruppenname': 'Gruppe15','reihenfolge': '15'},
+            # {'gruppenname': 'Gruppe16','reihenfolge': '16'},
+            # {'gruppenname': 'Gruppe17','reihenfolge': '17'},
+            # {'gruppenname': 'Gruppe18','reihenfolge': '18'},
+            # {'gruppenname': 'Gruppe19','reihenfolge': '19'},
+            # {'gruppenname': 'Gruppe20','reihenfolge': '20'},
+            # {'gruppenname': 'Gruppe21','reihenfolge': '21'},
+            # {'gruppenname': 'Gruppe22','reihenfolge': '22'},
+            # {'gruppenname': 'Gruppe23','reihenfolge': '23'},
+            # {'gruppenname': 'Gruppe24','reihenfolge': '24'},
+            # {'gruppenname': 'Gruppe25','reihenfolge': '25'},
+            # {'gruppenname': 'Gruppe26','reihenfolge': '26'},
+            # {'gruppenname': 'Gruppe27','reihenfolge': '27'},
+            # {'gruppenname': 'Gruppe28','reihenfolge': '28'},
+            # {'gruppenname': 'Gruppe29','reihenfolge': '29'},
+            # {'gruppenname': 'Gruppe30','reihenfolge': '30'}
         ]
 
         self.Durchgänge = []
@@ -155,9 +155,9 @@ class Hauptfenster():
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
         self.__root.zeitnehmung.pack(side='left', padx='10')
 
-        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', takefocus = 0)
+        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=3, takefocus = 0, justify="center")
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
-        self.__root.CBDG.pack(side='left', padx='10', pady='10')
+        self.__root.CBDG.pack(side='left', padx='10', pady='10', ipady=10)
 
         self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx='10', pady='10')
@@ -188,7 +188,7 @@ class Hauptfenster():
         self.__root.CB2 = Checkbutton(self.__root.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
         self.__root.CB2.grid(row=1, column=0, padx='10')
         self.__root.G2 = Label(self.__root.LfBahnen, text='###', font=('Helvetica', 20), takefocus = 0)
-        self.__root.G2 .grid(row=0, column=1, padx='10')
+        self.__root.G2 .grid(row=1, column=1, padx='10')
         # self.__root.G2 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
         # self.__root.G2.bind('<<ComboboxSelected>>',self.updateGruppe2)
         # self.__root.G2.grid(row=1, column=1, padx='10')
@@ -324,14 +324,6 @@ class Hauptfenster():
         else:
             self.anzeige.wm_overrideredirect(False) 
 
-    def updateGruppe1(self, event=None):
-        name = self.__root.G1.get()
-        self.anzeige.G1.config(text=name)
-
-    def updateGruppe2(self, event=None):
-        name = self.__root.G2.get()
-        self.anzeige.G2.config(text=name)
-
     def updateFontSizeZeit(self, event=None):
         size = self.__root.SGZ.get()
         self.anzeige.Z1.config(font=('Helvetica', size))
@@ -380,9 +372,6 @@ class Hauptfenster():
         self.Wettkampfgruppen.append(val)
         self.__root.Entry.delete(0, END)
         self.__root.Entry.insert(0, '')
-        # self.var.set(self.Wettkampfgruppen)
-        # self.__root.G1.config(values=self.Wettkampfgruppen)
-        # self.__root.G2.config(values=self.Wettkampfgruppen)
         self.zeichneAngemeldeteGruppen()
         self.writeKonsole(name + ' wurde hinzugefügt!')
 
@@ -501,6 +490,8 @@ class Hauptfenster():
                 self.Durchgänge.append(groupdict)
             
             
+        # self.dg_var.set(self.DGNumbers)
+        self.__root.CBDG.config(values=self.DGNumbers)
 
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
@@ -551,16 +542,29 @@ class Hauptfenster():
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='5', ipadx='10')
 
-    def ladeZeitnehmungsDaten(self):
+    def ladeZeitnehmungsDaten(self, event=None):
         count = 1
+        dg_select = self.__root.CBDG.get()
         for dg in self.Durchgänge:
             if dg['typ'] == 'gd':
-                if count == 1:
-                    self.__root.G1.config(text=dg['wettkampfgruppe'])
-                elif count == 2:
-                    self.__root.G2.config(text=dg['wettkampfgruppe'])
+                if dg['dg'] == int(dg_select):
+                    if count == 1:
+                        if dg['wettkampfgruppe'] == '...':
+                            # Deaktiviere Bahn
+                            print()
+                        else:
+                            self.__root.G1.config(text=dg['wettkampfgruppe'])
+                            self.anzeige.G1.config(text=dg['wettkampfgruppe'])
+                    elif count == 2:
+                        if dg['wettkampfgruppe'] == '...':
+                            # Deaktiviere Bahn
+                            print()
+                        else:
+                            self.__root.G2.config(text=dg['wettkampfgruppe'])
+                            self.anzeige.G2.config(text=dg['wettkampfgruppe'])
+                    count += 1
         
-        # Atkivere Buttons
+        # Aktiviere Buttons
 
 
     def switchBahn1State(self):
