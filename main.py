@@ -34,10 +34,10 @@ class Hauptfenster():
             {'gruppenname': 'Gruppe11','reihenfolge': '11'},
             {'gruppenname': 'Gruppe12','reihenfolge': '12'},
             {'gruppenname': 'Gruppe13','reihenfolge': '13'},
-            # {'gruppenname': 'Gruppe14','reihenfolge': '14'},
-            # {'gruppenname': 'Gruppe15','reihenfolge': '15'},
-            # {'gruppenname': 'Gruppe16','reihenfolge': '16'},
-            # {'gruppenname': 'Gruppe17','reihenfolge': '17'},
+            {'gruppenname': 'Gruppe14','reihenfolge': '14'},
+            {'gruppenname': 'Gruppe15','reihenfolge': '15'},
+            {'gruppenname': 'Gruppe16','reihenfolge': '16'},
+            {'gruppenname': 'Gruppe17','reihenfolge': '17'},
             # {'gruppenname': 'Gruppe18','reihenfolge': '18'},
             # {'gruppenname': 'Gruppe19','reihenfolge': '19'},
             # {'gruppenname': 'Gruppe20','reihenfolge': '20'},
@@ -78,7 +78,7 @@ class Hauptfenster():
 
         self.__root = Tk()
         self.__root.title('KuppelStopper 3.0')
-        self.__root.minsize(1000, 700)
+        self.__root.minsize(1200, 700)
 
         self.icon = PhotoImage(file='./Resources/Kuppelstopper.png')
         self.__root.iconphoto(False, self.icon)       
@@ -146,8 +146,8 @@ class Hauptfenster():
         # FTab Übersicht - Zeitnehmung
         self.checked_Bahn_1 = BooleanVar()
         self.checked_Bahn_2 = BooleanVar()
-        self.checked_Bahn_1.set(True)
-        self.checked_Bahn_2.set(True)
+        self.checked_Bahn_1.set(False)
+        self.checked_Bahn_2.set(False)
 
         self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
         self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
@@ -155,7 +155,7 @@ class Hauptfenster():
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
         self.__root.zeitnehmung.pack(side='left', padx='10')
 
-        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=3, takefocus = 0, justify="center")
+        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify="center",  font=('Helvetica', 14))
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
         self.__root.CBDG.pack(side='left', padx='10', pady='10', ipady=10)
 
@@ -164,9 +164,7 @@ class Hauptfenster():
         self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text='Alles Stop', width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
         self.__root.BtnAllesStop.pack(side='left', pady='10')
         self.__root.BtnReset = Button(self.__root.zeitnehmung, text='Reset', width=10, padding=10, command=self.reset, takefocus = 0, state=DISABLED)
-        self.__root.BtnReset.pack(side='right', padx='10', pady='10') 
-        self.__root.BtnLoeschen = Button(self.__root.zeitnehmung, text='Löschen', width=10, padding=10, command=self.loeschen, takefocus = 0, state=DISABLED)
-        self.__root.BtnLoeschen.pack(side='right', padx='10', pady='10')        
+        self.__root.BtnReset.pack(side='right', padx='10', pady='10')  
         self.__root.BtnWechsel = Button(self.__root.zeitnehmung, text='Bahn Wechsel', width=15, padding=10, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
         self.__root.BtnWechsel.pack(side='right', padx='10', pady='10')
 
@@ -175,26 +173,20 @@ class Hauptfenster():
 
         self.__root.CB1 = Checkbutton(self.__root.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
         self.__root.CB1.grid(row=0, column=0, padx='10')
-        # self.__root.G1 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
-        # self.__root.G1.bind('<<ComboboxSelected>>',self.updateGruppe1)
-        # self.__root.G1.grid(row=0, column=1, padx='10')
-        self.__root.G1 = Label(self.__root.LfBahnen, text='###', font=('Helvetica', 20), takefocus = 0)
+        self.__root.G1 = Label(self.__root.LfBahnen, text='...', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
         self.__root.G1 .grid(row=0, column=1, padx='10')
-        self.__root.T1 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0)
+        self.__root.T1 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
         self.__root.T1.grid(row=0, column=2, padx='10')
-        self.__root.B1 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_1, takefocus = 0)
+        self.__root.B1 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_1, takefocus = 0, state=DISABLED)
         self.__root.B1.grid(row=0, column=3)
 
         self.__root.CB2 = Checkbutton(self.__root.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
         self.__root.CB2.grid(row=1, column=0, padx='10')
-        self.__root.G2 = Label(self.__root.LfBahnen, text='###', font=('Helvetica', 20), takefocus = 0)
+        self.__root.G2 = Label(self.__root.LfBahnen, text='...', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
         self.__root.G2 .grid(row=1, column=1, padx='10')
-        # self.__root.G2 = Combobox(self.__root.LfBahnen, textvariable=StringVar(), state='readonly', takefocus = 0)
-        # self.__root.G2.bind('<<ComboboxSelected>>',self.updateGruppe2)
-        # self.__root.G2.grid(row=1, column=1, padx='10')
-        self.__root.T2 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0)
+        self.__root.T2 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
         self.__root.T2.grid(row=1, column=2, padx='10')
-        self.__root.B2 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_2, takefocus = 0)
+        self.__root.B2 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_2, takefocus = 0, state=DISABLED)
         self.__root.B2.grid(row=1, column=3)
 
 
@@ -415,13 +407,15 @@ class Hauptfenster():
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
 
     def uebernahmeGruppen(self):
-        self.__root.dg.pack_forget()
+        self.__root.dg.destroy()
+        self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
         self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
         self.__root.zeitnehmung.pack_forget()
         self.__root.zeitnehmung.pack(side='left', padx='10')
         self.__root.LfBahnen.pack_forget()
         self.__root.LfBahnen.pack(side='left', padx='10')
         self.Durchgänge = []
+        self.DGNumbers = []
 
         anzahl_gruppen = 0
         if len(self.Wettkampfgruppen) % 2:
@@ -429,7 +423,7 @@ class Hauptfenster():
         else: 
             anzahl_gruppen = len(self.Wettkampfgruppen)
 
-        if anzahl_gruppen < 15:
+        if anzahl_gruppen < 17:
             self.AnzeigeVFStartRow = 0
             self.AnzeigeVFStartColumn = 8
             self.AnzeigeHFStartRow = 10
@@ -441,7 +435,7 @@ class Hauptfenster():
             self.AnzeigeDWStartRow = 8
             self.AnzeigeDWStartColumn = 17
 
-            self.AnzahlGrunddurchgänge = 14
+            self.AnzahlGrunddurchgänge = anzahl_gruppen
 
             max_rows = self.AnzahlGrunddurchgänge
             space = Label(self.__root.dg, text='')
@@ -459,39 +453,19 @@ class Hauptfenster():
         self.__root.NbFTabControl.select(self.__root.FTab2)
         sorted_list = sorted(self.Wettkampfgruppen, key=lambda x : int(x['reihenfolge']), reverse=False)
         for i in sorted_list:
-            row = int(i['reihenfolge'])
+            row = self.AnzeigeGDStartRow + int(i['reihenfolge'])
+            col1 = self.AnzeigeGDStartColumn + 1
             txt = i['reihenfolge'] + ' - ' + i['gruppenname']
             text = Label(self.__root.dg, text=txt, takefocus = 0)
 
             if int(i['reihenfolge']) % 2:
-                text.grid(row=row, column=1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
             else:    
-                text.grid(row=row, column=1, sticky=(W), pady='0', ipady='5', ipadx='10')
+                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
             
-            for widget in self.__root.dg.grid_slaves(row, 0):
-                if type(widget) != Label:
-                    continue
-                if not widget['text'] in self.DGNumbers:
-                    self.DGNumbers.append(widget['text'])
-
-                groupdict = {
-                    'wettkampfgruppe': i['gruppenname'],
-                    'zeit1': '',
-                    'fehler1': '',
-                    'zeit2': '',
-                    'fehler2': '',
-                    'bestzeit': '',
-                    'fehlerbest': '',
-                    'typ': 'gd',            # Art  (Grunddurchgang, Viertelfinale, ...)
-                    'dg': widget['text'],   # Nummer des Durchganges
-                    'row': row,             # Reihe von Name
-                    'column': 1             # Spalte von Name
-                }
-                self.Durchgänge.append(groupdict)
-            
-            
-        # self.dg_var.set(self.DGNumbers)
-        self.__root.CBDG.config(values=self.DGNumbers)
+            for x in self.Durchgänge:
+                if x['typ'] == 'gd' and x['row'] == row and x['column'] == col1:
+                    x['wettkampfgruppe'] = i['gruppenname']
 
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
@@ -500,15 +474,17 @@ class Hauptfenster():
         time = '##:##:##'
         rh = '#'
         self.DurchgangNummer = 1
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True)
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True)
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True)
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True)
-        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True)
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True)
-
-    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh):
-        title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 16))
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, 'gd')
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, 'vf')
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, 'hf')
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, 'kf')
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, 'f')
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, 'dw')
+        self.DGNumbers.pop()
+        self.__root.CBDG.config(values=self.DGNumbers)
+        
+    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ):
+        title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 14))
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
         col1 = startcolumn + 1
         col2 = startcolumn + 2
@@ -526,6 +502,7 @@ class Hauptfenster():
                 lrh = Label(self.__root.dg, text=rh_text, takefocus = 0, anchor="center")
             rh = i + 1
             if rh % 2:
+                self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1)
                 durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
                 text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 time1.grid(row=row, column=col2, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
@@ -534,61 +511,97 @@ class Hauptfenster():
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 self.DurchgangNummer += 1
-            else:    
+            else:
+                self.konvertiereArray(self.DurchgangNummer-1, gruppe_txt, typ, row, col1)    
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='5', ipadx='10')
                 time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='5', ipadx='10')
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='5', ipadx='10')
+        
+    def konvertiereArray(self, dg_nummer, wettkampfgruppe, typ, row, column):
+        if dg_nummer not in self.DGNumbers:
+            self.DGNumbers.append(dg_nummer)
+        
+        groupdict = {
+            'wettkampfgruppe': wettkampfgruppe,
+            'zeit1': '',
+            'fehler1': '',
+            'zeit2': '',
+            'fehler2': '',
+            'bestzeit': '',
+            'fehlerbest': '',
+            'typ': typ,                     # Art  (Grunddurchgang, Viertelfinale, ...)
+            'dg': dg_nummer,                # Nummer des Durchganges
+            'row': row,                     # Reihe von Name
+            'column': column                # Spalte von Name
+        }
+        self.Durchgänge.append(groupdict)
 
     def ladeZeitnehmungsDaten(self, event=None):
+        self.checked_Bahn_1.set(False)
+        self.checked_Bahn_2.set(False)
+        self.switchBahn1State()
+        self.switchBahn2State()
+        self.__root.G1.config(text='...')
+        self.__root.G2.config(text='...')
+        self.__root.T1.config(text='00:00:00')
+        self.__root.T2.config(text='00:00:00')
+        self.anzeige.G1.config(text='...')
+        self.anzeige.G2.config(text='...')
+        self.anzeige.Z1.config(text='00:00:00')
+        self.anzeige.Z2.config(text='00:00:00')
         count = 1
         dg_select = self.__root.CBDG.get()
         for dg in self.Durchgänge:
             if dg['typ'] == 'gd':
                 if dg['dg'] == int(dg_select):
-                    if count == 1:
-                        if dg['wettkampfgruppe'] == '...':
-                            # Deaktiviere Bahn
-                            print()
-                        else:
-                            self.__root.G1.config(text=dg['wettkampfgruppe'])
-                            self.anzeige.G1.config(text=dg['wettkampfgruppe'])
-                    elif count == 2:
-                        if dg['wettkampfgruppe'] == '...':
-                            # Deaktiviere Bahn
-                            print()
-                        else:
-                            self.__root.G2.config(text=dg['wettkampfgruppe'])
-                            self.anzeige.G2.config(text=dg['wettkampfgruppe'])
+                    if count == 1 and dg['wettkampfgruppe'] != '...':
+                        self.checked_Bahn_1.set(True)
+                        self.switchBahn1State()
+                        self.__root.G1.config(text=dg['wettkampfgruppe'])
+                        self.anzeige.G1.config(text=dg['wettkampfgruppe'])
+                    elif count == 2 and dg['wettkampfgruppe'] != '...':
+                        self.checked_Bahn_2.set(True)
+                        self.switchBahn2State()
+                        self.__root.G2.config(text=dg['wettkampfgruppe'])
+                        self.anzeige.G2.config(text=dg['wettkampfgruppe'])
                     count += 1
         
-        # Aktiviere Buttons
-
+        self.__root.BtnStart['state'] = NORMAL
+        self.wechselAnsichtZurZeit()
 
     def switchBahn1State(self):
-        if (self.checked_Bahn_1.get() == False):
+        if self.checked_Bahn_1.get() == False:
             self.__root.G1['state'] = DISABLED
             self.__root.T1['state'] = DISABLED
             self.__root.B1['state'] = DISABLED
+            # self.anzeige.G1['state'] = DISABLED
+            # self.anzeige.Z1['state'] = DISABLED
             self.writeKonsole('Bahn 1 wurde deaktiviert!')
         else:
-            self.__root.G1['state'] = 'readonly'
+            self.__root.G1['state'] = NORMAL
             self.__root.T1['state'] = NORMAL
             self.__root.B1['state'] = NORMAL
+            # self.anzeige.G1['state'] = NORMAL
+            # self.anzeige.Z1['state'] = NORMAL
             self.writeKonsole('Bahn 1 wurde aktiviert!')
 
     def switchBahn2State(self):
-        if (self.checked_Bahn_2.get() == False):
+        if self.checked_Bahn_2.get() == False:
             self.__root.G2['state'] = DISABLED
             self.__root.T2['state'] = DISABLED
             self.__root.B2['state'] = DISABLED
+            # self.anzeige.G2['state'] = DISABLED
+            # self.anzeige.Z2['state'] = DISABLED
             self.writeKonsole('Bahn 2 wurde deaktiviert!')
         else:
-            self.__root.G2['state'] = 'readonly'
+            self.__root.G2['state'] = NORMAL
             self.__root.T2['state'] = NORMAL
             self.__root.B2['state'] = NORMAL
+            # self.anzeige.G2['state'] = NORMAL
+            # self.anzeige.Z2['state'] = NORMAL
             self.writeKonsole('Bahn 2 wurde aktiviert!')
 
     def startBuzzer1(self, event=None):
@@ -625,31 +638,32 @@ class Hauptfenster():
         self.__root.BtnStart['state'] = DISABLED
         self.__root.BtnAllesStop['state'] = NORMAL
         self.__root.BtnWechsel['state'] = DISABLED
-        self.__root.BtnLoeschen['state'] = DISABLED
         self.__root.BtnReset['state'] = DISABLED
 
         self.writeKonsole('Der Angriffbefehl wurde erteilt!')
-        self.wechselAnsichtZurZeit()
         # os.system('mpg123 ' + self.file_angriffbefehel)
-        if self.checked_GPIO.get() == True:
+        if self.checked_GPIO.get() == True and self.checked_Bahn_1.get() == True:
             self.GPIO_Start_1 = self.__root.Start_GPIO_1.get()
             self.GPIO_Stop_1 = self.__root.Stop_GPIO_1.get()
-            self.GPIO_Start_2 = self.__root.Start_GPIO_2.get()
-            self.GPIO_Stop_2 = self.__root.Stop_GPIO_2.get()
             self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
             self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
+            self.BuzzerStartBahn1.when_pressed = self.startBuzzer1
+
+        if self.checked_GPIO.get() == True and self.checked_Bahn_2.get() == True:
+            self.GPIO_Start_2 = self.__root.Start_GPIO_2.get()
+            self.GPIO_Stop_2 = self.__root.Stop_GPIO_2.get()
             self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
             self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
-            self.BuzzerStartBahn1.when_pressed = self.startBuzzer1
             self.BuzzerStartBahn2.when_pressed = self.startBuzzer2
 
-        if self.checked_Tastatur.get() == True:
+        if self.checked_Tastatur.get() == True and self.checked_Bahn_1.get() == True:
             self.Taste_Start_1 = self.__root.Start_Taste_1.get()
             self.Taste_Stop_1 = self.__root.Stop_Taste_1.get()
+            self.__root.bind(self.Taste_Start_1, self.startBuzzer1)
+        
+        if self.checked_Tastatur.get() == True and self.checked_Bahn_2.get() == True:
             self.Taste_Start_2 = self.__root.Start_Taste_2.get()
             self.Taste_Stop_2 = self.__root.Stop_Taste_2.get()
-
-            self.__root.bind(self.Taste_Start_1, self.startBuzzer1)
             self.__root.bind(self.Taste_Start_2, self.startBuzzer2)
 
     def stop_1(self, event=None):
@@ -663,7 +677,6 @@ class Hauptfenster():
         if self.time_is_running_1 == False and self.time_is_running_2 == False:
             self.__root.BtnAllesStop['state'] = DISABLED
             self.__root.BtnWechsel['state'] = NORMAL
-            self.__root.BtnLoeschen['state'] = NORMAL
             self.__root.BtnReset['state'] = NORMAL
 
     def stop_2(self, event=None):
@@ -677,7 +690,6 @@ class Hauptfenster():
         if self.time_is_running_1 == False and self.time_is_running_2 == False:
             self.__root.BtnAllesStop['state'] = DISABLED
             self.__root.BtnWechsel['state'] = NORMAL
-            self.__root.BtnLoeschen['state'] = NORMAL
             self.__root.BtnReset['state'] = NORMAL
 
     def reset(self):
@@ -689,14 +701,6 @@ class Hauptfenster():
         self.__root.BtnReset['state'] = DISABLED
         self.writeKonsole('Zeit und Button zurückgesetzt!')
         self.wechselAnsichtZurAuswertung()
-    
-    def loeschen(self):
-        self.__root.G1.set('')
-        self.__root.G2.set('')
-        self.anzeige.G1.config(text='')
-        self.anzeige.G2.config(text='')
-        # self.__root.BtnLoeschen['state'] = DISABLED
-        self.writeKonsole('Gruppenauswahl gelöscht!')
 
     def update_time_1(self):
         if self.time_is_running_1:
