@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter.ttk import *
 from datetime import datetime
 import time
+from random import *
 from gpiozero import Button as GPIO_Button
 
 
@@ -72,9 +73,11 @@ class Hauptfenster():
         self.AnzeigeDWStartColumn = 8
 
         self.time_is_running_1 = False
-        self.time_is_running_2 = False
         self.start_time_1 = ''
+        self.stop_time_1 = ''
+        self.time_is_running_2 = False
         self.start_time_2 = ''
+        self.stop_time_1 = ''
 
         self.__root = Tk()
         self.__root.title('KuppelStopper 3.0')
@@ -327,15 +330,138 @@ class Hauptfenster():
         self.anzeige.G2.config(font=('Helvetica', size))
 
     def bahnWechsel(self):
-        bahnA = self.__root.G1.get()
-        bahnB = self.__root.G2.get()
+        bahnA = self.__root.T1.cget("text")
+        bahnB = self.__root.T2.cget("text")
 
-        self.__root.G1.set(bahnB)
-        self.__root.G2.set(bahnA)
+        ### Zeit übertragen 
+        ### Fehler eintragen wo?
+        self.bestzeitPlatzierungBerechnen()
+
+        bahnA = self.__root.G1.cget("text")
+        bahnB = self.__root.G2.cget("text")
+
+        self.__root.G1.config(text=bahnB)
+        self.__root.T1.config(text='00:00:00')
+        self.__root.G2.config(text=bahnA)
+        self.__root.T2.config(text='00:00:00')
 
         self.anzeige.G1.config(text=bahnB)
+        self.anzeige.Z1.config(text='00:00:00')
         self.anzeige.G2.config(text=bahnA)
+        self.anzeige.Z2.config(text='00:00:00')
+
         self.writeKonsole('Die Bahnen wurden gewechselt!')
+
+    def zeitUebertragen(self, typ, row, column, zeit, fehler):
+        # schauen ob zeit 1 vorhanden, dann in zeit 2 eintragen und bestzeit berechnen
+
+        self.bestzeitPlatzierungBerechnen()
+
+    def bestzeitPlatzierungBerechnen(self):
+        Grunddurchgang = []
+        Viertelfinale = []
+        Halbfinale = []
+        KleinesFinale = []
+        Finale = []
+        Damenwertung = []
+
+        for dg in self.Durchgänge:
+            if dg['bestzeit'] != '':
+                bst = dg['bestzeit']
+                bst = bst.split(':')
+                bst_minute = int(bst[0])
+                bst_sekunden = int(bst[1])
+                bst_milisekunden = int(bst[2])
+                bst_fehler = int(dg['fehlerbest'])
+                bst_sekunden = bst_sekunden + bst_fehler
+
+                if bst_sekunden > 59:
+                    bst_sekunden = bst_sekunden - 60
+                    bst_minute = bst_minute + 1  
+
+                bestzeitinklfehler = str(bst_minute) + ':' + str(bst_sekunden) + ':' + str(bst_milisekunden)
+            else:
+                bestzeitinklfehler = ''
+
+            # Test mit Zufallszeiten
+            # test_minute = randint(1, 9)
+            # test_sekunden = randint(11, 59)
+            # test_milisukunden = randint(11, 99)
+            # bestzeitinklfehler = '0' + str(test_minute) + ':' + str(test_sekunden) + ':' + str(test_milisukunden)
+
+            best_dict = {
+                'gruppe': dg['wettkampfgruppe'],
+                'bestzeit': dg['bestzeit'],
+                'fehlerbest': dg['fehlerbest'],
+                'bestzeitinklfehler': bestzeitinklfehler,
+                'dg': dg['dg'],
+                'row': dg['row'],
+                'column': dg['column'],
+                'platzierung': 0
+            }
+
+            if dg['typ'] == 'gd' and dg['wettkampfgruppe'] != '...':
+                Grunddurchgang.append(best_dict)
+            elif dg['typ'] == 'vf':
+                Viertelfinale.append(best_dict)
+            elif dg['typ'] == 'hf':
+                Halbfinale.append(best_dict)
+            elif dg['typ'] == 'kf':
+                KleinesFinale.append(best_dict)
+            elif dg['typ'] == 'f':
+                Finale.append(best_dict)
+            elif dg['typ'] == 'dw':
+                Damenwertung.append(best_dict)
+        
+        Grunddurchgang.sort(key=self.sortTime)
+        for index, item in enumerate(Grunddurchgang):
+            if item['bestzeitinklfehler'] != '':
+                platzierung_neu = index + 1
+                item['platzierung'] = platzierung_neu
+        
+        Viertelfinale.sort(key=self.sortTime)
+        for index, item in enumerate(Viertelfinale):
+            if item['bestzeitinklfehler'] != '':
+                platzierung_neu = index + 1
+                item['platzierung'] = platzierung_neu
+
+        Halbfinale.sort(key=self.sortTime)
+        for index, item in enumerate(Halbfinale):
+            if item['bestzeitinklfehler'] != '':
+                platzierung_neu = index + 1
+                item['platzierung'] = platzierung_neu
+        
+        KleinesFinale.sort(key=self.sortTime)
+        for index, item in enumerate(KleinesFinale):
+            if item['bestzeitinklfehler'] != '':
+                platzierung_neu = index + 1
+                item['platzierung'] = platzierung_neu
+
+        Finale.sort(key=self.sortTime)
+        for index, item in enumerate(Finale):
+            if item['bestzeitinklfehler'] != '':
+                platzierung_neu = index + 1
+                item['platzierung'] = platzierung_neu
+
+        Damenwertung.sort(key=self.sortTime)
+        for index, item in enumerate(Damenwertung):
+            if item['bestzeitinklfehler'] != '':
+                platzierung_neu = index + 1
+                item['platzierung'] = platzierung_neu
+        
+        # Platzierungen in die nächste Stufe eintragen
+    
+    def sortTime(self, timeList):
+        if timeList['bestzeitinklfehler'] == '':
+            return '59', '59', '99'
+        else:
+            split_up = timeList['bestzeitinklfehler'].split(':')
+
+            return split_up[0], split_up[1], split_up[2]
+    
+    def zeichneNeuePlatzierung(self, row, column, platzierung):
+        lbl = Label(self.__root.dg, text=str(platzierung))
+        lbl.grid(row=row, column=column)
 
     def allesStop(self):
         self.stop_1('')
@@ -416,6 +542,8 @@ class Hauptfenster():
         self.__root.LfBahnen.pack(side='left', padx='10')
         self.Durchgänge = []
         self.DGNumbers = []
+
+        # übertrag in Damenwertung fehlt
 
         anzahl_gruppen = 0
         if len(self.Wettkampfgruppen) % 2:
@@ -527,7 +655,7 @@ class Hauptfenster():
         groupdict = {
             'wettkampfgruppe': wettkampfgruppe,
             'zeit1': '',
-            'fehler1': '',
+            'fehler1': '.',
             'zeit2': '',
             'fehler2': '',
             'bestzeit': '',
@@ -540,6 +668,7 @@ class Hauptfenster():
         self.Durchgänge.append(groupdict)
 
     def ladeZeitnehmungsDaten(self, event=None):
+        self.wechselAnsichtZurZeit()
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.switchBahn1State()
@@ -570,22 +699,24 @@ class Hauptfenster():
                     count += 1
         
         self.__root.BtnStart['state'] = NORMAL
-        self.wechselAnsichtZurZeit()
+
+        # nur test
+        self.bestzeitPlatzierungBerechnen()
 
     def switchBahn1State(self):
         if self.checked_Bahn_1.get() == False:
             self.__root.G1['state'] = DISABLED
             self.__root.T1['state'] = DISABLED
             self.__root.B1['state'] = DISABLED
-            # self.anzeige.G1['state'] = DISABLED
-            # self.anzeige.Z1['state'] = DISABLED
+            self.anzeige.G1.pack_forget()
+            self.anzeige.Z1.pack_forget()
             self.writeKonsole('Bahn 1 wurde deaktiviert!')
         else:
             self.__root.G1['state'] = NORMAL
             self.__root.T1['state'] = NORMAL
             self.__root.B1['state'] = NORMAL
-            # self.anzeige.G1['state'] = NORMAL
-            # self.anzeige.Z1['state'] = NORMAL
+            self.anzeige.G1.pack(expand=0, side=TOP, fill=X)
+            self.anzeige.Z1.pack(expand=1, side=TOP, fill=BOTH)
             self.writeKonsole('Bahn 1 wurde aktiviert!')
 
     def switchBahn2State(self):
@@ -593,15 +724,15 @@ class Hauptfenster():
             self.__root.G2['state'] = DISABLED
             self.__root.T2['state'] = DISABLED
             self.__root.B2['state'] = DISABLED
-            # self.anzeige.G2['state'] = DISABLED
-            # self.anzeige.Z2['state'] = DISABLED
+            self.anzeige.G2.pack_forget()
+            self.anzeige.Z2.pack_forget()
             self.writeKonsole('Bahn 2 wurde deaktiviert!')
         else:
             self.__root.G2['state'] = NORMAL
             self.__root.T2['state'] = NORMAL
             self.__root.B2['state'] = NORMAL
-            # self.anzeige.G2['state'] = NORMAL
-            # self.anzeige.Z2['state'] = NORMAL
+            self.anzeige.G2.pack(expand=0, side=BOTTOM, fill=X)
+            self.anzeige.Z2.pack(expand=1, side=TOP, fill=BOTH)
             self.writeKonsole('Bahn 2 wurde aktiviert!')
 
     def startBuzzer1(self, event=None):
@@ -614,7 +745,7 @@ class Hauptfenster():
                 self.__root.unbind(self.Taste_Start_1)
                 self.__root.bind(self.Taste_Stop_1, self.stop_1)
                 if event != None:
-                    self.writeKonsole('Zeit 1 mit Taste '' + event.char + '' gestartet!')
+                    self.writeKonsole('Zeit 1 mit Taste ' + event.char + ' gestartet!')
             self.time_is_running_1 = True
             self.start_time_1 = time.time()
             self.update_time_1()
@@ -629,7 +760,7 @@ class Hauptfenster():
                 self.__root.unbind(self.Taste_Start_2)
                 self.__root.bind(self.Taste_Stop_2, self.stop_2)
                 if event != None:
-                    self.writeKonsole('Zeit 2 mit Taste '' + event.char + '' gestartet!')
+                    self.writeKonsole('Zeit 2 mit Taste ' + event.char + ' gestartet!')
             self.time_is_running_2 = True
             self.start_time_2 = time.time()
             self.update_time_2()
@@ -671,7 +802,7 @@ class Hauptfenster():
         if self.checked_Tastatur.get() == True:
             self.__root.unbind(self.Taste_Stop_1)
             if event != None and event != '':
-                self.writeKonsole('Zeit 1 mit Taste '' + event.char + '' angehalten!')
+                self.writeKonsole('Zeit 1 mit Taste ' + event.char + ' angehalten!')
         if self.checked_GPIO.get() == True and event == None:
             self.writeKonsole('Zeit 1 mit Buzzer bzw Button angehalten!')
         if self.time_is_running_1 == False and self.time_is_running_2 == False:
@@ -684,7 +815,7 @@ class Hauptfenster():
         if self.checked_Tastatur.get() == True:
             self.__root.unbind(self.Taste_Stop_2)
             if event != None and event != '':
-                self.writeKonsole('Zeit 2 mit Taste '' + event.char + '' angehalten!')
+                self.writeKonsole('Zeit 2 mit Taste ' + event.char + ' angehalten!')
         if self.checked_GPIO.get() == True and event == None:
             self.writeKonsole('Zeit 1 mit Buzzer bzw Button angehalten!')
         if self.time_is_running_1 == False and self.time_is_running_2 == False:
@@ -700,7 +831,7 @@ class Hauptfenster():
         self.__root.BtnStart['state'] = NORMAL
         self.__root.BtnReset['state'] = DISABLED
         self.writeKonsole('Zeit und Button zurückgesetzt!')
-        self.wechselAnsichtZurAuswertung()
+        # self.wechselAnsichtZurAuswertung()
 
     def update_time_1(self):
         if self.time_is_running_1:
@@ -709,6 +840,8 @@ class Hauptfenster():
             self.__root.T1.config(text=dt)
             self.anzeige.Z1.config(text=dt)
             self.__root.T1.after(50, self.update_time_1)
+        else:
+            self.stop_time_1 = time.time()
 
     def update_time_2(self):
         if self.time_is_running_2:
@@ -717,6 +850,8 @@ class Hauptfenster():
             self.__root.T2.config(text=dt)
             self.anzeige.Z2.config(text=dt)
             self.__root.T2.after(50, self.update_time_2)
+        else:
+            self.stop_time_2 = time.time()
 
     def switchKonsoleState(self):
         if (self.checked_Konsole.get() == False):
