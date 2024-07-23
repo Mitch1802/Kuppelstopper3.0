@@ -344,16 +344,12 @@ class Hauptfenster():
         bahnBId = self.id_time_2
 
         self.__root.G1.config(text=bahnB)
-        # self.__root.T1.config(text='00:00:00')
         self.id_time_1 = bahnBId
         self.__root.G2.config(text=bahnA)
-        # self.__root.T2.config(text='00:00:00')
 
         self.anzeige.G1.config(text=bahnB)
-        # self.anzeige.Z1.config(text='00:00:00')
         self.id_time_2 = bahnAId
         self.anzeige.G2.config(text=bahnA)
-        # self.anzeige.Z2.config(text='00:00:00')
         
         self.__root.BtnStart['state'] = NORMAL
         self.__root.BtnReset['state'] = DISABLED
@@ -398,15 +394,15 @@ class Hauptfenster():
                     text = str(zeit)
                     if fehler > 0:
                         text1A += ' +' + str(fehler)
-                    self.zeichneNeueWerte(row, column+1, text, 'center')
-                    self.zeichneNeueWerte(row, column+3, text, 'center')
+                    self.zeichneNeueWerte(row, column+1, text)
+                    self.zeichneNeueWerte(row, column+3, text)
                 else:
                     x['zeit2'] = zeit
                     x['fehler2'] = fehler
                     text = str(zeit)
                     if fehler > 0:
                         text1A += ' +' + str(fehler)
-                    self.zeichneNeueWerte(row, column+2, text, 'center')
+                    self.zeichneNeueWerte(row, column+2, text)
                     
                     time1 = self.addiereFehlerZurZeit(x['zeit1'], x['fehler1']) 
                     time2 = self.addiereFehlerZurZeit(zeit, fehler)
@@ -414,7 +410,7 @@ class Hauptfenster():
                     if self.berechneBestzeit(time1, time2) == 2:
                         x['bestzeit'] = zeit
                         x['fehlerbest'] = fehler
-                        self.zeichneNeueWerte(row, column+3, text, 'center')
+                        self.zeichneNeueWerte(row, column+3, text)
 
         self.bestzeitPlatzierungBerechnen()
     
@@ -464,12 +460,6 @@ class Hauptfenster():
                 bestzeitinklfehler = self.addiereFehlerZurZeit(dg['bestzeit'], dg['fehlerbest'])
             else:
                 bestzeitinklfehler = ''
-
-            # Test mit Zufallszeiten
-            # test_minute = randint(1, 9)
-            # test_sekunden = randint(11, 59)
-            # test_milisukunden = randint(11, 99)
-            # bestzeitinklfehler = '0' + str(test_minute) + ':' + str(test_sekunden) + ':' + str(test_milisukunden)
 
             best_dict = {
                 'gruppe': dg['wettkampfgruppe'],
@@ -534,12 +524,12 @@ class Hauptfenster():
         # Platzierungen ergänzen und in die nächste Stufe eintragen
         for x in Grunddurchgang:
             if x['platzierung'] > 0:
-                self.zeichneNeueWerte(x['row'], x['column'] + 4, x['platzierung'], 'e')
+                self.zeichneNeueWerte(x['row'], x['column'] + 4, x['platzierung'])
             
             # if x['platzierung'] == 1:
                 # for i in self.Viertelfinale:
                     # if x['platzierung'] 
-                # self.zeichneNeuePlatzierung(x['row'], x['column'], x['platzierung'], 'e')
+                # self.zeichneNeuePlatzierung(x['row'], x['column'], x['platzierung'])
     
     def sortTime(self, timeList):
         if timeList['bestzeitinklfehler'] == '':
@@ -549,9 +539,9 @@ class Hauptfenster():
 
             return split_up[0], split_up[1], split_up[2]
     
-    def zeichneNeueWerte(self, row, column, text, position):
-        lbl = Label(self.__root.dg, text=str(text), takefocus = 0, anchor=position)
-        lbl.grid(row=row, column=column, ipady='5', ipadx='10')
+    def zeichneNeueWerte(self, row, column, text):
+        for label in self.__root.dg.grid_slaves(row=row, column=column):
+            label.config(text=text)
 
     def allesStop(self):
         self.stop_1('')
