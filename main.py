@@ -162,7 +162,7 @@ class Hauptfenster():
 
         self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify="center",  font=('Helvetica', 14))
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
-        self.__root.CBDG.pack(side='left', padx='10', pady='10', ipady=10)
+        self.__root.CBDG.pack(side='left', padx='10', pady='20', ipady=10)
 
         self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx='10', pady='10')
@@ -178,24 +178,30 @@ class Hauptfenster():
         self.__root.LfBahnen = LabelFrame(self.__root.FTab2, text='Zeitnehmung', borderwidth=1, relief=SOLID)
         self.__root.LfBahnen.pack(side='left', padx='10')
 
+        self.__root.LblFehler = Label(self.__root.LfBahnen, text='Fehler', takefocus = 0)
+        self.__root.LblFehler .grid(row=0, column=3, padx='10', pady=(5,0))
         
         self.__root.CB1 = Checkbutton(self.__root.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
-        self.__root.CB1.grid(row=0, column=0, padx='10')
+        self.__root.CB1.grid(row=1, column=0, padx='10')
         self.__root.G1 = Label(self.__root.LfBahnen, text='...', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
-        self.__root.G1 .grid(row=0, column=1, padx='10')
+        self.__root.G1 .grid(row=1, column=1, padx='10')
         self.__root.T1 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
-        self.__root.T1.grid(row=0, column=2, padx='10')
+        self.__root.T1.grid(row=1, column=2, padx='10')
+        self.__root.F1 = Entry(self.__root.LfBahnen, width=5, takefocus = 0)
+        self.__root.F1.grid(row=1, column=3, padx='10')
         self.__root.B1 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_1, takefocus = 0, state=DISABLED)
-        self.__root.B1.grid(row=0, column=3)
+        self.__root.B1.grid(row=1, column=4)
 
         self.__root.CB2 = Checkbutton(self.__root.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
-        self.__root.CB2.grid(row=1, column=0, padx='10')
+        self.__root.CB2.grid(row=2, column=0, padx='10')
         self.__root.G2 = Label(self.__root.LfBahnen, text='...', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
-        self.__root.G2 .grid(row=1, column=1, padx='10')
+        self.__root.G2 .grid(row=2, column=1, padx='10')
         self.__root.T2 = Label(self.__root.LfBahnen, text='00:00:00', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
-        self.__root.T2.grid(row=1, column=2, padx='10')
+        self.__root.T2.grid(row=2, column=2, padx='10')
+        self.__root.F2 = Entry(self.__root.LfBahnen, width=5, takefocus = 0)
+        self.__root.F2.grid(row=2, column=3, padx='10')
         self.__root.B2 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_2, takefocus = 0, state=DISABLED)
-        self.__root.B2.grid(row=1, column=3)
+        self.__root.B2.grid(row=2, column=4)
 
 
         # FTab Einstellungen
@@ -354,13 +360,25 @@ class Hauptfenster():
         self.__root.BtnStart['state'] = NORMAL
         self.__root.BtnReset['state'] = DISABLED
 
+        
+        self.checked_Bahn_1.set(False)
+        self.checked_Bahn_2.set(False)
+        self.switchBahn1State()
+        self.switchBahn2State()
+        self.checked_Bahn_1.set(True)
+        self.checked_Bahn_2.set(True)
+        self.switchBahn1State()
+        self.switchBahn2State()
+
         self.writeKonsole('Die Bahnen wurden gewechselt!')
     
     def werteInAnsichtUebertragen(self):
         self.wechselAnsichtZurAuswertung()
 
         zeit1A = self.__root.T1.cget("text")
-        fehler1A = 0 #self.__root.F1.cget("text")
+        fehler1A = self.__root.F1.get()
+        if fehler1A == '':
+            fehler1A == '0'
         id1A = self.id_time_1.split('_')
         typ1A = id1A[1]
         row1A = int(id1A[2])
@@ -368,7 +386,9 @@ class Hauptfenster():
         self.zeitUebertragen(typ1A, row1A, column1A, zeit1A, fehler1A)
 
         zeit2A = self.__root.T2.cget("text")
-        fehler2A = 0 #self.__root.F2.cget("text")
+        fehler2A = self.__root.F2.get()
+        if fehler2A == '':
+            fehler2A == '0'
         id2A = self.id_time_2.split('_')
         typ2A = id2A[1]
         row2A = int(id2A[2])
@@ -377,6 +397,10 @@ class Hauptfenster():
 
         self.__root.T1.config(text='00:00:00')
         self.__root.T2.config(text='00:00:00')
+        self.__root.F1.delete(0, END)
+        # self.__root.F1.insert(0, '')
+        self.__root.F2.delete(0, END)
+        # self.__root.F2.insert(0, '')
         self.anzeige.Z1.config(text='00:00:00')
         self.anzeige.Z2.config(text='00:00:00')
 
@@ -392,16 +416,16 @@ class Hauptfenster():
                     x['bestzeit'] = zeit
                     x['fehlerbest'] = fehler
                     text = str(zeit)
-                    if fehler > 0:
-                        text1A += ' +' + str(fehler)
+                    if int(fehler) > 0:
+                        text += ' +' + str(fehler)
                     self.zeichneNeueWerte(row, column+1, text)
                     self.zeichneNeueWerte(row, column+3, text)
                 else:
                     x['zeit2'] = zeit
                     x['fehler2'] = fehler
                     text = str(zeit)
-                    if fehler > 0:
-                        text1A += ' +' + str(fehler)
+                    if int(fehler) > 0:
+                        text += ' +' + str(fehler)
                     self.zeichneNeueWerte(row, column+2, text)
                     
                     time1 = self.addiereFehlerZurZeit(x['zeit1'], x['fehler1']) 
@@ -757,22 +781,26 @@ class Hauptfenster():
         self.__root.G2.config(text='...')
         self.__root.T1.config(text='00:00:00')
         self.__root.T2.config(text='00:00:00')
+        self.__root.F1.delete(0, END)
+        # self.__root.F1.insert(0, '')
         self.anzeige.G1.config(text='...')
         self.anzeige.G2.config(text='...')
         self.anzeige.Z1.config(text='00:00:00')
         self.anzeige.Z2.config(text='00:00:00')
+        self.__root.F2.delete(0, END)
+        # self.__root.F2.insert(0, '')
         count = 1
         dg_select = self.__root.CBDG.get()
         for dg in self.Durchgänge:
             if dg['typ'] == 'gd':
                 if dg['dg'] == int(dg_select):
-                    if count == 1 and dg['wettkampfgruppe'] != '...':
+                    if count == 1 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
                         self.checked_Bahn_1.set(True)
                         self.switchBahn1State()
                         self.__root.G1.config(text=dg['wettkampfgruppe'])
                         self.anzeige.G1.config(text=dg['wettkampfgruppe'])
                         self.id_time_1 = 'typ.row.column_' + str(dg['typ']) + '_' + str(dg['row']) + '_' + str(dg['column'])
-                    elif count == 2 and dg['wettkampfgruppe'] != '...':
+                    elif count == 2 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
                         self.checked_Bahn_2.set(True)
                         self.switchBahn2State()
                         self.__root.G2.config(text=dg['wettkampfgruppe'])
@@ -786,6 +814,7 @@ class Hauptfenster():
         if self.checked_Bahn_1.get() == False:
             self.__root.G1['state'] = DISABLED
             self.__root.T1['state'] = DISABLED
+            self.__root.F1['state'] = DISABLED
             self.__root.B1['state'] = DISABLED
             self.anzeige.G1.pack_forget()
             self.anzeige.Z1.pack_forget()
@@ -793,6 +822,7 @@ class Hauptfenster():
         else:
             self.__root.G1['state'] = NORMAL
             self.__root.T1['state'] = NORMAL
+            self.__root.F1['state'] = NORMAL
             self.__root.B1['state'] = NORMAL
             self.anzeige.G1.pack(expand=0, side=TOP, fill=X)
             self.anzeige.Z1.pack(expand=1, side=TOP, fill=BOTH)
@@ -802,6 +832,7 @@ class Hauptfenster():
         if self.checked_Bahn_2.get() == False:
             self.__root.G2['state'] = DISABLED
             self.__root.T2['state'] = DISABLED
+            self.__root.F2['state'] = DISABLED
             self.__root.B2['state'] = DISABLED
             self.anzeige.G2.pack_forget()
             self.anzeige.Z2.pack_forget()
@@ -809,6 +840,7 @@ class Hauptfenster():
         else:
             self.__root.G2['state'] = NORMAL
             self.__root.T2['state'] = NORMAL
+            self.__root.F2['state'] = NORMAL
             self.__root.B2['state'] = NORMAL
             self.anzeige.G2.pack(expand=0, side=BOTTOM, fill=X)
             self.anzeige.Z2.pack(expand=1, side=TOP, fill=BOTH)
