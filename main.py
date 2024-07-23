@@ -75,9 +75,11 @@ class Hauptfenster():
         self.time_is_running_1 = False
         self.start_time_1 = ''
         self.stop_time_1 = ''
+        self.id_time_1 = ''
         self.time_is_running_2 = False
         self.start_time_2 = ''
-        self.stop_time_1 = ''
+        self.stop_time_2 = ''
+        self.id_time_2 = ''
 
         self.__root = Tk()
         self.__root.title('KuppelStopper 3.0')
@@ -170,10 +172,13 @@ class Hauptfenster():
         self.__root.BtnReset.pack(side='right', padx='10', pady='10')  
         self.__root.BtnWechsel = Button(self.__root.zeitnehmung, text='Bahn Wechsel', width=15, padding=10, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
         self.__root.BtnWechsel.pack(side='right', padx='10', pady='10')
+        self.__root.BtnZeitUebertrag = Button(self.__root.zeitnehmung, text='Zeit übertragen', width=10, padding=10, command=self.reset, takefocus = 0, state=DISABLED)
+        self.__root.BtnZeitUebertrag.pack(side='right', padx='10', pady='10') 
 
         self.__root.LfBahnen = LabelFrame(self.__root.FTab2, text='Zeitnehmung', borderwidth=1, relief=SOLID)
         self.__root.LfBahnen.pack(side='left', padx='10')
 
+        
         self.__root.CB1 = Checkbutton(self.__root.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
         self.__root.CB1.grid(row=0, column=0, padx='10')
         self.__root.G1 = Label(self.__root.LfBahnen, text='...', font=('Helvetica', 20), takefocus = 0, state=DISABLED)
@@ -330,32 +335,121 @@ class Hauptfenster():
         self.anzeige.G2.config(font=('Helvetica', size))
 
     def bahnWechsel(self):
-        bahnA = self.__root.T1.cget("text")
-        bahnB = self.__root.T2.cget("text")
-
-        ### Zeit übertragen 
-        ### Fehler eintragen wo?
-        self.bestzeitPlatzierungBerechnen()
+        self.werteInAnsichtUebertragen()
 
         bahnA = self.__root.G1.cget("text")
         bahnB = self.__root.G2.cget("text")
 
+        bahnAId = self.id_time_1
+        bahnBId = self.id_time_2
+
         self.__root.G1.config(text=bahnB)
-        self.__root.T1.config(text='00:00:00')
+        # self.__root.T1.config(text='00:00:00')
+        self.id_time_1 = bahnBId
         self.__root.G2.config(text=bahnA)
-        self.__root.T2.config(text='00:00:00')
+        # self.__root.T2.config(text='00:00:00')
 
         self.anzeige.G1.config(text=bahnB)
-        self.anzeige.Z1.config(text='00:00:00')
+        # self.anzeige.Z1.config(text='00:00:00')
+        self.id_time_2 = bahnAId
         self.anzeige.G2.config(text=bahnA)
-        self.anzeige.Z2.config(text='00:00:00')
+        # self.anzeige.Z2.config(text='00:00:00')
+        
+        self.__root.BtnStart['state'] = NORMAL
+        self.__root.BtnReset['state'] = DISABLED
 
         self.writeKonsole('Die Bahnen wurden gewechselt!')
+    
+    def werteInAnsichtUebertragen(self):
+        self.wechselAnsichtZurAuswertung()
 
-    def zeitUebertragen(self, typ, row, column, zeit, fehler):
-        # schauen ob zeit 1 vorhanden, dann in zeit 2 eintragen und bestzeit berechnen
+        zeit1A = self.__root.T1.cget("text")
+        fehler1A = 0 #self.__root.F1.cget("text")
+        id1A = self.id_time_1.split('_')
+        typ1A = id1A[1]
+        row1A = int(id1A[2])
+        column1A = int(id1A[3])
+        self.zeitUebertragen(typ1A, row1A, column1A, zeit1A, fehler1A)
+
+        zeit2A = self.__root.T2.cget("text")
+        fehler2A = 0 #self.__root.F2.cget("text")
+        id2A = self.id_time_2.split('_')
+        typ2A = id2A[1]
+        row2A = int(id2A[2])
+        column2A = int(id2A[3])
+        self.zeitUebertragen(typ2A, row2A, column2A, zeit2A, fehler2A)
+
+        self.__root.T1.config(text='00:00:00')
+        self.__root.T2.config(text='00:00:00')
+        self.anzeige.Z1.config(text='00:00:00')
+        self.anzeige.Z2.config(text='00:00:00')
 
         self.bestzeitPlatzierungBerechnen()
+
+    def zeitUebertragen(self, typ, row, column, zeit, fehler):
+        
+        for x in self.Durchgänge:
+            if x['typ'] == typ and x['row'] == row and x['column'] == column:
+                if x['zeit1'] == '':
+                    x['zeit1'] = zeit
+                    x['fehler1'] = fehler
+                    x['bestzeit'] = zeit
+                    x['fehlerbest'] = fehler
+                    text = str(zeit)
+                    if fehler > 0:
+                        text1A += ' +' + str(fehler)
+                    self.zeichneNeueWerte(row, column+1, text, 'center')
+                    self.zeichneNeueWerte(row, column+3, text, 'center')
+                else:
+                    x['zeit2'] = zeit
+                    x['fehler2'] = fehler
+                    text = str(zeit)
+                    if fehler > 0:
+                        text1A += ' +' + str(fehler)
+                    self.zeichneNeueWerte(row, column+2, text, 'center')
+                    
+                    time1 = self.addiereFehlerZurZeit(x['zeit1'], x['fehler1']) 
+                    time2 = self.addiereFehlerZurZeit(zeit, fehler)
+
+                    if self.berechneBestzeit(time1, time2) == 2:
+                        x['bestzeit'] = zeit
+                        x['fehlerbest'] = fehler
+                        self.zeichneNeueWerte(row, column+3, text, 'center')
+
+        self.bestzeitPlatzierungBerechnen()
+    
+    def berechneBestzeit(self, zeit1, zeit2):
+        t1 = zeit1.split(':')
+        t1_minute = int(t1[0])
+        t1_sekunden = int(t1[1])
+        t1_milisekunden = int(t1[2])
+        tf1 = (((t1_minute * 60) + t1_sekunden) * 100) + t1_milisekunden
+
+        t2 = zeit2.split(':')
+        t2_minute = int(t2[0])
+        t2_sekunden = int(t2[1])
+        t2_milisekunden = int(t2[2])
+        tf2 = (((t2_minute * 60) + t2_sekunden) * 100) + t2_milisekunden
+
+        if tf1 < tf2:
+            return 1
+        elif tf1 >= tf2:
+            return 2
+        
+    def addiereFehlerZurZeit(self, zeit, fehler):
+        t = zeit.split(':')
+        t_minute = int(t[0])
+        t_sekunden = int(t[1])
+        t_milisekunden = int(t[2])
+        t_fehler = int(fehler)
+        t_sekunden = t_sekunden + t_fehler
+
+        if t_sekunden > 59:
+            t_sekunden = t_sekunden - 60
+            t_minute = t_minute + 1  
+
+        zeit_neu = str(t_minute) + ':' + str(t_sekunden) + ':' + str(t_milisekunden)
+        return zeit_neu
 
     def bestzeitPlatzierungBerechnen(self):
         Grunddurchgang = []
@@ -367,19 +461,7 @@ class Hauptfenster():
 
         for dg in self.Durchgänge:
             if dg['bestzeit'] != '':
-                bst = dg['bestzeit']
-                bst = bst.split(':')
-                bst_minute = int(bst[0])
-                bst_sekunden = int(bst[1])
-                bst_milisekunden = int(bst[2])
-                bst_fehler = int(dg['fehlerbest'])
-                bst_sekunden = bst_sekunden + bst_fehler
-
-                if bst_sekunden > 59:
-                    bst_sekunden = bst_sekunden - 60
-                    bst_minute = bst_minute + 1  
-
-                bestzeitinklfehler = str(bst_minute) + ':' + str(bst_sekunden) + ':' + str(bst_milisekunden)
+                bestzeitinklfehler = self.addiereFehlerZurZeit(dg['bestzeit'], dg['fehlerbest'])
             else:
                 bestzeitinklfehler = ''
 
@@ -449,7 +531,15 @@ class Hauptfenster():
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
         
-        # Platzierungen in die nächste Stufe eintragen
+        # Platzierungen ergänzen und in die nächste Stufe eintragen
+        for x in Grunddurchgang:
+            if x['platzierung'] > 0:
+                self.zeichneNeueWerte(x['row'], x['column'] + 4, x['platzierung'], 'e')
+            
+            # if x['platzierung'] == 1:
+                # for i in self.Viertelfinale:
+                    # if x['platzierung'] 
+                # self.zeichneNeuePlatzierung(x['row'], x['column'], x['platzierung'], 'e')
     
     def sortTime(self, timeList):
         if timeList['bestzeitinklfehler'] == '':
@@ -459,9 +549,9 @@ class Hauptfenster():
 
             return split_up[0], split_up[1], split_up[2]
     
-    def zeichneNeuePlatzierung(self, row, column, platzierung):
-        lbl = Label(self.__root.dg, text=str(platzierung))
-        lbl.grid(row=row, column=column)
+    def zeichneNeueWerte(self, row, column, text, position):
+        lbl = Label(self.__root.dg, text=str(text), takefocus = 0, anchor=position)
+        lbl.grid(row=row, column=column, ipady='5', ipadx='10')
 
     def allesStop(self):
         self.stop_1('')
@@ -598,9 +688,9 @@ class Hauptfenster():
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
     def zeichneGrundansicht(self):
-        txt = '...'
-        time = '##:##:##'
-        rh = '#'
+        txt = ''
+        time = ''
+        rh = ''
         self.DurchgangNummer = 1
         self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, 'gd')
         self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, 'vf')
@@ -655,7 +745,7 @@ class Hauptfenster():
         groupdict = {
             'wettkampfgruppe': wettkampfgruppe,
             'zeit1': '',
-            'fehler1': '.',
+            'fehler1': '',
             'zeit2': '',
             'fehler2': '',
             'bestzeit': '',
@@ -691,17 +781,16 @@ class Hauptfenster():
                         self.switchBahn1State()
                         self.__root.G1.config(text=dg['wettkampfgruppe'])
                         self.anzeige.G1.config(text=dg['wettkampfgruppe'])
+                        self.id_time_1 = 'typ.row.column_' + str(dg['typ']) + '_' + str(dg['row']) + '_' + str(dg['column'])
                     elif count == 2 and dg['wettkampfgruppe'] != '...':
                         self.checked_Bahn_2.set(True)
                         self.switchBahn2State()
                         self.__root.G2.config(text=dg['wettkampfgruppe'])
                         self.anzeige.G2.config(text=dg['wettkampfgruppe'])
+                        self.id_time_2 = 'typ.row.column_' + str(dg['typ']) + '_' + str(dg['row']) + '_' + str(dg['column'])
                     count += 1
         
         self.__root.BtnStart['state'] = NORMAL
-
-        # nur test
-        self.bestzeitPlatzierungBerechnen()
 
     def switchBahn1State(self):
         if self.checked_Bahn_1.get() == False:
@@ -824,6 +913,7 @@ class Hauptfenster():
             self.__root.BtnReset['state'] = NORMAL
 
     def reset(self):
+        self.werteInAnsichtUebertragen()
         self.__root.T1.config(text='00:00:00')
         self.__root.T2.config(text='00:00:00')
         self.anzeige.Z1.config(text='00:00:00')
@@ -831,7 +921,6 @@ class Hauptfenster():
         self.__root.BtnStart['state'] = NORMAL
         self.__root.BtnReset['state'] = DISABLED
         self.writeKonsole('Zeit und Button zurückgesetzt!')
-        # self.wechselAnsichtZurAuswertung()
 
     def update_time_1(self):
         if self.time_is_running_1:
@@ -878,4 +967,3 @@ class Hauptfenster():
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
 
 Hauptfenster()
-
