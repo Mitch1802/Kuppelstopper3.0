@@ -407,6 +407,10 @@ class Hauptfenster():
         self.bestzeitPlatzierungBerechnen()
 
     def zeitUebertragen(self, typ, row, column, zeit, fehler):
+        if fehler == '':
+            fehler = 0
+        elif fehler != '':
+            fehler = int(fehler)
         
         for x in self.Durchgänge:
             if x['typ'] == typ and x['row'] == row and x['column'] == column:
@@ -416,7 +420,7 @@ class Hauptfenster():
                     x['bestzeit'] = zeit
                     x['fehlerbest'] = fehler
                     text = str(zeit)
-                    if int(fehler) > 0:
+                    if fehler > 0:
                         text += ' +' + str(fehler)
                     self.zeichneNeueWerte(row, column+1, text)
                     self.zeichneNeueWerte(row, column+3, text)
@@ -424,7 +428,7 @@ class Hauptfenster():
                     x['zeit2'] = zeit
                     x['fehler2'] = fehler
                     text = str(zeit)
-                    if int(fehler) > 0:
+                    if fehler > 0:
                         text += ' +' + str(fehler)
                     self.zeichneNeueWerte(row, column+2, text)
                     
@@ -468,7 +472,22 @@ class Hauptfenster():
             t_sekunden = t_sekunden - 60
             t_minute = t_minute + 1  
 
-        zeit_neu = str(t_minute) + ':' + str(t_sekunden) + ':' + str(t_milisekunden)
+        if t_minute < 10:
+            t_minute = '0' + str(t_minute)
+        else:
+            t_minute = str(t_minute)
+
+        if t_sekunden < 10:
+            t_sekunden = '0' + str(t_sekunden)
+        else:
+            t_sekunden = str(t_sekunden)
+        
+        if t_milisekunden < 10:
+            t_milisekunden = '0' + str(t_milisekunden)
+        else:
+            t_milisekunden = str(t_milisekunden)
+
+        zeit_neu = t_minute + ':' + t_sekunden + ':' + t_milisekunden
         return zeit_neu
 
     def bestzeitPlatzierungBerechnen(self):
@@ -514,46 +533,55 @@ class Hauptfenster():
             if item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
+            if item['platzierung'] >= 1 and item['platzierung'] <= 8:
+                # Gruppe eine Runde weiter schieben
+                test = self.Durchgänge
+                print()
         
         Viertelfinale.sort(key=self.sortTime)
         for index, item in enumerate(Viertelfinale):
             if item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
+            if item['platzierung'] >= 1 and item['platzierung'] <= 4:
+                # Gruppe eine Runde weiter schieben
+                print()
 
         Halbfinale.sort(key=self.sortTime)
         for index, item in enumerate(Halbfinale):
             if item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
+            if item['platzierung'] >= 1 and item['platzierung'] <= 2:
+                # Gruppe eine Runde weiter schieben
+                print()
         
         KleinesFinale.sort(key=self.sortTime)
         for index, item in enumerate(KleinesFinale):
             if item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
 
         Finale.sort(key=self.sortTime)
         for index, item in enumerate(Finale):
             if item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
 
         Damenwertung.sort(key=self.sortTime)
         for index, item in enumerate(Damenwertung):
             if item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
         
         # Platzierungen ergänzen und in die nächste Stufe eintragen
-        for x in Grunddurchgang:
-            if x['platzierung'] > 0:
-                self.zeichneNeueWerte(x['row'], x['column'] + 4, x['platzierung'])
-            
-            # if x['platzierung'] == 1:
-                # for i in self.Viertelfinale:
-                    # if x['platzierung'] 
-                # self.zeichneNeuePlatzierung(x['row'], x['column'], x['platzierung'])
+        print()
     
     def sortTime(self, timeList):
         if timeList['bestzeitinklfehler'] == '':
@@ -706,16 +734,16 @@ class Hauptfenster():
         time = ''
         rh = ''
         self.DurchgangNummer = 1
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, 'gd')
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, 'vf')
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, 'hf')
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, 'kf')
-        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, 'f')
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, 'dw')
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, 'gd', False)
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, 'vf', True)
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, 'hf', True)
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, 'kf', True)
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, 'f', True)
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, 'dw', False)
         self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
         
-    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ):
+    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ, hinweis):
         title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 14))
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
         col1 = startcolumn + 1
@@ -723,7 +751,12 @@ class Hauptfenster():
         col3 = startcolumn + 3
         col4 = startcolumn + 4
         col5 = startcolumn + 5
+        count_vf = 1
         for i in range(anzahl_gruppen):
+            if hinweis == True:
+                if i['typ'] == 'gd':
+                    # Hinweis schreiben
+                    print()
             row = startrow + i + 1
             durchgang = Label(self.__root.dg, text=self.DurchgangNummer, takefocus = 0, background='#98CF8B', anchor="center")
             text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0)
@@ -734,7 +767,7 @@ class Hauptfenster():
                 lrh = Label(self.__root.dg, text=rh_text, takefocus = 0, anchor="center")
             rh = i + 1
             if rh % 2:
-                self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1)
+                self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1, hinweis)
                 durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
                 text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 time1.grid(row=row, column=col2, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
@@ -744,7 +777,7 @@ class Hauptfenster():
                     lrh.grid(row=row, column=col5, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 self.DurchgangNummer += 1
             else:
-                self.konvertiereArray(self.DurchgangNummer-1, gruppe_txt, typ, row, col1)    
+                self.konvertiereArray(self.DurchgangNummer-1, gruppe_txt, typ, row, col1, hinweis)    
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='5', ipadx='10')
@@ -752,7 +785,7 @@ class Hauptfenster():
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='5', ipadx='10')
         
-    def konvertiereArray(self, dg_nummer, wettkampfgruppe, typ, row, column):
+    def konvertiereArray(self, dg_nummer, wettkampfgruppe, typ, row, column, hinweis):
         if dg_nummer not in self.DGNumbers:
             self.DGNumbers.append(dg_nummer)
         
@@ -767,7 +800,8 @@ class Hauptfenster():
             'typ': typ,                     # Art  (Grunddurchgang, Viertelfinale, ...)
             'dg': dg_nummer,                # Nummer des Durchganges
             'row': row,                     # Reihe von Name
-            'column': column                # Spalte von Name
+            'column': column,               # Spalte von Name
+            'hinweis': hinweis              # Hinweis für Platzierungsposition zb GD_1
         }
         self.Durchgänge.append(groupdict)
 
