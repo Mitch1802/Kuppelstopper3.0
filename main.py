@@ -20,6 +20,8 @@ class Hauptfenster():
         self.Taste_Start_2 = 's'
         self.Taste_Stop_2 = 'w'
 
+        self.Status_Anzeige = True # True = Zeit, False Auswertung
+
         # self.Wettkampfgruppen = []
         self.Wettkampfgruppen = [
             {'gruppenname': 'Gruppe1','reihenfolge': '1'},
@@ -160,20 +162,19 @@ class Hauptfenster():
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
         self.__root.zeitnehmung.pack(side='left', padx='10')
 
+        self.__root.BtnAnsichtWechseln = Button(self.__root.zeitnehmung, text='Ansicht wechseln', width=20, padding=10, command=self.anzeigeUmschalten, takefocus = 0, state=DISABLED)
+        self.__root.BtnAnsichtWechseln.pack(side='left', padx='10', pady='10') 
         self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify="center",  font=('Helvetica', 14))
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
         self.__root.CBDG.pack(side='left', padx='10', pady='20', ipady=10)
-
         self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx='10', pady='10')
         self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text='Alles Stop', width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
         self.__root.BtnAllesStop.pack(side='left', pady='10')
-        self.__root.BtnReset = Button(self.__root.zeitnehmung, text='Reset', width=10, padding=10, command=self.reset, takefocus = 0, state=DISABLED)
-        self.__root.BtnReset.pack(side='right', padx='10', pady='10')  
         self.__root.BtnWechsel = Button(self.__root.zeitnehmung, text='Bahn Wechsel', width=15, padding=10, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
-        self.__root.BtnWechsel.pack(side='right', padx='10', pady='10')
-        self.__root.BtnZeitUebertrag = Button(self.__root.zeitnehmung, text='Zeit übertragen', width=10, padding=10, command=self.reset, takefocus = 0, state=DISABLED)
-        self.__root.BtnZeitUebertrag.pack(side='right', padx='10', pady='10') 
+        self.__root.BtnWechsel.pack(side='left', padx='10', pady='10')
+        self.__root.BtnZeitUebertragen = Button(self.__root.zeitnehmung, text='Zeit übertragen', width=20, padding=10, command=self.werteInAnsichtUebertragen, takefocus = 0, state=DISABLED)
+        self.__root.BtnZeitUebertragen.pack(side='left', padx='10', pady='10')
 
         self.__root.LfBahnen = LabelFrame(self.__root.FTab2, text='Zeitnehmung', borderwidth=1, relief=SOLID)
         self.__root.LfBahnen.pack(side='left', padx='10')
@@ -314,16 +315,15 @@ class Hauptfenster():
 
         self.anzeige.mainloop()
 
-    # Validation Functions
-    def validate_only_numbers(self, action, value_if_allowed):
-        try:
-            if action == '1' and int(value_if_allowed) > 0 and int(value_if_allowed) <= len(self.Wettkampfgruppen): 
-                float(value_if_allowed)
-                return True
-        except ValueError:
-            return False
-    
     # Functions    
+    def anzeigeUmschalten(self):
+        if self.Status_Anzeige == False:
+            self.Status_Anzeige = True
+            self.wechselAnsichtZurZeit()
+        else:
+            self.Status_Anzeige = False
+            self.wechselAnsichtZurAuswertung()
+
     def updateRahmenAnzeige(self):
         if self.checked_Rahmen.get() == True:
             self.anzeige.wm_overrideredirect(True) 
@@ -358,8 +358,6 @@ class Hauptfenster():
         self.anzeige.G2.config(text=bahnA)
         
         self.__root.BtnStart['state'] = NORMAL
-        self.__root.BtnReset['state'] = DISABLED
-
         
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
@@ -373,13 +371,11 @@ class Hauptfenster():
         self.writeKonsole('Die Bahnen wurden gewechselt!')
     
     def werteInAnsichtUebertragen(self):
-        self.wechselAnsichtZurAuswertung()
-
         zeit1A = self.__root.T1.cget("text")
         fehler1A = self.__root.F1.get()
         if fehler1A == '':
             fehler1A == '0'
-        id1A = self.id_time_1.split('_')
+        id1A = self.id_time_1.split('#')
         typ1A = id1A[1]
         row1A = int(id1A[2])
         column1A = int(id1A[3])
@@ -389,7 +385,7 @@ class Hauptfenster():
         fehler2A = self.__root.F2.get()
         if fehler2A == '':
             fehler2A == '0'
-        id2A = self.id_time_2.split('_')
+        id2A = self.id_time_2.split('#')
         typ2A = id2A[1]
         row2A = int(id2A[2])
         column2A = int(id2A[3])
@@ -439,8 +435,6 @@ class Hauptfenster():
                         x['bestzeit'] = zeit
                         x['fehlerbest'] = fehler
                         self.zeichneNeueWerte(row, column+3, text)
-
-        self.bestzeitPlatzierungBerechnen()
     
     def berechneBestzeit(self, zeit1, zeit2):
         t1 = zeit1.split(':')
@@ -491,105 +485,37 @@ class Hauptfenster():
         return zeit_neu
 
     def bestzeitPlatzierungBerechnen(self):
-        Grunddurchgang = []
-        Viertelfinale = []
-        Halbfinale = []
-        KleinesFinale = []
-        Finale = []
-        Damenwertung = []
-
         for dg in self.Durchgänge:
             if dg['bestzeit'] != '':
-                bestzeitinklfehler = self.addiereFehlerZurZeit(dg['bestzeit'], dg['fehlerbest'])
+                dg['bestzeitinklfehler'] = self.addiereFehlerZurZeit(dg['bestzeit'], dg['fehlerbest'])
             else:
-                bestzeitinklfehler = ''
+                dg['bestzeitinklfehler'] = ''
 
-            best_dict = {
-                'gruppe': dg['wettkampfgruppe'],
-                'bestzeit': dg['bestzeit'],
-                'fehlerbest': dg['fehlerbest'],
-                'bestzeitinklfehler': bestzeitinklfehler,
-                'dg': dg['dg'],
-                'row': dg['row'],
-                'column': dg['column'],
-                'platzierung': 0
-            }
-
-            if dg['typ'] == 'gd' and dg['wettkampfgruppe'] != '...':
-                Grunddurchgang.append(best_dict)
-            elif dg['typ'] == 'vf':
-                Viertelfinale.append(best_dict)
-            elif dg['typ'] == 'hf':
-                Halbfinale.append(best_dict)
-            elif dg['typ'] == 'kf':
-                KleinesFinale.append(best_dict)
-            elif dg['typ'] == 'f':
-                Finale.append(best_dict)
-            elif dg['typ'] == 'dw':
-                Damenwertung.append(best_dict)
+        self.Durchgänge.sort(key=self.sortTime)
         
-        Grunddurchgang.sort(key=self.sortTime)
-        for index, item in enumerate(Grunddurchgang):
-            if item['bestzeitinklfehler'] != '':
-                platzierung_neu = index + 1
-                item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
-            if item['platzierung'] >= 1 and item['platzierung'] <= 8:
-                # Gruppe eine Runde weiter schieben
-                test = self.Durchgänge
-                print()
-        
-        Viertelfinale.sort(key=self.sortTime)
-        for index, item in enumerate(Viertelfinale):
-            if item['bestzeitinklfehler'] != '':
-                platzierung_neu = index + 1
-                item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
-            if item['platzierung'] >= 1 and item['platzierung'] <= 4:
-                # Gruppe eine Runde weiter schieben
-                print()
-
-        Halbfinale.sort(key=self.sortTime)
-        for index, item in enumerate(Halbfinale):
-            if item['bestzeitinklfehler'] != '':
-                platzierung_neu = index + 1
-                item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
-            if item['platzierung'] >= 1 and item['platzierung'] <= 2:
-                # Gruppe eine Runde weiter schieben
-                print()
-        
-        KleinesFinale.sort(key=self.sortTime)
-        for index, item in enumerate(KleinesFinale):
-            if item['bestzeitinklfehler'] != '':
-                platzierung_neu = index + 1
-                item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
-
-        Finale.sort(key=self.sortTime)
-        for index, item in enumerate(Finale):
-            if item['bestzeitinklfehler'] != '':
-                platzierung_neu = index + 1
-                item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
-
-        Damenwertung.sort(key=self.sortTime)
-        for index, item in enumerate(Damenwertung):
-            if item['bestzeitinklfehler'] != '':
+        for index, item in enumerate(self.Durchgänge):
+            if item['typ'] == '1_gd' and item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
                 self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
         
-        # Platzierungen ergänzen und in die nächste Stufe eintragen
-        print()
-    
+                if item['platzierung'] >= 1 and item['platzierung'] <= 8:
+                    for dg in self.Durchgänge:
+                        suchtext = 'GD_' + str(item['platzierung'])
+                        if dg['hinweis'] == suchtext:
+                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+        
+        # TODO: schiebe Gew. VF in HF
+
+        # TODO: schiebe Gew. HF in KF und F
+
     def sortTime(self, timeList):
         if timeList['bestzeitinklfehler'] == '':
-            return '59', '59', '99'
+            return timeList['typ'], '59', '59', '99'
         else:
             split_up = timeList['bestzeitinklfehler'].split(':')
-
-            return split_up[0], split_up[1], split_up[2]
+            return timeList['typ'], split_up[0], split_up[1], split_up[2]
     
     def zeichneNeueWerte(self, row, column, text):
         for label in self.__root.dg.grid_slaves(row=row, column=column):
@@ -675,7 +601,7 @@ class Hauptfenster():
         self.Durchgänge = []
         self.DGNumbers = []
 
-        # übertrag in Damenwertung fehlt
+        # TODO: übertrag in Damenwertung fehlt
 
         anzahl_gruppen = 0
         if len(self.Wettkampfgruppen) % 2:
@@ -724,7 +650,7 @@ class Hauptfenster():
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
             
             for x in self.Durchgänge:
-                if x['typ'] == 'gd' and x['row'] == row and x['column'] == col1:
+                if x['typ'] == '1_gd' and x['row'] == row and x['column'] == col1:
                     x['wettkampfgruppe'] = i['gruppenname']
 
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
@@ -734,12 +660,12 @@ class Hauptfenster():
         time = ''
         rh = ''
         self.DurchgangNummer = 1
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, 'gd', False)
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, 'vf', True)
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, 'hf', True)
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, 'kf', True)
-        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, 'f', True)
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, 'dw', False)
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, '1_gd', False)
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, '2_vf', True)
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, '3_hf', False)
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, '4_kf', False)
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, '5_f', False)
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, '6_dw', False)
         self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
         
@@ -751,12 +677,28 @@ class Hauptfenster():
         col3 = startcolumn + 3
         col4 = startcolumn + 4
         col5 = startcolumn + 5
-        count_vf = 1
+        hinweis_text = ''
         for i in range(anzahl_gruppen):
-            if hinweis == True:
-                if i['typ'] == 'gd':
-                    # Hinweis schreiben
-                    print()
+            if hinweis == True and typ == '2_vf':
+                vf_index = i + 1
+                if vf_index == 1: 
+                    hinweis_text = 'GD_1'
+                elif vf_index == 2: 
+                    hinweis_text = 'GD_8' 
+                elif vf_index == 3: 
+                    hinweis_text = 'GD_2' 
+                elif vf_index == 4: 
+                    hinweis_text = 'GD_7' 
+                elif vf_index == 5: 
+                    hinweis_text = 'GD_3' 
+                elif vf_index == 6: 
+                    hinweis_text = 'GD_6' 
+                elif vf_index == 7: 
+                    hinweis_text = 'GD_4' 
+                elif vf_index == 8: 
+                    hinweis_text = 'GD_5' 
+            else:
+                hinweis_text=''
             row = startrow + i + 1
             durchgang = Label(self.__root.dg, text=self.DurchgangNummer, takefocus = 0, background='#98CF8B', anchor="center")
             text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0)
@@ -767,7 +709,7 @@ class Hauptfenster():
                 lrh = Label(self.__root.dg, text=rh_text, takefocus = 0, anchor="center")
             rh = i + 1
             if rh % 2:
-                self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1, hinweis)
+                self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1, hinweis_text)
                 durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(10,0), ipadx='5')
                 text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 time1.grid(row=row, column=col2, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
@@ -777,7 +719,7 @@ class Hauptfenster():
                     lrh.grid(row=row, column=col5, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 self.DurchgangNummer += 1
             else:
-                self.konvertiereArray(self.DurchgangNummer-1, gruppe_txt, typ, row, col1, hinweis)    
+                self.konvertiereArray(self.DurchgangNummer-1, gruppe_txt, typ, row, col1, hinweis_text)    
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='5', ipadx='10') 
                 time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='5', ipadx='10')
@@ -791,22 +733,23 @@ class Hauptfenster():
         
         groupdict = {
             'wettkampfgruppe': wettkampfgruppe,
+            'hinweis': hinweis,             # Hinweis für Platzierungsposition zb GD_1
+            'platzierung': 0,
             'zeit1': '',
             'fehler1': '',
             'zeit2': '',
             'fehler2': '',
             'bestzeit': '',
             'fehlerbest': '',
+            'bestzeitinklfehler':'',
             'typ': typ,                     # Art  (Grunddurchgang, Viertelfinale, ...)
             'dg': dg_nummer,                # Nummer des Durchganges
             'row': row,                     # Reihe von Name
-            'column': column,               # Spalte von Name
-            'hinweis': hinweis              # Hinweis für Platzierungsposition zb GD_1
+            'column': column,               # Spalte von Name           
         }
         self.Durchgänge.append(groupdict)
 
     def ladeZeitnehmungsDaten(self, event=None):
-        self.wechselAnsichtZurZeit()
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.switchBahn1State()
@@ -817,32 +760,30 @@ class Hauptfenster():
         self.__root.T2.config(text='00:00:00')
         self.__root.F1.delete(0, END)
         # self.__root.F1.insert(0, '')
-        self.anzeige.G1.config(text='...')
-        self.anzeige.G2.config(text='...')
-        self.anzeige.Z1.config(text='00:00:00')
-        self.anzeige.Z2.config(text='00:00:00')
         self.__root.F2.delete(0, END)
         # self.__root.F2.insert(0, '')
         count = 1
         dg_select = self.__root.CBDG.get()
         for dg in self.Durchgänge:
-            if dg['typ'] == 'gd':
+            if dg['typ'] == '1_gd':
                 if dg['dg'] == int(dg_select):
                     if count == 1 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
                         self.checked_Bahn_1.set(True)
                         self.switchBahn1State()
                         self.__root.G1.config(text=dg['wettkampfgruppe'])
                         self.anzeige.G1.config(text=dg['wettkampfgruppe'])
-                        self.id_time_1 = 'typ.row.column_' + str(dg['typ']) + '_' + str(dg['row']) + '_' + str(dg['column'])
+                        self.id_time_1 = 'typ.row.column#' + str(dg['typ']) + '#' + str(dg['row']) + '#' + str(dg['column'])
                     elif count == 2 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
                         self.checked_Bahn_2.set(True)
                         self.switchBahn2State()
                         self.__root.G2.config(text=dg['wettkampfgruppe'])
                         self.anzeige.G2.config(text=dg['wettkampfgruppe'])
-                        self.id_time_2 = 'typ.row.column_' + str(dg['typ']) + '_' + str(dg['row']) + '_' + str(dg['column'])
+                        self.id_time_2 = 'typ.row.column#' + str(dg['typ']) + '#' + str(dg['row']) + '#' + str(dg['column'])
                     count += 1
+            # TODO: Lade VF, HF, KF, F, DW
         
-        self.__root.BtnStart['state'] = NORMAL
+        self.reset()
+        self.wechselAnsichtZurZeit()
 
     def switchBahn1State(self):
         if self.checked_Bahn_1.get() == False:
@@ -914,7 +855,8 @@ class Hauptfenster():
         self.__root.BtnStart['state'] = DISABLED
         self.__root.BtnAllesStop['state'] = NORMAL
         self.__root.BtnWechsel['state'] = DISABLED
-        self.__root.BtnReset['state'] = DISABLED
+        self.__root.BtnAnsichtWechseln['state'] = DISABLED
+        self.__root.BtnZeitUebertragen['state'] = DISABLED
 
         self.writeKonsole('Der Angriffbefehl wurde erteilt!')
         # os.system('mpg123 ' + self.file_angriffbefehel)
@@ -953,7 +895,8 @@ class Hauptfenster():
         if self.time_is_running_1 == False and self.time_is_running_2 == False:
             self.__root.BtnAllesStop['state'] = DISABLED
             self.__root.BtnWechsel['state'] = NORMAL
-            self.__root.BtnReset['state'] = NORMAL
+            self.__root.BtnAnsichtWechseln['state'] = NORMAL
+            self.__root.BtnZeitUebertragen['state'] = NORMAL
 
     def stop_2(self, event=None):
         self.time_is_running_2 = False
@@ -966,17 +909,15 @@ class Hauptfenster():
         if self.time_is_running_1 == False and self.time_is_running_2 == False:
             self.__root.BtnAllesStop['state'] = DISABLED
             self.__root.BtnWechsel['state'] = NORMAL
-            self.__root.BtnReset['state'] = NORMAL
+            self.__root.BtnAnsichtWechseln['state'] = NORMAL
+            self.__root.BtnZeitUebertragen['state'] = NORMAL
 
     def reset(self):
-        self.werteInAnsichtUebertragen()
         self.__root.T1.config(text='00:00:00')
         self.__root.T2.config(text='00:00:00')
         self.anzeige.Z1.config(text='00:00:00')
         self.anzeige.Z2.config(text='00:00:00')
         self.__root.BtnStart['state'] = NORMAL
-        self.__root.BtnReset['state'] = DISABLED
-        self.writeKonsole('Zeit und Button zurückgesetzt!')
 
     def update_time_1(self):
         if self.time_is_running_1:
@@ -1021,5 +962,9 @@ class Hauptfenster():
         self.anzeige.Z2.pack_forget()
         self.anzeige.G2.pack_forget()
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
+
+    def ladeAuswertungDaten(self):
+        # TODO: Lade und zeichne Auswertung
+        print()
 
 Hauptfenster()
