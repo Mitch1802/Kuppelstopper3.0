@@ -496,6 +496,8 @@ class Hauptfenster():
         return zeit_neu
 
     def bestzeitPlatzierungBerechnen(self):
+        dg_select = self.__root.CBDG.get()
+
         for dg in self.Durchgänge:
             if dg['bestzeit'] != '':
                 dg['bestzeitinklfehler'] = self.addiereFehlerZurZeit(dg['bestzeit'], dg['fehlerbest'])
@@ -503,6 +505,11 @@ class Hauptfenster():
                 dg['bestzeitinklfehler'] = ''
 
         self.Durchgänge.sort(key=self.sortTime)
+
+        vf_durchgang = 0
+        vf_hinweis = ''
+        hf_durchgang = 0
+        hf_hinweis = ''
         
         for index, item in enumerate(self.Durchgänge):
             if item['typ'] == '1_gd' and item['bestzeitinklfehler'] != '':
@@ -517,16 +524,58 @@ class Hauptfenster():
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
         
-        # TODO: schiebe Gew. VF in HF
+            if item['typ'] == '2_vf' and item['bestzeitinklfehler'] != '':
+                if vf_durchgang == 0 or vf_durchgang < item['dg']:
+                    vf_durchgang = item['dg']
+                    if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
+                        vf_hinweis = 'VF_1'
+                    elif item['hinweis'] == 'GD_2' or item['hinweis'] == 'GD_7':
+                        vf_hinweis = 'VF_2'
+                    elif item['hinweis']  == 'GD_3' or item['hinweis'] == 'GD_6':
+                        vf_hinweis = 'VF_3'
+                    elif item['hinweis'] == 'GD_4' or item['hinweis'] == 'GD_5':
+                        vf_hinweis = 'VF_4'
+                    for dg in self.Durchgänge:
+                        if dg['hinweis'] == vf_hinweis:
+                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+            
+            if item['typ'] == '3_hf' and item['bestzeitinklfehler'] != '':
+                if hf_durchgang == 0 or hf_durchgang < item['dg']:
+                    hf_durchgang = item['dg']
+                    if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
+                        hf_hinweis = 'F_1'
+                    elif item['hinweis'] == 'VF_3' or item['hinweis'] == 'VF_4':
+                        hf_hinweis = 'F_2'
+                    for dg in self.Durchgänge:
+                        if dg['hinweis'] == hf_hinweis:
+                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+                elif hf_durchgang == item['dg']:
+                    if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
+                        hf_hinweis = 'KF_1'
+                    elif item['hinweis'] == 'VF_3' or item['hinweis'] == 'VF_4':
+                        hf_hinweis = 'KF_2'
+                    for dg in self.Durchgänge:
+                        if dg['hinweis'] == hf_hinweis:
+                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
 
-        # TODO: schiebe Gew. HF in KF und F
+            # TODO: Platzierung DW
 
     def sortTime(self, timeList):
-        if timeList['bestzeitinklfehler'] == '':
-            return timeList['typ'], '59', '59', '99'
+        if timeList['typ'] == '1_gd' or timeList['typ'] == '6_dw':
+            if timeList['bestzeitinklfehler'] == '':
+                return timeList['typ'], '59', '59', '99'
+            else:
+                split_up = timeList['bestzeitinklfehler'].split(':')
+                return timeList['typ'], split_up[0], split_up[1], split_up[2]
         else:
-            split_up = timeList['bestzeitinklfehler'].split(':')
-            return timeList['typ'], split_up[0], split_up[1], split_up[2]
+            if timeList['bestzeitinklfehler'] == '':
+                return timeList['typ'], timeList['dg'], '59', '59', '99'
+            else:
+                split_up = timeList['bestzeitinklfehler'].split(':')
+                return timeList['typ'], timeList['dg'], split_up[0], split_up[1], split_up[2]
     
     def zeichneNeueWerte(self, row, column, text):
         for label in self.__root.dg.grid_slaves(row=row, column=column):
@@ -671,16 +720,16 @@ class Hauptfenster():
         time = ''
         rh = ''
         self.DurchgangNummer = 1
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, '1_gd', False)
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, '2_vf', True)
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, '3_hf', False)
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, '4_kf', False)
-        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, '5_f', False)
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, '6_dw', False)
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, '1_gd')
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, '2_vf')
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, '3_hf')
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, '4_kf')
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, '5_f')
+        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, '6_dw')
         self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
         
-    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ, hinweis):
+    def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ):
         title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 14))
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
         col1 = startcolumn + 1
@@ -690,7 +739,7 @@ class Hauptfenster():
         col5 = startcolumn + 5
         hinweis_text = ''
         for i in range(anzahl_gruppen):
-            if hinweis == True and typ == '2_vf':
+            if typ == '2_vf':
                 vf_index = i + 1
                 if vf_index == 1: 
                     hinweis_text = 'GD_1'
@@ -708,6 +757,15 @@ class Hauptfenster():
                     hinweis_text = 'GD_4' 
                 elif vf_index == 8: 
                     hinweis_text = 'GD_5' 
+            elif typ == '3_hf':
+                hf_index = i + 1
+                hinweis_text = 'VF_' + str(hf_index)
+            elif typ == '4_kf':
+                kf_index = i + 1
+                hinweis_text = 'KF_' + str(kf_index)
+            elif typ == '5_f':
+                f_index = i + 1
+                hinweis_text = 'F_' + str(f_index)
             else:
                 hinweis_text=''
             row = startrow + i + 1
