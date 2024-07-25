@@ -74,6 +74,7 @@ class Hauptfenster():
         self.AnzeigeDWStartRow = 24
         self.AnzeigeDWStartColumn = 8
 
+        self.ZeitUebertragen = False
         self.time_is_running_1 = False
         self.start_time_1 = ''
         self.stop_time_1 = ''
@@ -363,33 +364,43 @@ class Hauptfenster():
         self.checked_Bahn_2.set(False)
         self.switchBahn1State()
         self.switchBahn2State()
-        self.checked_Bahn_1.set(True)
-        self.checked_Bahn_2.set(True)
-        self.switchBahn1State()
-        self.switchBahn2State()
+
+        if self.__root.G1.cget("text") != '...':
+            self.checked_Bahn_1.set(True)
+            self.switchBahn1State()
+        if self.__root.G2.cget("text") != '...':
+            self.checked_Bahn_2.set(True)
+            self.switchBahn2State()
 
         self.writeKonsole('Die Bahnen wurden gewechselt!')
     
     def werteInAnsichtUebertragen(self):
-        zeit1A = self.__root.T1.cget("text")
-        fehler1A = self.__root.F1.get()
-        if fehler1A == '':
-            fehler1A == '0'
-        id1A = self.id_time_1.split('#')
-        typ1A = id1A[1]
-        row1A = int(id1A[2])
-        column1A = int(id1A[3])
-        self.zeitUebertragen(typ1A, row1A, column1A, zeit1A, fehler1A)
+        dg_select = self.__root.CBDG.get()
 
-        zeit2A = self.__root.T2.cget("text")
-        fehler2A = self.__root.F2.get()
-        if fehler2A == '':
-            fehler2A == '0'
-        id2A = self.id_time_2.split('#')
-        typ2A = id2A[1]
-        row2A = int(id2A[2])
-        column2A = int(id2A[3])
-        self.zeitUebertragen(typ2A, row2A, column2A, zeit2A, fehler2A)
+        if self.id_time_1  != '' and self.ZeitUebertragen == False:
+            zeit1A = self.__root.T1.cget("text")
+            fehler1A = self.__root.F1.get()
+            if fehler1A == '':
+                fehler1A == '0'
+            id1A = self.id_time_1.split('#')
+            typ1A = id1A[1]
+            row1A = int(id1A[2])
+            column1A = int(id1A[3])
+            self.zeitUebertragen(typ1A, row1A, column1A, zeit1A, fehler1A, int(dg_select))
+
+        if self.id_time_2  != '' and self.ZeitUebertragen == False:
+            zeit2A = self.__root.T2.cget("text")
+            fehler2A = self.__root.F2.get()
+            if fehler2A == '':
+                fehler2A == '0'
+            id2A = self.id_time_2.split('#')
+            typ2A = id2A[1]
+            row2A = int(id2A[2])
+            column2A = int(id2A[3])
+            self.zeitUebertragen(typ2A, row2A, column2A, zeit2A, fehler2A, int(dg_select))
+        
+        if self.ZeitUebertragen == False:
+            self.ZeitUebertragen = True
 
         self.__root.T1.config(text='00:00:00')
         self.__root.T2.config(text='00:00:00')
@@ -402,14 +413,14 @@ class Hauptfenster():
 
         self.bestzeitPlatzierungBerechnen()
 
-    def zeitUebertragen(self, typ, row, column, zeit, fehler):
+    def zeitUebertragen(self, typ, row, column, zeit, fehler, dg):
         if fehler == '':
             fehler = 0
         elif fehler != '':
             fehler = int(fehler)
         
         for x in self.Durchgänge:
-            if x['typ'] == typ and x['row'] == row and x['column'] == column:
+            if x['typ'] == typ and x['row'] == row and x['column'] == column and x['dg'] == dg:
                 if x['zeit1'] == '':
                     x['zeit1'] = zeit
                     x['fehler1'] = fehler
@@ -750,6 +761,7 @@ class Hauptfenster():
         self.Durchgänge.append(groupdict)
 
     def ladeZeitnehmungsDaten(self, event=None):
+        self.wechselAnsichtZurZeit()
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.switchBahn1State()
@@ -762,28 +774,27 @@ class Hauptfenster():
         # self.__root.F1.insert(0, '')
         self.__root.F2.delete(0, END)
         # self.__root.F2.insert(0, '')
+        self.id_time_1 = ''
+        self.id_time_2 = ''
         count = 1
         dg_select = self.__root.CBDG.get()
         for dg in self.Durchgänge:
-            if dg['typ'] == '1_gd':
-                if dg['dg'] == int(dg_select):
-                    if count == 1 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
-                        self.checked_Bahn_1.set(True)
-                        self.switchBahn1State()
-                        self.__root.G1.config(text=dg['wettkampfgruppe'])
-                        self.anzeige.G1.config(text=dg['wettkampfgruppe'])
-                        self.id_time_1 = 'typ.row.column#' + str(dg['typ']) + '#' + str(dg['row']) + '#' + str(dg['column'])
-                    elif count == 2 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
-                        self.checked_Bahn_2.set(True)
-                        self.switchBahn2State()
-                        self.__root.G2.config(text=dg['wettkampfgruppe'])
-                        self.anzeige.G2.config(text=dg['wettkampfgruppe'])
-                        self.id_time_2 = 'typ.row.column#' + str(dg['typ']) + '#' + str(dg['row']) + '#' + str(dg['column'])
-                    count += 1
-            # TODO: Lade VF, HF, KF, F, DW
+            if dg['dg'] == int(dg_select):
+                if count == 1 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
+                    self.checked_Bahn_1.set(True)
+                    self.switchBahn1State()
+                    self.__root.G1.config(text=dg['wettkampfgruppe'])
+                    self.anzeige.G1.config(text=dg['wettkampfgruppe'])
+                    self.id_time_1 = 'typ.row.column#' + str(dg['typ']) + '#' + str(dg['row']) + '#' + str(dg['column'])
+                elif count == 2 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
+                    self.checked_Bahn_2.set(True)
+                    self.switchBahn2State()
+                    self.__root.G2.config(text=dg['wettkampfgruppe'])
+                    self.anzeige.G2.config(text=dg['wettkampfgruppe'])
+                    self.id_time_2 = 'typ.row.column#' + str(dg['typ']) + '#' + str(dg['row']) + '#' + str(dg['column'])
+                count += 1
         
         self.reset()
-        self.wechselAnsichtZurZeit()
 
     def switchBahn1State(self):
         if self.checked_Bahn_1.get() == False:
@@ -852,6 +863,7 @@ class Hauptfenster():
             self.update_time_2()
 
     def start(self):   
+        self.ZeitUebertragen = False
         self.__root.BtnStart['state'] = DISABLED
         self.__root.BtnAllesStop['state'] = NORMAL
         self.__root.BtnWechsel['state'] = DISABLED
