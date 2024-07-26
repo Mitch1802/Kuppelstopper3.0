@@ -24,36 +24,36 @@ class Hauptfenster():
 
         # self.Wettkampfgruppen = []
         self.Wettkampfgruppen = [
-            {'gruppenname': 'Gruppe1','reihenfolge': '1'},
-            {'gruppenname': 'Gruppe2','reihenfolge': '2'},
-            {'gruppenname': 'Gruppe3','reihenfolge': '3'},
-            {'gruppenname': 'Gruppe4','reihenfolge': '4'},
-            {'gruppenname': 'Gruppe5','reihenfolge': '5'},
-            {'gruppenname': 'Gruppe6','reihenfolge': '6'},
-            {'gruppenname': 'Gruppe7','reihenfolge': '7'},
-            {'gruppenname': 'Gruppe8','reihenfolge': '8'},
-            {'gruppenname': 'Gruppe9','reihenfolge': '9'},
-            {'gruppenname': 'Gruppe10','reihenfolge': '10'},
-            {'gruppenname': 'Gruppe11','reihenfolge': '11'},
-            {'gruppenname': 'Gruppe12','reihenfolge': '12'},
-            {'gruppenname': 'Gruppe13','reihenfolge': '13'},
-            {'gruppenname': 'Gruppe14','reihenfolge': '14'},
-            {'gruppenname': 'Gruppe15','reihenfolge': '15'},
-            {'gruppenname': 'Gruppe16','reihenfolge': '16'},
-            {'gruppenname': 'Gruppe17','reihenfolge': '17'},
-            # {'gruppenname': 'Gruppe18','reihenfolge': '18'},
-            # {'gruppenname': 'Gruppe19','reihenfolge': '19'},
-            # {'gruppenname': 'Gruppe20','reihenfolge': '20'},
-            # {'gruppenname': 'Gruppe21','reihenfolge': '21'},
-            # {'gruppenname': 'Gruppe22','reihenfolge': '22'},
-            # {'gruppenname': 'Gruppe23','reihenfolge': '23'},
-            # {'gruppenname': 'Gruppe24','reihenfolge': '24'},
-            # {'gruppenname': 'Gruppe25','reihenfolge': '25'},
-            # {'gruppenname': 'Gruppe26','reihenfolge': '26'},
-            # {'gruppenname': 'Gruppe27','reihenfolge': '27'},
-            # {'gruppenname': 'Gruppe28','reihenfolge': '28'},
-            # {'gruppenname': 'Gruppe29','reihenfolge': '29'},
-            # {'gruppenname': 'Gruppe30','reihenfolge': '30'}
+            {'gruppenname': 'Gruppe1','reihenfolge': '1', 'damenwertung': False},
+            {'gruppenname': 'Gruppe2','reihenfolge': '2', 'damenwertung': True},
+            {'gruppenname': 'Gruppe3','reihenfolge': '3', 'damenwertung': False},
+            {'gruppenname': 'Gruppe4','reihenfolge': '4', 'damenwertung': True},
+            {'gruppenname': 'Gruppe5','reihenfolge': '5', 'damenwertung': False},
+            {'gruppenname': 'Gruppe6','reihenfolge': '6', 'damenwertung': False},
+            {'gruppenname': 'Gruppe7','reihenfolge': '7', 'damenwertung': False},
+            {'gruppenname': 'Gruppe8','reihenfolge': '8', 'damenwertung': False},
+            {'gruppenname': 'Gruppe9','reihenfolge': '9', 'damenwertung': False},
+            {'gruppenname': 'Gruppe10','reihenfolge': '10', 'damenwertung': False},
+            {'gruppenname': 'Gruppe11','reihenfolge': '11', 'damenwertung': False},
+            {'gruppenname': 'Gruppe12','reihenfolge': '12', 'damenwertung': False},
+            {'gruppenname': 'Gruppe13','reihenfolge': '13', 'damenwertung': False},
+            {'gruppenname': 'Gruppe14','reihenfolge': '14', 'damenwertung': False},
+            {'gruppenname': 'Gruppe15','reihenfolge': '15', 'damenwertung': False},
+            {'gruppenname': 'Gruppe16','reihenfolge': '16', 'damenwertung': False},
+            {'gruppenname': 'Gruppe17','reihenfolge': '17', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe18','reihenfolge': '18', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe19','reihenfolge': '19', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe20','reihenfolge': '20', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe21','reihenfolge': '21', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe22','reihenfolge': '22', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe23','reihenfolge': '23', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe24','reihenfolge': '24', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe25','reihenfolge': '25', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe26','reihenfolge': '26', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe27','reihenfolge': '27', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe28','reihenfolge': '28', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe29','reihenfolge': '29', 'damenwertung': False},
+            # {'gruppenname': 'Gruppe30','reihenfolge': '30', 'damenwertung': False}
         ]
 
         self.Durchgänge = []
@@ -496,8 +496,6 @@ class Hauptfenster():
         return zeit_neu
 
     def bestzeitPlatzierungBerechnen(self):
-        dg_select = self.__root.CBDG.get()
-
         for dg in self.Durchgänge:
             if dg['bestzeit'] != '':
                 dg['bestzeitinklfehler'] = self.addiereFehlerZurZeit(dg['bestzeit'], dg['fehlerbest'])
@@ -510,6 +508,7 @@ class Hauptfenster():
         vf_hinweis = ''
         hf_durchgang = 0
         hf_hinweis = ''
+        dw_platzierung_neu = 1
         
         for index, item in enumerate(self.Durchgänge):
             if item['typ'] == '1_gd' and item['bestzeitinklfehler'] != '':
@@ -561,7 +560,11 @@ class Hauptfenster():
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
 
-            # TODO: Platzierung DW
+            # TODO: Test Platzierung DW
+            if item['typ'] == '6_dw' and item['bestzeitinklfehler'] != '':
+                item['platzierung'] = dw_platzierung_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, dw_platzierung_neu)  
+                dw_platzierung_neu += 1
 
     def sortTime(self, timeList):
         if timeList['typ'] == '1_gd' or timeList['typ'] == '6_dw':
@@ -603,7 +606,8 @@ class Hauptfenster():
 
         val= {
             'gruppenname': name,
-            'reihenfolge': ''
+            'reihenfolge': '',
+            'damenwertung': False
             }
         self.Wettkampfgruppen.append(val)
         self.__root.Entry.delete(0, END)
@@ -623,6 +627,9 @@ class Hauptfenster():
             row = index + 1
             gruppenname = i['gruppenname']
             reihenfolge = i['reihenfolge']
+            damenwertung = i['damenwertung']
+            checkbox_var = BooleanVar(value=i['damenwertung'])
+            # TODO: Eintrag DW not work
 
             w = Label(self.__root.LfReihenfolge, text=gruppenname, takefocus = 0)
             w.grid(row=row, column=0, sticky=(W), padx='10', pady='2')
@@ -632,9 +639,21 @@ class Hauptfenster():
             e.insert(0, reihenfolge)
             e.bind('<KeyRelease>', lambda event, name=gruppenname: self.reihenfolgeSpeichern(event, name))
 
+            cb = Checkbutton(self.__root.LfReihenfolge, text='DW', variable=checkbox_var, command=lambda name=gruppenname: self.eintragDamenwertung(damenwertung, name), takefocus = 0)
+            cb.grid(row=row, column=2, sticky=(W), padx='10', pady='2')
+
             x = Label(self.__root.LfReihenfolge, image=self.iconDelete, takefocus = 0)
-            x.grid(row=row, column=2, sticky=(W), padx='10', pady='2')
+            x.grid(row=row, column=3, sticky=(W), padx='10', pady='2')
             x.bind('<Button>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
+
+    def eintragDamenwertung(self, variable, name):
+        for i in self.Wettkampfgruppen:
+            if i['gruppenname'] == name:
+                i['damenwertung'] = variable
+                if variable == False:
+                    self.writeKonsole(name + ' aus der Damenwertung entfernt')
+                elif variable == True:
+                    self.writeKonsole(name + ' zur Damenwertung hinzugefügt')
 
     def deleteWettkampfgruppe(self, event, name):
         for i in self.Wettkampfgruppen:
