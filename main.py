@@ -299,19 +299,20 @@ class Hauptfenster():
         self.anzeige = Toplevel()
         self.anzeige.title('KuppelStopper 3.0 Anzeige')
         self.anzeige.minsize(700, 400)
+        self.anzeige.config(background='#6e6c6b')
 
         self.icon = PhotoImage(file='Resources/Kuppelstopper.png')
         self.anzeige.iconphoto(False, self.icon)
 
         self.anzeige.frame = Frame(self.anzeige)
-        self.anzeige.frame.pack(expand=1, side=TOP, fill=BOTH)
+        self.anzeige.frame.pack(expand=1, side=TOP, fill=BOTH, padx=20, pady=20)
 
         self.anzeige.G1 = Label(self.anzeige.frame, text='', foreground='#818ef0', background='#6e6c6b', font=('Helvetica', self.__root.SGG.get()), takefocus=0)
         self.anzeige.Z1 = Label(self.anzeige.frame, text='00:00:00', anchor='center', foreground='#ffffff', background='#6e6c6b', font=('Helvetica', self.__root.SGZ.get()), takefocus=0)
         self.anzeige.Z2 = Label(self.anzeige.frame, text='00:00:00', anchor='center', foreground='#ffffff', background='#6e6c6b', font=('Helvetica', self.__root.SGZ.get()), takefocus=0)
         self.anzeige.G2 = Label(self.anzeige.frame, text='', anchor='ne', foreground='#93ff8f', background='#6e6c6b', font=('Helvetica', self.__root.SGG.get()), takefocus=0)
         
-        self.anzeige.ERG = Label(self.anzeige.frame, text='Hier finden Sie später\ndie Auswertung!', anchor='center', justify='center', foreground='#ffffff', background='#6e6c6b', font=('Helvetica', self.__root.SGZ.get()), takefocus=0)
+        self.anzeige.ERG = Frame(self.anzeige.frame)
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
 
         self.anzeige.mainloop()
@@ -685,102 +686,114 @@ class Hauptfenster():
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
 
     def uebernahmeGruppen(self):
-        # TODO: Mitteilung gesamte Auswertung zurückgesetzt
+        res = messagebox.askquestion("Reset Auswertung", "Die Auswertung wird komplett zurückgesetzt!") 
         
-        self.__root.dg.destroy()
-        self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
-        self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
-        self.__root.zeitnehmung.pack_forget()
-        self.__root.zeitnehmung.pack(side='left', padx='10')
-        self.__root.LfBahnen.pack_forget()
-        self.__root.LfBahnen.pack(side='left', padx='10')
-        self.Durchgänge = []
-        self.DGNumbers = []
-        mixedWertung = []
-        damenWertung = []
-        damen_vorhanden = False
+        if res == 'yes':
+            self.checked_Bahn_1.set(False)
+            self.checked_Bahn_2.set(False)
+            self.switchBahn1State()
+            self.switchBahn2State()
+            self.reset() 
+            self.__root.BtnStart['state'] = DISABLED
+            self.__root.BtnAllesStop['state'] = DISABLED
+            self.__root.BtnWechsel['state'] = DISABLED
+            self.__root.BtnAnsichtWechseln['state'] = DISABLED
+            self.__root.BtnZeitUebertragen['state'] = DISABLED
 
-        for grp in self.Wettkampfgruppen:
-            if grp['damenwertung'] == True:
-                damenWertung.append(grp)
+            self.__root.dg.destroy()
+            self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
+            self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
+            self.__root.zeitnehmung.pack_forget()
+            self.__root.zeitnehmung.pack(side='left', padx='10')
+            self.__root.LfBahnen.pack_forget()
+            self.__root.LfBahnen.pack(side='left', padx='10')
+            self.Durchgänge = []
+            self.DGNumbers = []
+            mixedWertung = []
+            damenWertung = []
+            damen_vorhanden = False
+
+            for grp in self.Wettkampfgruppen:
+                if grp['damenwertung'] == True:
+                    damenWertung.append(grp)
+                else:
+                    mixedWertung.append(grp)
+
+            anzahl_gruppen = 0
+            if len(mixedWertung) % 2:
+                anzahl_gruppen = len(mixedWertung) + 1
+            else: 
+                anzahl_gruppen = len(mixedWertung)
+
+            if anzahl_gruppen < 19:
+                self.AnzeigeVFStartRow = 0
+                self.AnzeigeVFStartColumn = 8
+                self.AnzeigeHFStartRow = 10
+                self.AnzeigeHFStartColumn = 8
+                self.AnzeigeKFStartRow = 0
+                self.AnzeigeKFStartColumn = 17
+                self.AnzeigeFStartRow = 4
+                self.AnzeigeFStartColumn = 17
+                self.AnzeigeDWStartRow = 8
+                self.AnzeigeDWStartColumn = 17
+
+                self.AnzahlGrunddurchgänge = anzahl_gruppen
+
+                max_rows = self.AnzahlGrunddurchgänge
+                space = Label(self.__root.dg, text='')
+                space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+                space = Label(self.__root.dg, text='')
+                space.grid(row=0, column=16, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
             else:
-                mixedWertung.append(grp)
+                self.AnzahlGrunddurchgänge = anzahl_gruppen
+                max_rows = self.AnzahlGrunddurchgänge
+                space = Label(self.__root.dg, text='')
+                space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
 
-        anzahl_gruppen = 0
-        if len(mixedWertung) % 2:
-            anzahl_gruppen = len(mixedWertung) + 1
-        else: 
-            anzahl_gruppen = len(mixedWertung)
+            if len(damenWertung) > 0:
+                damen_vorhanden = True
+            if anzahl_gruppen % 2:
+                self.zeichneGrundansicht(True, damen_vorhanden)
+            else:
+                self.zeichneGrundansicht(False, damen_vorhanden) 
 
-        if anzahl_gruppen < 19:
-            self.AnzeigeVFStartRow = 0
-            self.AnzeigeVFStartColumn = 8
-            self.AnzeigeHFStartRow = 10
-            self.AnzeigeHFStartColumn = 8
-            self.AnzeigeKFStartRow = 0
-            self.AnzeigeKFStartColumn = 17
-            self.AnzeigeFStartRow = 4
-            self.AnzeigeFStartColumn = 17
-            self.AnzeigeDWStartRow = 8
-            self.AnzeigeDWStartColumn = 17
+            self.__root.NbFTabControl.select(self.__root.FTab2)
+            sorted_MixedWertung = sorted(mixedWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
+            sorted_DamenWertung = sorted(damenWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
 
-            self.AnzahlGrunddurchgänge = anzahl_gruppen
+            for index, item in enumerate(sorted_MixedWertung):
+                row = self.AnzeigeGDStartRow + int(index) + 1
+                col1 = self.AnzeigeGDStartColumn + 1
+                txt = item['reihenfolge'] + ' - ' + item['gruppenname']
+                text = Label(self.__root.dg, text=txt, takefocus = 0)
 
-            max_rows = self.AnzahlGrunddurchgänge
-            space = Label(self.__root.dg, text='')
-            space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
-            space = Label(self.__root.dg, text='')
-            space.grid(row=0, column=16, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
-        else:
-            self.AnzahlGrunddurchgänge = anzahl_gruppen
-            max_rows = self.AnzahlGrunddurchgänge
-            space = Label(self.__root.dg, text='')
-            space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+                if int(row) % 2:
+                    text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                else:    
+                    text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
+                
+                for x in self.Durchgänge:
+                    if x['typ'] == '1_gd' and x['row'] == row and x['column'] == col1:
+                        x['wettkampfgruppe'] = item['gruppenname']
 
-        if len(damenWertung) > 0:
-            damen_vorhanden = True
-        if anzahl_gruppen % 2:
-            self.zeichneGrundansicht(True, damen_vorhanden)
-        else:
-           self.zeichneGrundansicht(False, damen_vorhanden) 
+            self.writeKonsole(str(len(mixedWertung)) + ' Gruppen wurden übernommen!')
 
-        self.__root.NbFTabControl.select(self.__root.FTab2)
-        sorted_MixedWertung = sorted(mixedWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
-        sorted_DamenWertung = sorted(damenWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
+            for index, item in enumerate(sorted_DamenWertung):
+                row = self.AnzeigeDWStartRow + int(index) + 1
+                col1 = self.AnzeigeDWStartColumn + 1
+                txt = item['reihenfolge'] + ' - ' + item['gruppenname']
+                text = Label(self.__root.dg, text=txt, takefocus = 0)
 
-        for index, item in enumerate(sorted_MixedWertung):
-            row = self.AnzeigeGDStartRow + int(index) + 1
-            col1 = self.AnzeigeGDStartColumn + 1
-            txt = item['reihenfolge'] + ' - ' + item['gruppenname']
-            text = Label(self.__root.dg, text=txt, takefocus = 0)
+                if int(row) % 2:
+                    text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+                else:    
+                    text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
+                
+                for x in self.Durchgänge:
+                    if x['typ'] == '6_dw' and x['row'] == row and x['column'] == col1:
+                        x['wettkampfgruppe'] = item['gruppenname']
 
-            if int(row) % 2:
-                text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-            else:    
-                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
-            
-            for x in self.Durchgänge:
-                if x['typ'] == '1_gd' and x['row'] == row and x['column'] == col1:
-                    x['wettkampfgruppe'] = item['gruppenname']
-
-        self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
-
-        for index, item in enumerate(sorted_DamenWertung):
-            row = self.AnzeigeDWStartRow + int(index) + 1
-            col1 = self.AnzeigeDWStartColumn + 1
-            txt = item['reihenfolge'] + ' - ' + item['gruppenname']
-            text = Label(self.__root.dg, text=txt, takefocus = 0)
-
-            if int(row) % 2:
-                text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-            else:    
-                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
-            
-            for x in self.Durchgänge:
-                if x['typ'] == '6_dw' and x['row'] == row and x['column'] == col1:
-                    x['wettkampfgruppe'] = item['gruppenname']
-
-        self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Damengruppen wurden übernommen!')
+            self.writeKonsole(str(len(damenWertung)) + ' Damengruppen wurden übernommen!')
 
     def zeichneGrundansicht(self, ungerade_MixedWertung, damenwertung):
         txt = ''
@@ -797,6 +810,7 @@ class Hauptfenster():
         if ungerade_MixedWertung == True:
             self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
+        self.__root.CBDG.current(0)
         
     def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ):
         title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 14))
@@ -998,6 +1012,7 @@ class Hauptfenster():
         self.__root.BtnZeitUebertragen['state'] = DISABLED
 
         self.writeKonsole('Der Angriffbefehl wurde erteilt!')
+        # TODO: Angriffsbefehl
         # os.system('mpg123 ' + self.file_angriffbefehel)
         if self.checked_GPIO.get() == True and self.checked_Bahn_1.get() == True:
             self.GPIO_Start_1 = self.__root.Start_GPIO_1.get()
@@ -1101,9 +1116,36 @@ class Hauptfenster():
         self.anzeige.Z2.pack_forget()
         self.anzeige.G2.pack_forget()
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
+        self.ladeAuswertungDaten()
 
     def ladeAuswertungDaten(self):
         # TODO: Lade und zeichne Auswertung
-        print()
+        for widgets in self.anzeige.ERG.winfo_children():
+            widgets.grid_remove()
+
+
+        title = Label(self.anzeige.ERG, text='Grunddurchgang', takefocus = 0, anchor="center", font=('Helvetica', 14))
+        title.grid(row=0, column=0, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(10,0))
+        for dg in self.Durchgänge:
+            if dg['typ'] == '1_gd' and dg['platzierung'] > 0:
+                row = dg['platzierung']
+                col = 0
+                text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
+                w = Label(self.anzeige.ERG, text=text, takefocus = 0)
+                w.grid(row=row, column=col, sticky=(W), padx='10', pady='2')
+
+                time = dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                t = Label(self.anzeige.ERG, text=time, takefocus = 0)
+                t.grid(row=row, column=col+1, sticky=(W), padx='10', pady='2')
+
+
 
 Hauptfenster()
+
+# TODO: Auswertung konfiguierbar in Einstellungen (zeige alle Zeiten oder nur Bestzeit, nur aktueller Durchgang oder ganze Tabelle, nächste Gruppe, ...)
+# TODO: nachträgliche Änderung von Zeiten und Fehlern (Popup über Toplevel, analog Anzeige)
+# TODO: Cursor bei Fehlern -> Reset bei Bahnwechseln oder Zeit übertragen
+# TODO: Grafik Auswertung anpassen (Weiter kommende Gruppen anderer Hintergrund, ...)
+# TODO: Rahmen ausblenden geht nicht
+# TODO: Input Felder, Einschränkung Eingabe (Fehler, Reihenfolge nur Zahlen erlaubt)
+# TODO: Alle Farben, Schriftarten, Schriftgrößen konfigurierbar in Einstellungen
