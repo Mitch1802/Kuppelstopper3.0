@@ -38,7 +38,7 @@ class Hauptfenster():
             {'gruppenname': 'Gruppe12','reihenfolge': '12', 'damenwertung': False},
             {'gruppenname': 'Gruppe13','reihenfolge': '13', 'damenwertung': False},
             {'gruppenname': 'Gruppe14','reihenfolge': '14', 'damenwertung': False},
-            {'gruppenname': 'Gruppe15','reihenfolge': '15', 'damenwertung': False},
+            {'gruppenname': 'Gruppe15','reihenfolge': '15', 'damenwertung': True},
             {'gruppenname': 'Gruppe16','reihenfolge': '16', 'damenwertung': False},
             {'gruppenname': 'Gruppe17','reihenfolge': '17', 'damenwertung': False},
             # {'gruppenname': 'Gruppe18','reihenfolge': '18', 'damenwertung': False},
@@ -560,7 +560,6 @@ class Hauptfenster():
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
 
-            # TODO: Test Platzierung DW
             if item['typ'] == '6_dw' and item['bestzeitinklfehler'] != '':
                 item['platzierung'] = dw_platzierung_neu
                 self.zeichneNeueWerte(item['row'], item['column'] + 4, dw_platzierung_neu)  
@@ -622,38 +621,54 @@ class Hauptfenster():
         if len(self.Wettkampfgruppen) == 0:
             self.__root.LNoGroups = Label(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!', takefocus = 0)
             self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+        else:
+            w = Label(self.__root.LfReihenfolge, text='Gruppenname', takefocus = 0)
+            w.grid(row=0, column=0, sticky=(W), padx='10', pady='2')
+
+            e = Label(self.__root.LfReihenfolge, text='Reihenf.', takefocus = 0)
+            e.grid(row=0, column=1, sticky=(W), padx='10', pady='2')
+
+            cb = Label(self.__root.LfReihenfolge, text='Damen', takefocus = 0)
+            cb.grid(row=0, column=2, sticky=(W), padx='10', pady='2')
+
+            x = Label(self.__root.LfReihenfolge, text='#', takefocus = 0)
+            x.grid(row=0, column=3, sticky=(W), padx='10', pady='2')
 
         for index, i in enumerate(self.Wettkampfgruppen):
             row = index + 1
             gruppenname = i['gruppenname']
             reihenfolge = i['reihenfolge']
-            damenwertung = i['damenwertung']
-            checkbox_var = BooleanVar(value=i['damenwertung'])
-            # TODO: Eintrag DW not work
+            damenwertung = 'NEIN'
+            if i['damenwertung'] ==True:
+                damenwertung = 'JA'
 
             w = Label(self.__root.LfReihenfolge, text=gruppenname, takefocus = 0)
             w.grid(row=row, column=0, sticky=(W), padx='10', pady='2')
 
-            e = Entry(self.__root.LfReihenfolge, width=5, takefocus = 0)
+            e = Entry(self.__root.LfReihenfolge, width=5, takefocus = 0, justify = 'center')
             e.grid(row=row, column=1, sticky=(W), padx='10', pady='2')
             e.insert(0, reihenfolge)
             e.bind('<KeyRelease>', lambda event, name=gruppenname: self.reihenfolgeSpeichern(event, name))
 
-            cb = Checkbutton(self.__root.LfReihenfolge, text='DW', variable=checkbox_var, command=lambda name=gruppenname: self.eintragDamenwertung(damenwertung, name), takefocus = 0)
-            cb.grid(row=row, column=2, sticky=(W), padx='10', pady='2')
+            cb = Label(self.__root.LfReihenfolge, text=damenwertung, takefocus = 0)
+            cb.grid(row=row, column=2, sticky=(W), padx='10', pady='2')            
+            cb.bind('<Button>', lambda event,  name=gruppenname, value=i['damenwertung']: self.eintragDamenwertung(event, name, value))
 
             x = Label(self.__root.LfReihenfolge, image=self.iconDelete, takefocus = 0)
             x.grid(row=row, column=3, sticky=(W), padx='10', pady='2')
             x.bind('<Button>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
 
-    def eintragDamenwertung(self, variable, name):
+    def eintragDamenwertung(self, event, name, value):
         for i in self.Wettkampfgruppen:
             if i['gruppenname'] == name:
-                i['damenwertung'] = variable
-                if variable == False:
+                if value == True:
+                    i['damenwertung'] = False
                     self.writeKonsole(name + ' aus der Damenwertung entfernt')
-                elif variable == True:
+                elif value == False:
+                    i['damenwertung'] = True
                     self.writeKonsole(name + ' zur Damenwertung hinzugefügt')
+        
+        self.zeichneAngemeldeteGruppen()
 
     def deleteWettkampfgruppe(self, event, name):
         for i in self.Wettkampfgruppen:
@@ -670,6 +685,8 @@ class Hauptfenster():
                 self.writeKonsole(name + ' hat die Reihenfolgenposition von ' + reihenfolge)
 
     def uebernahmeGruppen(self):
+        # TODO: Mitteilung gesamte Auswertung zurückgesetzt
+        
         self.__root.dg.destroy()
         self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
         self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
@@ -679,16 +696,23 @@ class Hauptfenster():
         self.__root.LfBahnen.pack(side='left', padx='10')
         self.Durchgänge = []
         self.DGNumbers = []
+        mixedWertung = []
+        damenWertung = []
+        damen_vorhanden = False
 
-        # TODO: übertrag in Damenwertung fehlt
+        for grp in self.Wettkampfgruppen:
+            if grp['damenwertung'] == True:
+                damenWertung.append(grp)
+            else:
+                mixedWertung.append(grp)
 
         anzahl_gruppen = 0
-        if len(self.Wettkampfgruppen) % 2:
-            anzahl_gruppen = len(self.Wettkampfgruppen) + 1
+        if len(mixedWertung) % 2:
+            anzahl_gruppen = len(mixedWertung) + 1
         else: 
-            anzahl_gruppen = len(self.Wettkampfgruppen)
+            anzahl_gruppen = len(mixedWertung)
 
-        if anzahl_gruppen < 17:
+        if anzahl_gruppen < 19:
             self.AnzeigeVFStartRow = 0
             self.AnzeigeVFStartColumn = 8
             self.AnzeigeHFStartRow = 10
@@ -713,28 +737,52 @@ class Hauptfenster():
             space = Label(self.__root.dg, text='')
             space.grid(row=0, column=7, rowspan=max_rows, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
 
-        self.zeichneGrundansicht()
+        if len(damenWertung) > 0:
+            damen_vorhanden = True
+        if anzahl_gruppen % 2:
+            self.zeichneGrundansicht(True, damen_vorhanden)
+        else:
+           self.zeichneGrundansicht(False, damen_vorhanden) 
 
         self.__root.NbFTabControl.select(self.__root.FTab2)
-        sorted_list = sorted(self.Wettkampfgruppen, key=lambda x : int(x['reihenfolge']), reverse=False)
-        for i in sorted_list:
-            row = self.AnzeigeGDStartRow + int(i['reihenfolge'])
+        sorted_MixedWertung = sorted(mixedWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
+        sorted_DamenWertung = sorted(damenWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
+
+        for index, item in enumerate(sorted_MixedWertung):
+            row = self.AnzeigeGDStartRow + int(index) + 1
             col1 = self.AnzeigeGDStartColumn + 1
-            txt = i['reihenfolge'] + ' - ' + i['gruppenname']
+            txt = item['reihenfolge'] + ' - ' + item['gruppenname']
             text = Label(self.__root.dg, text=txt, takefocus = 0)
 
-            if int(i['reihenfolge']) % 2:
+            if int(row) % 2:
                 text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
             else:    
                 text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
             
             for x in self.Durchgänge:
                 if x['typ'] == '1_gd' and x['row'] == row and x['column'] == col1:
-                    x['wettkampfgruppe'] = i['gruppenname']
+                    x['wettkampfgruppe'] = item['gruppenname']
 
         self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Gruppen wurden übernommen!')
 
-    def zeichneGrundansicht(self):
+        for index, item in enumerate(sorted_DamenWertung):
+            row = self.AnzeigeDWStartRow + int(index) + 1
+            col1 = self.AnzeigeDWStartColumn + 1
+            txt = item['reihenfolge'] + ' - ' + item['gruppenname']
+            text = Label(self.__root.dg, text=txt, takefocus = 0)
+
+            if int(row) % 2:
+                text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
+            else:    
+                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
+            
+            for x in self.Durchgänge:
+                if x['typ'] == '6_dw' and x['row'] == row and x['column'] == col1:
+                    x['wettkampfgruppe'] = item['gruppenname']
+
+        self.writeKonsole(str(len(self.Wettkampfgruppen)) + ' Damengruppen wurden übernommen!')
+
+    def zeichneGrundansicht(self, ungerade_MixedWertung, damenwertung):
         txt = ''
         time = ''
         rh = ''
@@ -744,8 +792,10 @@ class Hauptfenster():
         self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, '3_hf')
         self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, '4_kf')
         self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, '5_f')
-        self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 4, True, '6_dw')
-        self.DGNumbers.pop()
+        if damenwertung == True:
+            self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 6, True, '6_dw')
+        if ungerade_MixedWertung == True:
+            self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
         
     def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ):
