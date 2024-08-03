@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter.ttk import *
 from datetime import datetime
 import time
-from random import *
 from gpiozero import Button as GPIO_Button
 
 
@@ -136,16 +135,6 @@ class Hauptfenster():
             self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
         else:
             self.zeichneAngemeldeteGruppen()
-
-        # self.__root.LfSetupBewerb = LabelFrame(self.__root.FTab1, text='Bewerb Konfiguration', borderwidth=1, relief=SOLID)
-        # self.__root.LfSetupBewerb.pack(side='top', fill='x', padx='10', pady='10')
-        # self.__root.RbConfig1 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x AF:1x VF:1x HB:1x KF:1x GF:2x', variable=self.config, value=1, takefocus=0)
-        # self.__root.RbConfig1.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
-        # self.__root.RbConfig2 = Radiobutton(self.__root.LfSetupBewerb, text='GR:2x VF:2x HB:2x KF:2x GF:2x', variable=self.config, value=2, takefocus=0)
-        # self.__root.RbConfig2.grid(row=1, column=0, sticky=(W), padx='10', pady='5')
-        # legende = 'GR.....Grunddurchgang\nAF.....Achtelfinale(16)\nVF.....Viertelfinale(8)\nHF.....Halbfinale(4)\nKF.....Kleines Finale(2)\nAF.....Große Finale(2)\n1x.....1 Bahn\n2x.....Beide Bahnen'
-        # self.__root.LConfigLegende = Label(self.__root.LfSetupBewerb, text=legende, takefocus = 0)
-        # self.__root.LConfigLegende.grid(row=0, column=1, rowspan=2, padx='10', pady='5')
 
         self.__root.BtnStart = Button(self.__root.FTab1, text='Gruppen übernehmen', width=10, padding=10, command=self.uebernahmeGruppen, takefocus = 0)
         self.__root.BtnStart.pack(side='top', fill='x', padx='10', pady='10')
@@ -294,14 +283,14 @@ class Hauptfenster():
 
         self.showAnzeige()
 
+        self.__root.mainloop()
+
     # Anzeigefenster
     def showAnzeige(self):
         self.anzeige = Toplevel()
         self.anzeige.title('KuppelStopper 3.0 Anzeige')
         self.anzeige.minsize(700, 400)
         self.anzeige.config(background='#6e6c6b')
-
-        self.icon = PhotoImage(file='Resources/Kuppelstopper.png')
         self.anzeige.iconphoto(False, self.icon)
 
         self.anzeige.frame = Frame(self.anzeige)
@@ -315,8 +304,61 @@ class Hauptfenster():
         self.anzeige.ERG = Frame(self.anzeige.frame)
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
 
-        self.anzeige.mainloop()
+    # Eingabefenster
+    def showChangingWindow(self, event, typ, row, column):
+        grp_text = ""
+        zeit1_text = ""
+        fehler1_text = ""
+        zeit2_text = ""
+        fehler2_text = ""
+        for x in self.Durchgänge:
+            if x['typ'] == typ and x['row'] == row and x['column'] == column:
+                grp_text = x['wettkampfgruppe']
+                zeit1_text = x['zeit1']
+                fehler1_text = x['fehler1']
+                zeit2_text = x['zeit2']
+                fehler2_text = x['fehler2']
 
+        self.changewindow = Toplevel(self.__root)
+        self.changewindow.title('Änderung')
+        self.changewindow.minsize(700, 400)
+
+        self.changewindow.iconphoto(False, self.icon)
+
+        self.changewindow.frame = Frame(self.changewindow)
+        self.changewindow.frame.pack(expand=1, side=TOP, fill=BOTH, padx=20, pady=20)
+
+        self.changewindow.GRP = Label(self.changewindow.frame, text=grp_text, takefocus=0)
+        self.changewindow.GRP.grid(row=0, column=0)
+
+        self.changewindow.Z1 = Entry(self.changewindow.frame, width=10, takefocus=0)
+        self.changewindow.Z1.grid(row=0, column=1)
+        self.changewindow.Z1.insert(0, zeit1_text)
+        
+        self.changewindow.F1 = Entry(self.changewindow.frame, width=5, takefocus=0)
+        self.changewindow.F1.grid(row=0, column=2)
+        self.changewindow.F1.insert(0, fehler1_text)
+
+        self.changewindow.Z2 = Entry(self.changewindow.frame, width=10, takefocus=0)
+        self.changewindow.Z2.grid(row=0, column=3)
+        self.changewindow.Z2.insert(0, zeit2_text)
+        
+        self.changewindow.F2 = Entry(self.changewindow.frame, width=5, takefocus=0)
+        self.changewindow.F2.grid(row=0, column=4)
+        self.changewindow.F2.insert(0, fehler2_text)
+
+        self.changewindow.BTN = Button(self.changewindow.frame, text='Speichern', takefocus=0)
+        self.changewindow.BTN.grid(row=1, column=0)
+        self.changewindow.BTN.bind('<Button-1>', lambda event, typ=typ, row=row, column=column:self.closeChangingWindow(event, typ, row, column))
+    
+    def closeChangingWindow(self, event, typ, row, column):
+        for x in self.Durchgänge:
+            if x['typ'] == typ and x['row'] == row and x['column'] == column:
+                # TODO: Änderungen speichern
+                print()
+
+        self.changewindow.destroy()
+    
     # Validierung
     def isNumber(self, text):
         try:
@@ -430,11 +472,11 @@ class Hauptfenster():
 
             cb = Label(self.__root.LfReihenfolge, text=damenwertung, takefocus = 0)
             cb.grid(row=row, column=2, sticky=(W), padx='10', pady='2')            
-            cb.bind('<Button>', lambda event,  name=gruppenname, value=i['damenwertung']: self.eintragDamenwertung(event, name, value))
+            cb.bind('<Button-1>', lambda event,  name=gruppenname, value=i['damenwertung']: self.eintragDamenwertung(event, name, value))
 
             x = Label(self.__root.LfReihenfolge, image=self.iconDelete, takefocus = 0)
             x.grid(row=row, column=3, sticky=(W), padx='10', pady='2')
-            x.bind('<Button>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
+            x.bind('<Button-1>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
 
     def reihenfolgeSpeichern(self, event, name):
         reihenfolge = event.widget.get()
@@ -556,6 +598,9 @@ class Hauptfenster():
                     text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
                 else:    
                     text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
+
+                text.bind('<Button-1>', lambda event, row=row, column=col1: self.showChangingWindow(event, '1_gd', row, column))
+
                 
                 for x in self.Durchgänge:
                     if x['typ'] == '1_gd' and x['row'] == row and x['column'] == col1:
@@ -664,7 +709,7 @@ class Hauptfenster():
                 time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='5', ipadx='10')
                 if show_rh == True:
                     lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='5', ipadx='10')
-        
+                
     def konvertiereArray(self, dg_nummer, wettkampfgruppe, typ, row, column, hinweis):
         if dg_nummer not in self.DGNumbers:
             self.DGNumbers.append(dg_nummer)
@@ -936,6 +981,8 @@ class Hauptfenster():
     def zeichneNeueWerte(self, row, column, text):
         for label in self.__root.dg.grid_slaves(row=row, column=column):
             label.config(text=text)
+            # TODO: Änderungsfenster nur bei Gruppenänderung
+            # label.bind('<Button-1>', lambda event, typ=typ, row=row, column=col1: self.showChangingWindow(event, typ, row, column))
 
     def ladeZeitnehmungsDaten(self, event=None):
         self.wechselAnsichtZurZeit()
@@ -1137,9 +1184,7 @@ class Hauptfenster():
     # Functions - Tab Einstellungen
     def updateRahmenAnzeige(self):
         if self.checked_Rahmen.get() == True:
-            self.anzeige.wm_overrideredirect(True) 
-        else:
-            self.anzeige.wm_overrideredirect(False) 
+            self.anzeige.wm_attributes('-type', 'splash')
 
     def updateFontSizeZeit(self, event=None):
         size = self.__root.SGZ.get()
@@ -1159,13 +1204,11 @@ class Hauptfenster():
 
 
 
-
 Hauptfenster()
 
 # TODO: Auswertung konfiguierbar in Einstellungen (zeige alle Zeiten oder nur Bestzeit, nur aktueller Durchgang oder ganze Tabelle, nächste Gruppe, ...)
 # TODO: nachträgliche Änderung von Zeiten und Fehlern (Popup über Toplevel, analog Anzeige)
 # TODO: Cursor bei Fehlern -> Reset bei Bahnwechseln oder Zeit übertragen
 # TODO: Grafik Auswertung anpassen (Weiter kommende Gruppen anderer Hintergrund, ...)
-# TODO: Rahmen ausblenden geht nicht
 # TODO: Input Felder, Einschränkung Eingabe (Fehler, Reihenfolge nur Zahlen erlaubt)
 # TODO: Alle Farben, Schriftarten, Schriftgrößen konfigurierbar in Einstellungen
