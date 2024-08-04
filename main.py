@@ -1,112 +1,113 @@
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, font, colorchooser
 from tkinter.ttk import *
 from datetime import datetime
-import time
+import time, os, json
 from gpiozero import Button as GPIO_Button
 
 
-class Hauptfenster():        
+class Hauptfenster(): 
+    #Konfig
+    Wettkampfgruppen = []   
+
+    FileAngriffsbefehl = ''
+    FileIcon = ''
+    FileIconDelete = ''
+    Title = ''
+
+    GPIO_Start_1 = 0
+    GPIO_Stop_1 = 0
+    GPIO_Start_2 = 0
+    GPIO_Stop_2 = 0
+    Taste_Start_1 = ''
+    Taste_Stop_1 = ''
+    Taste_Start_2 = ''
+    Taste_Stop_2 = ''
+
+    Status_Anzeige = True # True = Zeit, False Auswertung
+
+    TYP_GD = '1_gd'
+    TYP_VF = '2_vf'
+    TYP_HF = '3_hf'
+    TYP_KF = '4_kf'
+    TYP_F = '5_f'
+    TYP_DW = '6_dw'
+
+    Durchgänge = []
+    DGNumbers = []
+    DurchgangNummer = 1
+    AnzahlGrunddurchgänge = 0
+
+    AnzeigeGDStartRow = 0
+    AnzeigeGDStartColumn = 0
+    AnzeigeVFStartRow = 0
+    AnzeigeVFStartColumn = 8
+    AnzeigeHFStartRow = 10
+    AnzeigeHFStartColumn = 8
+    AnzeigeKFStartRow = 16
+    AnzeigeKFStartColumn = 8
+    AnzeigeFStartRow = 20
+    AnzeigeFStartColumn = 8
+    AnzeigeDWStartRow = 24
+    AnzeigeDWStartColumn = 8
+
+    ZeitUebertragen = False
+    time_is_running_1 = False
+    start_time_1 = ''
+    stop_time_1 = ''
+    id_time_1 = ''
+    time_is_running_2 = False
+    start_time_2 = ''
+    stop_time_2 = ''
+    id_time_2 = ''
+
+
     # Hauptfenster
     def __init__(self):
-        self.file_angriffbefehel = './Resources/AngriffsbefehlWonie.mp3'
-        self.GPIO_Start_1 = 17
-        self.GPIO_Stop_1 = 27
-        self.GPIO_Start_2 = 19
-        self.GPIO_Stop_2 = 26
-        self.Taste_Start_1 = 'a'
-        self.Taste_Stop_1 = 'q'
-        self.Taste_Start_2 = 's'
-        self.Taste_Stop_2 = 'w'
-
-        self.Status_Anzeige = True # True = Zeit, False Auswertung
-
-        # self.Wettkampfgruppen = []
-        self.Wettkampfgruppen = [
-            {'gruppenname': 'Gruppe1','reihenfolge': '1', 'damenwertung': False},
-            {'gruppenname': 'Gruppe2','reihenfolge': '2', 'damenwertung': True},
-            {'gruppenname': 'Gruppe3','reihenfolge': '3', 'damenwertung': False},
-            {'gruppenname': 'Gruppe4','reihenfolge': '4', 'damenwertung': True},
-            {'gruppenname': 'Gruppe5','reihenfolge': '5', 'damenwertung': False},
-            {'gruppenname': 'Gruppe6','reihenfolge': '6', 'damenwertung': False},
-            {'gruppenname': 'Gruppe7','reihenfolge': '7', 'damenwertung': False},
-            {'gruppenname': 'Gruppe8','reihenfolge': '8', 'damenwertung': False},
-            {'gruppenname': 'Gruppe9','reihenfolge': '9', 'damenwertung': False},
-            {'gruppenname': 'Gruppe10','reihenfolge': '10', 'damenwertung': False},
-            {'gruppenname': 'Gruppe11','reihenfolge': '11', 'damenwertung': False},
-            {'gruppenname': 'Gruppe12','reihenfolge': '12', 'damenwertung': False},
-            {'gruppenname': 'Gruppe13','reihenfolge': '13', 'damenwertung': False},
-            {'gruppenname': 'Gruppe14','reihenfolge': '14', 'damenwertung': False},
-            {'gruppenname': 'Gruppe15','reihenfolge': '15', 'damenwertung': True},
-            {'gruppenname': 'Gruppe16','reihenfolge': '16', 'damenwertung': False},
-            {'gruppenname': 'Gruppe17','reihenfolge': '17', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe18','reihenfolge': '18', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe19','reihenfolge': '19', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe20','reihenfolge': '20', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe21','reihenfolge': '21', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe22','reihenfolge': '22', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe23','reihenfolge': '23', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe24','reihenfolge': '24', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe25','reihenfolge': '25', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe26','reihenfolge': '26', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe27','reihenfolge': '27', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe28','reihenfolge': '28', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe29','reihenfolge': '29', 'damenwertung': False},
-            # {'gruppenname': 'Gruppe30','reihenfolge': '30', 'damenwertung': False}
-        ]
-
-        self.Durchgänge = []
-        self.DGNumbers = []
-        self.DurchgangNummer = 1
-        self.AnzahlGrunddurchgänge = 0
-
-        self.AnzeigeGDStartRow = 0
-        self.AnzeigeGDStartColumn = 0
-        self.AnzeigeVFStartRow = 0
-        self.AnzeigeVFStartColumn = 8
-        self.AnzeigeHFStartRow = 10
-        self.AnzeigeHFStartColumn = 8
-        self.AnzeigeKFStartRow = 16
-        self.AnzeigeKFStartColumn = 8
-        self.AnzeigeFStartRow = 20
-        self.AnzeigeFStartColumn = 8
-        self.AnzeigeDWStartRow = 24
-        self.AnzeigeDWStartColumn = 8
-
-        self.ZeitUebertragen = False
-        self.time_is_running_1 = False
-        self.start_time_1 = ''
-        self.stop_time_1 = ''
-        self.id_time_1 = ''
-        self.time_is_running_2 = False
-        self.start_time_2 = ''
-        self.stop_time_2 = ''
-        self.id_time_2 = ''
+        self.ladeKonfiguration()
 
         self.__root = Tk()
-        self.__root.title('KuppelStopper 3.0')
+        self.__root.title(self.Title)
         self.__root.minsize(1200, 700)
 
-        self.icon = PhotoImage(file='./Resources/Kuppelstopper.png')
-        self.__root.iconphoto(False, self.icon)       
+        self.icon = PhotoImage(file=self.FileIcon)
+        self.__root.iconphoto(False, self.icon)   
+        self.iconDelete = PhotoImage(file=self.FileIconDelete) 
 
-        self.iconDelete = PhotoImage(file='./Resources/delete.png')
-        
         COLOR_FTab_INACTIVE = '#FFFFFF'
         COLOR_FTab_ACTIVE = '#D3C9C6'
         COLOR_BUTTON_ACTIVE = COLOR_FTab_ACTIVE
         COLOR_BUTTON_HOVER = '#C2BCBA'
         COLOR_BUTTON_DISABLED = '#FFFFFF'
 
-        self.style = Style()
-        self.style.theme_use('default')
-        self.style.configure('.', background='white')
-        self.style.configure('TNotebook', borderwidth=0, background=COLOR_FTab_INACTIVE)
-        self.style.configure('TNotebook.FTab', relief=SOLID, borderwidth=0, bordercolor=COLOR_FTab_INACTIVE, darkcolor=COLOR_FTab_INACTIVE, lightcolor=COLOR_FTab_INACTIVE, padding=[10,5], background=COLOR_FTab_INACTIVE)
-        self.style.map('TNotebook.FTab', background=[('selected',COLOR_FTab_ACTIVE),('active',COLOR_FTab_ACTIVE)])
-        self.style.configure('TButton', relief=SOLID, borderwidth=0, bordercolor=COLOR_BUTTON_ACTIVE, darkcolor=COLOR_BUTTON_ACTIVE, lightcolor=COLOR_BUTTON_ACTIVE, padding=[10,5], background=COLOR_BUTTON_ACTIVE)
-        self.style.map('TButton', background=[('active',COLOR_BUTTON_HOVER),('disabled',COLOR_BUTTON_DISABLED)], foreground=[('disabled',COLOR_BUTTON_DISABLED)])
+        style = Style()
+        style.theme_use('default')
+        style.configure('.', background='white')
+        style.configure('TNotebook', borderwidth=0, background=COLOR_FTab_INACTIVE)
+        style.configure('TNotebook.FTab', relief=SOLID, borderwidth=0, bordercolor=COLOR_FTab_INACTIVE, darkcolor=COLOR_FTab_INACTIVE, lightcolor=COLOR_FTab_INACTIVE, padding=[10,5], background=COLOR_FTab_INACTIVE)
+        style.map('TNotebook.FTab', background=[('selected',COLOR_FTab_ACTIVE),('active',COLOR_FTab_ACTIVE)])
+        style.configure('TButton', relief=SOLID, borderwidth=0, bordercolor=COLOR_BUTTON_ACTIVE, darkcolor=COLOR_BUTTON_ACTIVE, lightcolor=COLOR_BUTTON_ACTIVE, padding=[10,5], background=COLOR_BUTTON_ACTIVE)
+        style.map('TButton', background=[('active',COLOR_BUTTON_HOVER),('disabled',COLOR_BUTTON_DISABLED)], foreground=[('disabled',COLOR_BUTTON_DISABLED)])    
 
+
+        self.min_font_size = 10
+        self.screen_height = self.__root.winfo_screenheight()
+        self.max_font_size = int(self.screen_height / 3)
+
+        self.checked_Bahn_1 = BooleanVar()
+        self.checked_Bahn_2 = BooleanVar()
+        self.checked_Tastatur = BooleanVar()
+        self.checked_GPIO = BooleanVar()
+        self.checked_Rahmen = BooleanVar()
+        self.checked_Konsole = BooleanVar()
+
+        self.checked_Bahn_1.set(False)
+        self.checked_Bahn_2.set(False)
+        self.checked_Tastatur.set(True)
+        self.checked_GPIO.set(False)
+        self.checked_Rahmen.set(False)
+        self.checked_Konsole.set(True)
+        
         # Menü
         self.__root.NbFTabControl = Notebook(self.__root, padding='0')
         self.__root.FTab1 = Frame(self.__root.NbFTabControl, padding='5')
@@ -118,9 +119,6 @@ class Hauptfenster():
         self.__root.NbFTabControl.pack(expand=1, fill='both')
    
         # FTab Anmeldung
-        self.config = IntVar()
-        self.config.set(1)
-
         self.__root.anmeldungWettkampfgruppen = LabelFrame(self.__root.FTab1, text='Anmeldung Wettkampfgruppen', borderwidth=1, relief=SOLID)
         self.__root.anmeldungWettkampfgruppen.pack(side='top', fill='x', padx='10', pady='10')
         self.__root.Entry = Entry(self.__root.anmeldungWettkampfgruppen, takefocus = 1)
@@ -139,13 +137,7 @@ class Hauptfenster():
         self.__root.BtnStart = Button(self.__root.FTab1, text='Gruppen übernehmen', width=10, padding=10, command=self.uebernahmeGruppen, takefocus = 0)
         self.__root.BtnStart.pack(side='top', fill='x', padx='10', pady='10')
 
-
         # FTab Übersicht - Zeitnehmung
-        self.checked_Bahn_1 = BooleanVar()
-        self.checked_Bahn_2 = BooleanVar()
-        self.checked_Bahn_1.set(False)
-        self.checked_Bahn_2.set(False)
-
         self.__root.dg = LabelFrame(self.__root.FTab2, text='Durchgänge', borderwidth=1, relief=SOLID)
         self.__root.dg.pack(side='top', fill='both', padx='10', pady='10', ipady='10')
 
@@ -154,7 +146,7 @@ class Hauptfenster():
 
         self.__root.BtnAnsichtWechseln = Button(self.__root.zeitnehmung, text='Ansicht wechseln', width=20, padding=10, command=self.anzeigeUmschalten, takefocus = 0, state=DISABLED)
         self.__root.BtnAnsichtWechseln.pack(side='left', padx='10', pady='10') 
-        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify="center",  font=('Helvetica', 14))
+        self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify='center',  font=('Helvetica', 14))
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
         self.__root.CBDG.pack(side='left', padx='10', pady='20', ipady=10)
         self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
@@ -196,16 +188,6 @@ class Hauptfenster():
 
 
         # FTab Einstellungen
-        self.checked_Tastatur = BooleanVar()
-        self.checked_GPIO = BooleanVar()
-        self.checked_Rahmen = BooleanVar()
-        self.checked_Konsole = BooleanVar()
-
-        self.checked_Tastatur.set(True)
-        self.checked_GPIO.set(False)
-        self.checked_Rahmen.set(False)
-        self.checked_Konsole.set(True)
-
         self.__root.setupEingabe = LabelFrame(self.__root.FTab3, text='Eingabe', borderwidth=1, relief=SOLID)
         self.__root.setupEingabe.pack(side='top', fill='x', padx='10', pady='5')
         self.__root.CheckTastatur = Checkbutton(self.__root.setupEingabe, text='Tastatur', variable=self.checked_Tastatur, takefocus = 0)
@@ -269,20 +251,43 @@ class Hauptfenster():
         self.__root.setupStyle.pack(side='top', fill='x', padx='10', pady='5')
         self.__root.SGZL = Label(self.__root.setupStyle, text='Schriftgröße Zeit', takefocus = 0)
         self.__root.SGZL.grid(row=0, column=0, padx='10', pady='10')
-        self.__root.SGZ = Spinbox(self.__root.setupStyle, width=3, from_=1, to=500, command=self.updateFontSizeZeit, takefocus = 0)
+        self.__root.SGZ = Spinbox(self.__root.setupStyle, width=3, from_=self.min_font_size, to=self.max_font_size, command=self.updateFontSizeZeit, takefocus = 0)
         self.__root.SGZ.grid(row=0, column=1, padx='10', pady='10')
         self.__root.SGZ.set(50)
         self.__root.SGGL = Label(self.__root.setupStyle, text='Schriftgröße Gruppe', takefocus = 0)
         self.__root.SGGL.grid(row=0, column=2, padx='10', pady='10')
-        self.__root.SGG = Spinbox(self.__root.setupStyle, width=3, from_=1, to=500, command=self.updateFontSizeGruppe, takefocus = 0)
+        self.__root.SGG = Spinbox(self.__root.setupStyle, width=3, from_=self.min_font_size, to=self.max_font_size, command=self.updateFontSizeGruppe, takefocus = 0)
         self.__root.SGG.grid(row=0, column=3, padx='10', pady='10')
         self.__root.SGG.set(30)
+
+        self.__root.setupGobalStyle = LabelFrame(self.__root.FTab3, text='Grafik Anpassungen - !!! Neustart erforderlich !!!', borderwidth=1, relief=SOLID)
+        self.__root.setupGobalStyle.pack(side='bottom', fill='x', padx='10', pady='5')
+        self.__root.GlobalFontSizeTextLabel= Label(self.__root.setupGobalStyle, text='Schriftgröße Text', takefocus = 0)
+        self.__root.GlobalFontSizeTextLabel.grid(row=0, column=0, padx='10', pady='10')
+        self.__root.GlobalFontSizeTextLabel = Spinbox(self.__root.setupGobalStyle, width=3, from_=self.min_font_size, to=self.max_font_size, takefocus = 0)
+        self.__root.GlobalFontSizeTextLabel.grid(row=0, column=1, padx='10', pady='10')
+        self.__root.GlobalFontSizeTextLabel.set(14)
+        self.__root.GlobalFontSizeTitleLabel = Label(self.__root.setupGobalStyle, text='Schriftgröße Überschirft', takefocus = 0)
+        self.__root.GlobalFontSizeTitleLabel.grid(row=0, column=2, padx='10', pady='10')
+        self.__root.GlobalFontSizeTitle = Spinbox(self.__root.setupGobalStyle, width=3, from_=self.min_font_size, to=self.max_font_size, takefocus = 0)
+        self.__root.GlobalFontSizeTitle.grid(row=0, column=3, padx='10', pady='10')
+        self.__root.GlobalFontSizeTitle.set(30)
+        self.__root.GlobalFontTypeLabel = Label(self.__root.setupGobalStyle, text='Schriftart', takefocus = 0)
+        self.__root.GlobalFontTypeLabel.grid(row=0, column=4, padx='10', pady='10')
+        fonts=list(font.families())
+        fonts.sort()
+        fontnames=list(font.names())
+        fontnames.sort()
+        f = font.nametofont('TkTextFont')
+        test = f.actual()
+
+        self.__root.GlobalFontType = Combobox(self.__root.setupGobalStyle, values=fonts, state='readonly', width=5, takefocus = 0, justify='center',  font=('Helvetica', 14))
+        self.__root.GlobalFontType.grid(row=0, column=5, padx='10', pady='10')
 
         self.__root.Konsole = Label(self.__root, takefocus = 0, foreground='#8f8e8c')
         self.__root.Konsole.pack(expand=1, side='top', fill='both')
 
         self.showAnzeige()
-
         self.__root.mainloop()
 
     # Anzeigefenster
@@ -306,11 +311,11 @@ class Hauptfenster():
 
     # Eingabefenster
     def showChangingWindow(self, event, typ, row, column):
-        grp_text = ""
-        zeit1_text = ""
-        fehler1_text = ""
-        zeit2_text = ""
-        fehler2_text = ""
+        grp_text = ''
+        zeit1_text = ''
+        fehler1_text = ''
+        zeit2_text = ''
+        fehler2_text = ''
         for x in self.Durchgänge:
             if x['typ'] == typ and x['row'] == row and x['column'] == column:
                 grp_text = x['wettkampfgruppe']
@@ -318,46 +323,104 @@ class Hauptfenster():
                 fehler1_text = x['fehler1']
                 zeit2_text = x['zeit2']
                 fehler2_text = x['fehler2']
-
-        self.changewindow = Toplevel(self.__root)
-        self.changewindow.title('Änderung')
-        self.changewindow.minsize(700, 400)
-
-        self.changewindow.iconphoto(False, self.icon)
-
-        self.changewindow.frame = Frame(self.changewindow)
-        self.changewindow.frame.pack(expand=1, side=TOP, fill=BOTH, padx=20, pady=20)
-
-        self.changewindow.GRP = Label(self.changewindow.frame, text=grp_text, takefocus=0)
-        self.changewindow.GRP.grid(row=0, column=0)
-
-        self.changewindow.Z1 = Entry(self.changewindow.frame, width=10, takefocus=0)
-        self.changewindow.Z1.grid(row=0, column=1)
-        self.changewindow.Z1.insert(0, zeit1_text)
         
-        self.changewindow.F1 = Entry(self.changewindow.frame, width=5, takefocus=0)
-        self.changewindow.F1.grid(row=0, column=2)
-        self.changewindow.F1.insert(0, fehler1_text)
+        if zeit1_text != '':
+            self.changewindow = Toplevel(self.__root)
+            self.changewindow.title('Änderung')
 
-        self.changewindow.Z2 = Entry(self.changewindow.frame, width=10, takefocus=0)
-        self.changewindow.Z2.grid(row=0, column=3)
-        self.changewindow.Z2.insert(0, zeit2_text)
-        
-        self.changewindow.F2 = Entry(self.changewindow.frame, width=5, takefocus=0)
-        self.changewindow.F2.grid(row=0, column=4)
-        self.changewindow.F2.insert(0, fehler2_text)
+            self.changewindow.iconphoto(False, self.icon)
 
-        self.changewindow.BTN = Button(self.changewindow.frame, text='Speichern', takefocus=0)
-        self.changewindow.BTN.grid(row=1, column=0)
-        self.changewindow.BTN.bind('<Button-1>', lambda event, typ=typ, row=row, column=column:self.closeChangingWindow(event, typ, row, column))
-    
+            self.changewindow.frame = Frame(self.changewindow)
+            self.changewindow.frame.pack(expand=1, side=TOP, fill=BOTH)
+
+            self.changewindow.LZ1 = Label(self.changewindow.frame, text='Zeit 1', takefocus=0)
+            self.changewindow.LZ1.grid(row=0, column=1, padx=(0,5), pady=(20,0))
+
+            self.changewindow.LF1 = Label(self.changewindow.frame, text='Feh. 1', takefocus=0)
+            self.changewindow.LF1.grid(row=0, column=2, padx=(0,5), pady=(20,0))
+
+            self.changewindow.LZ2 = Label(self.changewindow.frame, text='Zeit 2', takefocus=0)
+            self.changewindow.LZ2.grid(row=0, column=3, padx=(0,5), pady=(20,0))
+
+            self.changewindow.LF2 = Label(self.changewindow.frame, text='Feh. 2', takefocus=0)
+            self.changewindow.LF2.grid(row=0, column=4, padx=(0,20), pady=(20,0))
+
+            self.changewindow.GRP = Label(self.changewindow.frame, text=grp_text, takefocus=0)
+            self.changewindow.GRP.grid(row=1, column=0, sticky=(W), padx=(20,5), pady=(0,20))
+
+            self.changewindow.Z1 = Entry(self.changewindow.frame, width=10, takefocus=0)
+            self.changewindow.Z1.grid(row=1, column=1, padx=(0,5), pady=(0,20))
+            self.changewindow.Z1.insert(0, zeit1_text)
+            
+            self.changewindow.F1 = Entry(self.changewindow.frame, width=5, takefocus=0)
+            self.changewindow.F1.grid(row=1, column=2, padx=(0,5), pady=(0,20))
+            self.changewindow.F1.insert(0, fehler1_text)
+
+            self.changewindow.Z2 = Entry(self.changewindow.frame, width=10, takefocus=0)
+            self.changewindow.Z2.grid(row=1, column=3, padx=(0,5), pady=(0,20))
+            self.changewindow.Z2.insert(0, zeit2_text)
+            
+            self.changewindow.F2 = Entry(self.changewindow.frame, width=5, takefocus=0)
+            self.changewindow.F2.grid(row=1, column=4, padx=(0,20), pady=(0,20))
+            self.changewindow.F2.insert(0, fehler2_text)
+
+            self.changewindow.BTN = Button(self.changewindow.frame, text='Speichern', takefocus=0)
+            self.changewindow.BTN.grid(row=2, column=1, columnspan=2, sticky=(W+N+E+S), pady=(0,20))
+            self.changewindow.BTN.bind('<Button-1>', lambda event, typ=typ, row=row, column=column:self.closeChangingWindow(event, typ, row, column))
+            # TODO: Richtige Eingabe nur erlaubt
+
     def closeChangingWindow(self, event, typ, row, column):
         for x in self.Durchgänge:
             if x['typ'] == typ and x['row'] == row and x['column'] == column:
-                # TODO: Änderungen speichern
-                print()
+                z1 = self.changewindow.Z1.get()
+                f1 = int(self.changewindow.F1.get())
+                z2 = self.changewindow.Z2.get()
+                f2 = int(self.changewindow.F2.get())
+
+                if z1 != '':
+                    x['zeit1'] = z1
+                    x['fehler1'] = f1
+
+                    text = str(z1)
+                    if f1 > 0:
+                        text += ' +' + str(f1)
+                    
+                    self.zeichneNeueWerte(row, column+1, text, row, column, typ)
+
+                    if z2 == '':
+                        x['bestzeit'] = z1
+                        x['fehlerbest'] = f1
+                        self.zeichneNeueWerte(row, column+3, text, row, column, typ)
+
+                if z1 != '' and z2 != '':
+                    x['zeit2'] = z2
+                    x['fehler2'] = f2
+
+                    text2 = str(z2)
+                    if f2 > 0:
+                        text2 += ' +' + str(f2)
+                    self.zeichneNeueWerte(row, column+2, text2, row, column, typ)
+
+                    time1 = self.addiereFehlerZurZeit(z1, f1) 
+                    time2 = self.addiereFehlerZurZeit(z2, f2)
+
+                    if self.berechneBestzeit(time1, time2) == 2:
+                        x['bestzeit'] = z2
+                        x['fehlerbest'] = f2
+
+                        self.zeichneNeueWerte(row, column+3, text2, row, column, typ)
+
+                if z1 == '' and z2 != '':
+                    messagebox.showwarning('Änderungen', 'Zeit 1 fehlt! \nZeit 2 kann nicht übernomen werden!')
+                    return
+
+                self.changewindow.Z1.delete(0, END)
+                self.changewindow.F1.delete(0, END)
+                self.changewindow.Z2.delete(0, END)
+                self.changewindow.F2.delete(0, END)
 
         self.changewindow.destroy()
+        self.bestzeitPlatzierungBerechnen()
     
     # Validierung
     def isNumber(self, text):
@@ -368,6 +431,44 @@ class Hauptfenster():
             return False
 
     # Functions - Allgemein
+    def neustart(self, event=None):
+        # TODO: Neustart wenn möglich
+        print()
+    
+    def ladeKonfiguration(self):
+        # Lade Wettkampfgruppen
+        anmeldungen_file = open('./config/anmeldung.json')
+        self.Wettkampfgruppen = json.load(anmeldungen_file)
+        anmeldungen_file.close()
+
+        # Lade Durchgänge
+        bewerb_file = open('./config/bewerb.json')
+        bewerb_data = json.load(bewerb_file)
+        bewerb_file.close()
+        self.Durchgänge = bewerb_data['Durchgänge']
+        self.DGNumbers = bewerb_data['DGNumbers']
+
+        # TODO: Lade Konfiguration (Style, Buttonbelegung, ...) 
+        setup_file = open('./config/setup.json')
+        setup_data = json.load(setup_file)
+        setup_file.close()
+
+        files = setup_data['Files']
+        self.FileAngriffsbefehl = files['angriffsbefehl']
+        self.FileIcon = files['icon']
+        self.FileIconDelete = files['iconDelete']
+        
+        buttons = setup_data['Buttons']
+        self.GPIO_Start_1 = buttons['GPIO_Start_1']
+        self.GPIO_Stop_1 = buttons['GPIO_Stop_1']
+        self.GPIO_Start_2 = buttons['GPIO_Start_2']
+        self.GPIO_Stop_2 = buttons['GPIO_Stop_2']
+        self.Taste_Start_1 = buttons['Taste_Start_1']
+        self.Taste_Stop_1 = buttons['Taste_Stop_1']
+        self.Taste_Start_2 = buttons['Taste_Start_2']
+        self.Taste_Stop_2 = buttons['Taste_Stop_2']
+
+
     def writeKonsole(self, text):
         if (self.checked_Konsole.get() == True):
             self.__root.Konsole.config(text='Konsole: ' + text)
@@ -393,10 +494,10 @@ class Hauptfenster():
             widgets.grid_remove()
 
 
-        title = Label(self.anzeige.ERG, text='Grunddurchgang', takefocus = 0, anchor="center", font=('Helvetica', 14))
+        title = Label(self.anzeige.ERG, text='Grunddurchgang', takefocus = 0, anchor='center', font=('Helvetica', 14))
         title.grid(row=0, column=0, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(10,0))
         for dg in self.Durchgänge:
-            if dg['typ'] == '1_gd' and dg['platzierung'] > 0:
+            if dg['typ'] == self.TYP_GD  and dg['platzierung'] > 0:
                 row = dg['platzierung']
                 col = 0
                 text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
@@ -513,7 +614,7 @@ class Hauptfenster():
         self.writeKonsole(name + ' wurde gelöscht!')
 
     def uebernahmeGruppen(self):
-        res = messagebox.askquestion("Reset Auswertung", "Die Auswertung wird komplett zurückgesetzt!") 
+        res = messagebox.askquestion('Reset Auswertung', 'Die Auswertung wird komplett zurückgesetzt!') 
         
         if res == 'yes':
             self.checked_Bahn_1.set(False)
@@ -592,18 +693,10 @@ class Hauptfenster():
                 row = self.AnzeigeGDStartRow + int(index) + 1
                 col1 = self.AnzeigeGDStartColumn + 1
                 txt = item['reihenfolge'] + ' - ' + item['gruppenname']
-                text = Label(self.__root.dg, text=txt, takefocus = 0)
+                self.zeichneNeueWerte(row, col1, txt, row, col1, self.TYP_GD )
 
-                if int(row) % 2:
-                    text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-                else:    
-                    text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
-
-                text.bind('<Button-1>', lambda event, row=row, column=col1: self.showChangingWindow(event, '1_gd', row, column))
-
-                
                 for x in self.Durchgänge:
-                    if x['typ'] == '1_gd' and x['row'] == row and x['column'] == col1:
+                    if x['typ'] == self.TYP_GD  and x['row'] == row and x['column'] == col1:
                         x['wettkampfgruppe'] = item['gruppenname']
 
             self.writeKonsole(str(len(mixedWertung)) + ' Gruppen wurden übernommen!')
@@ -620,7 +713,7 @@ class Hauptfenster():
                     text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
                 
                 for x in self.Durchgänge:
-                    if x['typ'] == '6_dw' and x['row'] == row and x['column'] == col1:
+                    if x['typ'] == self.TYP_DW and x['row'] == row and x['column'] == col1:
                         x['wettkampfgruppe'] = item['gruppenname']
 
             self.writeKonsole(str(len(damenWertung)) + ' Damengruppen wurden übernommen!')
@@ -631,20 +724,20 @@ class Hauptfenster():
         time = ''
         rh = ''
         self.DurchgangNummer = 1
-        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, '1_gd')
-        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, '2_vf')
-        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, '3_hf')
-        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, '4_kf')
-        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, '5_f')
+        self.zeichneZeitTable('Grunddurchgang (T1/T2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, self.TYP_GD )
+        self.zeichneZeitTable('Viertelfinale (T1/T2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, self.TYP_VF )
+        self.zeichneZeitTable('Halbfinale (T1/T2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, self.TYP_HF )
+        self.zeichneZeitTable('Kleines Finale (T1/T2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, self.TYP_KF )
+        self.zeichneZeitTable('Finale (T1/T2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, self.TYP_F )
         if damenwertung == True:
-            self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 6, True, '6_dw')
+            self.zeichneZeitTable('Damenwertung (T1/T2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, 6, True, self.TYP_DW)
         if ungerade_MixedWertung == True:
             self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
         self.__root.CBDG.current(0)
         
     def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ):
-        title = Label(self.__root.dg, text=title, takefocus = 0, anchor="center", font=('Helvetica', 14))
+        title = Label(self.__root.dg, text=title, takefocus = 0, anchor='center', font=('Helvetica', 14))
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
         col1 = startcolumn + 1
         col2 = startcolumn + 2
@@ -653,7 +746,7 @@ class Hauptfenster():
         col5 = startcolumn + 5
         hinweis_text = ''
         for i in range(anzahl_gruppen):
-            if typ == '2_vf':
+            if typ == self.TYP_VF :
                 vf_index = i + 1
                 if vf_index == 1: 
                     hinweis_text = 'GD_1'
@@ -671,25 +764,25 @@ class Hauptfenster():
                     hinweis_text = 'GD_4' 
                 elif vf_index == 8: 
                     hinweis_text = 'GD_5' 
-            elif typ == '3_hf':
+            elif typ == self.TYP_HF :
                 hf_index = i + 1
                 hinweis_text = 'VF_' + str(hf_index)
-            elif typ == '4_kf':
+            elif typ == self.TYP_KF :
                 kf_index = i + 1
                 hinweis_text = 'KF_' + str(kf_index)
-            elif typ == '5_f':
+            elif typ == self.TYP_F :
                 f_index = i + 1
                 hinweis_text = 'F_' + str(f_index)
             else:
                 hinweis_text=''
             row = startrow + i + 1
-            durchgang = Label(self.__root.dg, text=self.DurchgangNummer, takefocus = 0, background='#98CF8B', anchor="center")
+            durchgang = Label(self.__root.dg, text=self.DurchgangNummer, takefocus = 0, background='#98CF8B', anchor='center')
             text = Label(self.__root.dg, text=gruppe_txt, takefocus = 0)
-            time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
-            time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
-            time3 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor="e")
+            time1 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor='e')
+            time2 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor='e')
+            time3 = Label(self.__root.dg, text=time_txt, takefocus = 0, anchor='e')
             if show_rh == True:
-                lrh = Label(self.__root.dg, text=rh_text, takefocus = 0, anchor="center")
+                lrh = Label(self.__root.dg, text=rh_text, takefocus = 0, anchor='center')
             rh = i + 1
             if rh % 2:
                 self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1, hinweis_text)
@@ -719,11 +812,11 @@ class Hauptfenster():
             'hinweis': hinweis,             # Hinweis für Platzierungsposition zb GD_1
             'platzierung': 0,
             'zeit1': '',
-            'fehler1': '',
+            'fehler1': 0,
             'zeit2': '',
-            'fehler2': '',
+            'fehler2': 0,
             'bestzeit': '',
-            'fehlerbest': '',
+            'fehlerbest': 0,
             'bestzeitinklfehler':'',
             'typ': typ,                     # Art  (Grunddurchgang, Viertelfinale, ...)
             'dg': dg_nummer,                # Nummer des Durchganges
@@ -743,8 +836,8 @@ class Hauptfenster():
     def bahnWechsel(self):
         self.werteInAnsichtUebertragen()
 
-        bahnA = self.__root.G1.cget("text")
-        bahnB = self.__root.G2.cget("text")
+        bahnA = self.__root.G1.cget('text')
+        bahnB = self.__root.G2.cget('text')
 
         bahnAId = self.id_time_1
         bahnBId = self.id_time_2
@@ -764,10 +857,10 @@ class Hauptfenster():
         self.switchBahn1State()
         self.switchBahn2State()
 
-        if self.__root.G1.cget("text") != '...':
+        if self.__root.G1.cget('text') != '...':
             self.checked_Bahn_1.set(True)
             self.switchBahn1State()
-        if self.__root.G2.cget("text") != '...':
+        if self.__root.G2.cget('text') != '...':
             self.checked_Bahn_2.set(True)
             self.switchBahn2State()
 
@@ -777,7 +870,7 @@ class Hauptfenster():
         dg_select = self.__root.CBDG.get()
 
         if self.id_time_1  != '' and self.ZeitUebertragen == False:
-            zeit1A = self.__root.T1.cget("text")
+            zeit1A = self.__root.T1.cget('text')
             fehler1A = self.__root.F1.get()
             if fehler1A == '':
                 fehler1A == '0'
@@ -788,7 +881,7 @@ class Hauptfenster():
             self.zeitUebertragen(typ1A, row1A, column1A, zeit1A, fehler1A, int(dg_select))
 
         if self.id_time_2  != '' and self.ZeitUebertragen == False:
-            zeit2A = self.__root.T2.cget("text")
+            zeit2A = self.__root.T2.cget('text')
             fehler2A = self.__root.F2.get()
             if fehler2A == '':
                 fehler2A == '0'
@@ -828,15 +921,15 @@ class Hauptfenster():
                     text = str(zeit)
                     if fehler > 0:
                         text += ' +' + str(fehler)
-                    self.zeichneNeueWerte(row, column+1, text)
-                    self.zeichneNeueWerte(row, column+3, text)
+                    self.zeichneNeueWerte(row, column+1, text, row, column, typ)
+                    self.zeichneNeueWerte(row, column+3, text, row, column, typ)
                 else:
                     x['zeit2'] = zeit
                     x['fehler2'] = fehler
                     text = str(zeit)
                     if fehler > 0:
                         text += ' +' + str(fehler)
-                    self.zeichneNeueWerte(row, column+2, text)
+                    self.zeichneNeueWerte(row, column+2, text, row, column, typ)
                     
                     time1 = self.addiereFehlerZurZeit(x['zeit1'], x['fehler1']) 
                     time2 = self.addiereFehlerZurZeit(zeit, fehler)
@@ -844,7 +937,7 @@ class Hauptfenster():
                     if self.berechneBestzeit(time1, time2) == 2:
                         x['bestzeit'] = zeit
                         x['fehlerbest'] = fehler
-                        self.zeichneNeueWerte(row, column+3, text)
+                        self.zeichneNeueWerte(row, column+3, text, row, column, typ)
     
     def berechneBestzeit(self, zeit1, zeit2):
         t1 = zeit1.split(':')
@@ -910,19 +1003,19 @@ class Hauptfenster():
         dw_platzierung_neu = 1
         
         for index, item in enumerate(self.Durchgänge):
-            if item['typ'] == '1_gd' and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_GD  and item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu)
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu, item['row'], item['column'], item['typ'])
         
                 if item['platzierung'] >= 1 and item['platzierung'] <= 8:
                     for dg in self.Durchgänge:
                         suchtext = 'GD_' + str(item['platzierung'])
                         if dg['hinweis'] == suchtext:
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
         
-            if item['typ'] == '2_vf' and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_VF  and item['bestzeitinklfehler'] != '':
                 if vf_durchgang == 0 or vf_durchgang < item['dg']:
                     vf_durchgang = item['dg']
                     if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
@@ -936,9 +1029,9 @@ class Hauptfenster():
                     for dg in self.Durchgänge:
                         if dg['hinweis'] == vf_hinweis:
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
             
-            if item['typ'] == '3_hf' and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_HF  and item['bestzeitinklfehler'] != '':
                 if hf_durchgang == 0 or hf_durchgang < item['dg']:
                     hf_durchgang = item['dg']
                     if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
@@ -948,7 +1041,7 @@ class Hauptfenster():
                     for dg in self.Durchgänge:
                         if dg['hinweis'] == hf_hinweis:
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
                 elif hf_durchgang == item['dg']:
                     if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
                         hf_hinweis = 'KF_1'
@@ -957,15 +1050,15 @@ class Hauptfenster():
                     for dg in self.Durchgänge:
                         if dg['hinweis'] == hf_hinweis:
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'])
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
 
-            if item['typ'] == '6_dw' and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_DW and item['bestzeitinklfehler'] != '':
                 item['platzierung'] = dw_platzierung_neu
                 self.zeichneNeueWerte(item['row'], item['column'] + 4, dw_platzierung_neu)  
                 dw_platzierung_neu += 1
 
     def sortTime(self, timeList):
-        if timeList['typ'] == '1_gd' or timeList['typ'] == '6_dw':
+        if timeList['typ'] == self.TYP_GD  or timeList['typ'] == self.TYP_DW:
             if timeList['bestzeitinklfehler'] == '':
                 return timeList['typ'], '59', '59', '99'
             else:
@@ -978,11 +1071,11 @@ class Hauptfenster():
                 split_up = timeList['bestzeitinklfehler'].split(':')
                 return timeList['typ'], timeList['dg'], split_up[0], split_up[1], split_up[2]
     
-    def zeichneNeueWerte(self, row, column, text):
+    def zeichneNeueWerte(self, row, column, text, id_row, id_col, id_typ):
         for label in self.__root.dg.grid_slaves(row=row, column=column):
             label.config(text=text)
-            # TODO: Änderungsfenster nur bei Gruppenänderung
-            # label.bind('<Button-1>', lambda event, typ=typ, row=row, column=col1: self.showChangingWindow(event, typ, row, column))
+            if row == id_row and column == id_col:
+                label.bind('<Button-1>', lambda event, typ=id_typ, row=id_row, column=id_col: self.showChangingWindow(event, typ, row, column))
 
     def ladeZeitnehmungsDaten(self, event=None):
         self.wechselAnsichtZurZeit()
@@ -1207,7 +1300,6 @@ class Hauptfenster():
 Hauptfenster()
 
 # TODO: Auswertung konfiguierbar in Einstellungen (zeige alle Zeiten oder nur Bestzeit, nur aktueller Durchgang oder ganze Tabelle, nächste Gruppe, ...)
-# TODO: nachträgliche Änderung von Zeiten und Fehlern (Popup über Toplevel, analog Anzeige)
 # TODO: Cursor bei Fehlern -> Reset bei Bahnwechseln oder Zeit übertragen
 # TODO: Grafik Auswertung anpassen (Weiter kommende Gruppen anderer Hintergrund, ...)
 # TODO: Input Felder, Einschränkung Eingabe (Fehler, Reihenfolge nur Zahlen erlaubt)
