@@ -1,12 +1,15 @@
 {
     "Style": {
-        "GlobalFontArt": "MS Sans Serif",
-        "GlobalFontSizeText": 14,
+        "GlobalFontArt": "Arial",
+        "GlobalFontSizeText": 10,
         "GlobalFontSizeTitle": 20,
-        "GlobalDGBackgroundColor": "",
+        "GlobalDGBackgroundColor": "#98CF8B",
         "AnzeigeFontSizeGroup": 30,
         "AnzeigeFontSizeTime": 50,
-        "AnzeigeBackgroundColor": ""
+        "AnzeigeBackgroundColor": "#6e6c6b",
+        "AnzeigeGroupColor": "#818ef0",
+        "AnzeigeGroup2Color": "#93ff8f",
+        "AnzeigeTimeColor": "#ffffff"
     },
     "Buttons": {
         "GPIO_Start_1": 17,
@@ -25,7 +28,7 @@
     },
     "Setup": {
         "Title": "KuppelStopper 3.0",
-        "Nurbestzeit": false,
-        "FinaleUntereinander": false
+        "TitleAnzeige": "KuppelStopper 3.0 Anzeige",
+        "FinaleInEinerSpalte": false
     }
 }
