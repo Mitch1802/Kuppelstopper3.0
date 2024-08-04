@@ -1,0 +1,31 @@
+{
+    "Style": {
+        "GlobalFontArt": "MS Sans Serif",
+        "GlobalFontSizeText": 14,
+        "GlobalFontSizeTitle": 20,
+        "GlobalDGBackgroundColor": "",
+        "AnzeigeFontSizeGroup": 30,
+        "AnzeigeFontSizeTime": 50,
+        "AnzeigeBackgroundColor": ""
+    },
+    "Buttons": {
+        "GPIO_Start_1": 17,
+        "GPIO_Stop_1": 27,
+        "GPIO_Start_2": 19,
+        "GPIO_Stop_2": 26,
+        "Taste_Start_1": "a",
+        "Taste_Stop_1": "q",
+        "Taste_Start_2": "s",
+        "Taste_Stop_2": "w"
+    },
+    "Files": {
+        "icon": "./Resources/Kuppelstopper.png",
+        "angriffsbefehl": "./Resources/AngriffsbefehlWonie.mp3",
+        "iconDelete": "./Resources/delete.png"
+    },
+    "Setup": {
+        "Title": "KuppelStopper 3.0",
+        "Nurbestzeit": false,
+        "FinaleUntereinander": false
+    }
+}
