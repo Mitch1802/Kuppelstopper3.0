@@ -128,7 +128,7 @@ class Hauptfenster():
         self.__root.zeitnehmung = LabelFrame(self.__root.FTab2, text='Aktueller Durchgang', borderwidth=1, relief=SOLID)
         self.__root.zeitnehmung.pack(side='left', padx='10')
 
-        self.__root.BtnAnsichtWechseln = Button(self.__root.zeitnehmung, text='Ansicht wechseln', width=20, padding=10, command=self.anzeigeUmschalten, takefocus = 0, state=DISABLED)
+        self.__root.BtnAnsichtWechseln = Button(self.__root.zeitnehmung, text='Ansicht wechseln', width=20, padding=10, command=self.anzeigeUmschalten, takefocus = 0)
         self.__root.BtnAnsichtWechseln.pack(side='left', padx='10', pady='10') 
         self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify='center')
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
@@ -286,6 +286,64 @@ class Hauptfenster():
         self.anzeige.ERG = Frame(self.anzeige.frame)
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
 
+    def ladeAuswertungDaten(self):
+        for widgets in self.anzeige.ERG.winfo_children():
+            widgets.grid_remove()
+
+        f_durchgang = 0
+
+        title = Label(self.anzeige.ERG, text='Grunddurchgang', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+
+        title = Label(self.anzeige.ERG, text='Viertelfinale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+
+        title = Label(self.anzeige.ERG, text='Halbfinale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+
+        title = Label(self.anzeige.ERG, text='Kleines Finale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+
+        title = Label(self.anzeige.ERG, text='Finale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+
+        title = Label(self.anzeige.ERG, text='Damenwertung', takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+        for dg in self.Durchgänge:
+            if (dg['typ'] == self.TYP_GD or dg['typ'] == self.TYP_DW) and dg['platzierung'] > 0:
+                color = '#ffffff'
+                if dg['typ'] == self.TYP_GD:
+                    row = dg['platzierung']
+                    col = 0
+                    if dg['platzierung'] <= 8:
+                        color = '#dbff33'
+                if dg['typ'] == self.TYP_DW:
+                    row = dg['platzierung'] + self.AnzeigeDWStartRow
+                    col = self.AnzeigeDWStartColumn + 1
+                    if dg['platzierung'] <= 1:
+                        color = '#dbff33'
+
+                text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
+                w = Label(self.anzeige.ERG, text=text, background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
+                w.grid(row=row, column=col, sticky=(W), padx='10', pady='5')
+
+                time = dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
+                t.grid(row=row, column=col+1, sticky=(W), padx='10', pady='5')
+            
+            if (dg['typ'] == self.TYP_VF or dg['typ'] == self.TYP_HF or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
+                color = '#ffffff'
+                if f_durchgang == 0 or f_durchgang < dg['dg']:
+                    f_durchgang = dg['dg']
+                    color = '#dbff33'
+        
+                w = Label(self.anzeige.ERG, text=dg['wettkampfgruppe'], background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
+                w.grid(row=dg['row'], column=dg['column'], sticky=(W), padx='10', pady='5')
+
+                time = dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
+                t.grid(row=dg['row'], column=dg['column']+1, sticky=(W), padx='10', pady='5')
+       
     # Eingabefenster
     def showChangingWindow(self, event, typ, row, column):
         grp_text = ''
@@ -462,6 +520,21 @@ class Hauptfenster():
         self.TitleAnzeige = setup['TitleAnzeige']
         self.FinaleInEinerSpalte = setup['FinaleInEinerSpalte']
 
+        # Spalten und Reihen Konfig nach dem Setup anpassen
+        if self.FinaleInEinerSpalte == False:
+            self.AnzeigeVFStartRow = 0
+            self.AnzeigeVFStartColumn = 8
+            self.AnzeigeHFStartRow = 10
+            self.AnzeigeHFStartColumn = 8
+            self.AnzeigeKFStartRow = 0
+            self.AnzeigeKFStartColumn = 17
+            self.AnzeigeFStartRow = 4
+            self.AnzeigeFStartColumn = 17
+            self.AnzeigeDWStartRow = 8
+            self.AnzeigeDWStartColumn = 17
+
+            self.changeRowAndColumnInDurchgaenge()
+
     def exportAnmeldungKonfig(self):
         new_list = self.Wettkampfgruppen
         with open(self.KonfigGruppenFile, "w") as outfile:
@@ -475,6 +548,36 @@ class Hauptfenster():
         with open(self.KonfigBewerbFile, "w") as outfile:
             json.dump(new_dict, outfile)
 
+    def changeRowAndColumnInDurchgaenge(self):
+        #TODO Überschreibe Spalten und Rows mit neuen Werten F, DW 
+        row_kf = self.AnzeigeKFStartRow + 1
+        col_kf = self.AnzeigeKFStartColumn + 1
+        row_f = self.AnzeigeFStartRow + 1
+        col_f = self.AnzeigeFStartColumn + 1
+        row_dw = self.AnzeigeDWStartRow + 1
+        col_dw = self.AnzeigeDWStartColumn + 1
+        self.Durchgänge.sort(key=self.sortTimeByRow)
+        for dg in self.Durchgänge:
+            if dg['typ'] == self.TYP_KF:
+                dg['row'] = row_kf
+                dg['column'] = col_kf
+                row_kf += 1
+            if dg['typ'] == self.TYP_F:
+                # Not work
+                dg['row'] = row_f
+                dg['column'] = col_f
+                row_kf += 1
+            if dg['typ'] == self.TYP_DW:
+                # Not work
+                dg['row'] = row_dw
+                dg['column'] = col_dw
+                row_kf += 1
+        
+        self.Durchgänge.sort(key=self.sortTime)
+    
+    def sortTimeByRow(self, timeList):
+        return timeList['typ'], timeList['row']
+    
     def writeKonsole(self, text):
         if (self.checked_Konsole.get() == True):
             self.__root.Konsole.config(text='Konsole: ' + text)
@@ -492,27 +595,7 @@ class Hauptfenster():
         self.anzeige.Z2.pack_forget()
         self.anzeige.G2.pack_forget()
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
-        self.ladeAuswertungDaten()
-
-    def ladeAuswertungDaten(self):
-        # TODO: Lade und zeichne Auswertung
-        for widgets in self.anzeige.ERG.winfo_children():
-            widgets.grid_remove()
-
-
-        title = Label(self.anzeige.ERG, text='Grunddurchgang', takefocus = 0, anchor='center', font=('Helvetica', 14))
-        title.grid(row=0, column=0, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(10,0))
-        for dg in self.Durchgänge:
-            if dg['typ'] == self.TYP_GD  and dg['platzierung'] > 0:
-                row = dg['platzierung']
-                col = 0
-                text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
-                w = Label(self.anzeige.ERG, text=text, takefocus = 0)
-                w.grid(row=row, column=col, sticky=(W), padx='10', pady='2')
-
-                time = dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
-                t = Label(self.anzeige.ERG, text=time, takefocus = 0)
-                t.grid(row=row, column=col+1, sticky=(W), padx='10', pady='2')
+        self.ladeAuswertungDaten()     
 
     # Functions - Tab Anmeldung
     def addWettkampfgruppe(self, event=None):
@@ -628,6 +711,7 @@ class Hauptfenster():
             self.Durchgänge = []
             self.DGNumbers = [] 
         else:
+            self.wechselAnsichtZurAuswertung()
             new_Array = False
             res = 'yes'
         
@@ -640,7 +724,6 @@ class Hauptfenster():
             self.__root.BtnStart['state'] = DISABLED
             self.__root.BtnAllesStop['state'] = DISABLED
             self.__root.BtnWechsel['state'] = DISABLED
-            self.__root.BtnAnsichtWechseln['state'] = DISABLED
             self.__root.BtnZeitUebertragen['state'] = DISABLED
 
             self.__root.dg.destroy()
@@ -666,18 +749,7 @@ class Hauptfenster():
             else: 
                 anzahl_gruppen = len(mixedWertung)
 
-            if anzahl_gruppen < 19:
-                self.AnzeigeVFStartRow = 0
-                self.AnzeigeVFStartColumn = 8
-                self.AnzeigeHFStartRow = 10
-                self.AnzeigeHFStartColumn = 8
-                self.AnzeigeKFStartRow = 0
-                self.AnzeigeKFStartColumn = 17
-                self.AnzeigeFStartRow = 4
-                self.AnzeigeFStartColumn = 17
-                self.AnzeigeDWStartRow = 8
-                self.AnzeigeDWStartColumn = 17
-
+            if self.FinaleInEinerSpalte == False:
                 self.AnzahlGrunddurchgänge = anzahl_gruppen
 
                 max_rows = self.AnzahlGrunddurchgänge
@@ -712,22 +784,22 @@ class Hauptfenster():
                     if x['typ'] == self.TYP_GD  and x['row'] == row and x['column'] == col1:
                         x['wettkampfgruppe'] = item['gruppenname']
 
-                    if new_Array == False and x['row'] == row and x['column'] == col1:
-                        if x['zeit1'] != '':
-                            text = str(x['zeit1'])
-                            if x['fehler1'] > 0:
-                                text += ' +' + str(x['fehler1'])
-                            self.zeichneNeueWerte(row, col1+1, text, x['row'], x['column'], x['typ'])
-                        if x['zeit2'] != '':
-                            text = str(x['zeit2'])
-                            if x['fehler2'] > 0:
-                                text += ' +' + str(x['fehler2'])
-                            self.zeichneNeueWerte(row, col1+2, text, x['row'], x['column'], x['typ'])
-                        if x['bestzeit'] != '':
-                            text = str(x['bestzeit'])
-                            if x['fehlerbest'] > 0:
-                                text += ' +' + str(x['fehlerbest'])
-                            self.zeichneNeueWerte(row, col1+3, text, x['row'], x['column'], x['typ'])
+            for x in self.Durchgänge:
+                if x['zeit1'] != '':
+                    text = str(x['zeit1'])
+                    if x['fehler1'] > 0:
+                        text += ' +' + str(x['fehler1'])
+                    self.zeichneNeueWerte(x['row'], x['column']+1, text, x['row'], x['column'], x['typ'])
+                if x['zeit2'] != '':
+                    text = str(x['zeit2'])
+                    if x['fehler2'] > 0:
+                        text += ' +' + str(x['fehler2'])
+                    self.zeichneNeueWerte(x['row'], x['column']+2, text, x['row'], x['column'], x['typ'])
+                if x['bestzeit'] != '':
+                    text = str(x['bestzeit'])
+                    if x['fehlerbest'] > 0:
+                        text += ' +' + str(x['fehlerbest'])
+                    self.zeichneNeueWerte(x['row'], x['column']+3, text, x['row'], x['column'], x['typ'])
 
             self.writeKonsole(str(len(mixedWertung)) + ' Gruppen wurden übernommen!')
 
@@ -735,18 +807,17 @@ class Hauptfenster():
                 row = self.AnzeigeDWStartRow + int(index) + 1
                 col1 = self.AnzeigeDWStartColumn + 1
                 txt = item['reihenfolge'] + ' - ' + item['gruppenname']
-                text = Label(self.__root.dg, text=txt, takefocus = 0)
+                self.zeichneNeueWerte(row, col1, txt, row, col1, self.TYP_DW)
 
-                if int(row) % 2:
-                    text.grid(row=row, column=col1, sticky=(W), pady=(10,0), ipady='5', ipadx='10')
-                else:    
-                    text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='5', ipadx='10')
                 
                 for x in self.Durchgänge:
                     if x['typ'] == self.TYP_DW and x['row'] == row and x['column'] == col1:
                         x['wettkampfgruppe'] = item['gruppenname']
 
             self.writeKonsole(str(len(damenWertung)) + ' Damengruppen wurden übernommen!')
+
+            self.changeRowAndColumnInDurchgaenge()
+            self.bestzeitPlatzierungBerechnen()
 
     # Functions - Tab Übersicht - Zeitnehmung
     def zeichneGrundansicht(self, ungerade_MixedWertung, damenwertung, new_Array):
@@ -1035,7 +1106,7 @@ class Hauptfenster():
         dw_platzierung_neu = 1
         
         for index, item in enumerate(self.Durchgänge):
-            if item['typ'] == self.TYP_GD  and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_GD and item['bestzeitinklfehler'] != '':
                 platzierung_neu = index + 1
                 item['platzierung'] = platzierung_neu
                 self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu, item['row'], item['column'], item['typ'])
@@ -1047,7 +1118,7 @@ class Hauptfenster():
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
         
-            if item['typ'] == self.TYP_VF  and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_VF and item['bestzeitinklfehler'] != '':
                 if vf_durchgang == 0 or vf_durchgang < item['dg']:
                     vf_durchgang = item['dg']
                     if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
@@ -1063,7 +1134,7 @@ class Hauptfenster():
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
             
-            if item['typ'] == self.TYP_HF  and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_HF and item['bestzeitinklfehler'] != '':
                 if hf_durchgang == 0 or hf_durchgang < item['dg']:
                     hf_durchgang = item['dg']
                     if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
@@ -1086,7 +1157,7 @@ class Hauptfenster():
 
             if item['typ'] == self.TYP_DW and item['bestzeitinklfehler'] != '':
                 item['platzierung'] = dw_platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, dw_platzierung_neu)  
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, dw_platzierung_neu, dg['row'], dg['column'], dg['typ'])  
                 dw_platzierung_neu += 1
 
     def sortTime(self, timeList):
@@ -1335,5 +1406,4 @@ Hauptfenster()
 
 # TODO: Auswertung konfiguierbar in Einstellungen (zeige alle Zeiten oder nur Bestzeit, nur aktueller Durchgang oder ganze Tabelle, nächste Gruppe, ...)
 # TODO: Cursor bei Fehlern -> Reset bei Bahnwechseln oder Zeit übertragen
-# TODO: Grafik Auswertung anpassen (Weiter kommende Gruppen anderer Hintergrund, ...)
 # TODO: Input Felder, Einschränkung Eingabe (Fehler, Reihenfolge nur Zahlen erlaubt)
