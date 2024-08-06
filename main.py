@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox, font, colorchooser
 from tkinter.ttk import *
 from datetime import datetime
-import time, os, json
+import time, os, json, re
 from gpiozero import Button as GPIO_Button
 
 
@@ -346,6 +346,7 @@ class Hauptfenster():
        
     # Eingabefenster
     def showChangingWindow(self, event, typ, row, column):
+        self.changeWindowIsAenderungFalse = False
         grp_text = ''
         zeit1_text = ''
         fehler1_text = ''
@@ -360,7 +361,7 @@ class Hauptfenster():
                 fehler2_text = x['fehler2']
         
         if zeit1_text != '':
-            self.changewindow = Toplevel(self.__root)
+            self.changewindow = Toplevel()
             self.changewindow.title('Änderung')
 
             self.changewindow.iconphoto(False, self.icon)
@@ -386,76 +387,85 @@ class Hauptfenster():
             self.changewindow.Z1 = Entry(self.changewindow.frame, width=10, takefocus=0)
             self.changewindow.Z1.grid(row=1, column=1, padx=(0,5), pady=(0,20))
             self.changewindow.Z1.insert(0, zeit1_text)
+            self.changewindow.Z1.bind('<KeyRelease>', self.validate_time)
             
             self.changewindow.F1 = Entry(self.changewindow.frame, width=5, takefocus=0)
             self.changewindow.F1.grid(row=1, column=2, padx=(0,5), pady=(0,20))
             self.changewindow.F1.insert(0, fehler1_text)
+            self.changewindow.Z1.bind('<KeyRelease>', self.validate_number)
 
             self.changewindow.Z2 = Entry(self.changewindow.frame, width=10, takefocus=0)
             self.changewindow.Z2.grid(row=1, column=3, padx=(0,5), pady=(0,20))
             self.changewindow.Z2.insert(0, zeit2_text)
+            self.changewindow.Z1.bind('<KeyRelease>', self.validate_time)
             
             self.changewindow.F2 = Entry(self.changewindow.frame, width=5, takefocus=0)
             self.changewindow.F2.grid(row=1, column=4, padx=(0,20), pady=(0,20))
             self.changewindow.F2.insert(0, fehler2_text)
+            self.changewindow.Z1.bind('<KeyRelease>', self.validate_number)
 
             self.changewindow.BTN = Button(self.changewindow.frame, text='Speichern', takefocus=0)
             self.changewindow.BTN.grid(row=2, column=1, columnspan=2, sticky=(W+N+E+S), pady=(0,20))
             self.changewindow.BTN.bind('<Button-1>', lambda event, typ=typ, row=row, column=column:self.closeChangingWindow(event, typ, row, column))
-            # TODO: Richtige Eingabe nur erlaubt
+
 
     def closeChangingWindow(self, event, typ, row, column):
-        for x in self.Durchgänge:
-            if x['typ'] == typ and x['row'] == row and x['column'] == column:
-                z1 = self.changewindow.Z1.get()
-                f1 = int(self.changewindow.F1.get())
-                z2 = self.changewindow.Z2.get()
-                f2 = int(self.changewindow.F2.get())
+        # TODO: Abfrage ob was geändert wurde funktioniert nicht
+        if self.changeWindowIsAenderungFalse == False:
+            for x in self.Durchgänge:
+                if x['typ'] == typ and x['row'] == row and x['column'] == column:
+                    z1 = self.changewindow.Z1.get()
+                    f1 = int(self.changewindow.F1.get())
+                    z2 = self.changewindow.Z2.get()
+                    f2 = int(self.changewindow.F2.get())
 
-                if z1 != '':
-                    x['zeit1'] = z1
-                    x['fehler1'] = f1
+                    if z1 != '':
+                        x['zeit1'] = z1
+                        x['fehler1'] = f1
 
-                    text = str(z1)
-                    if f1 > 0:
-                        text += ' +' + str(f1)
-                    
-                    self.zeichneNeueWerte(row, column+1, text, row, column, typ)
+                        text = str(z1)
+                        if f1 > 0:
+                            text += ' +' + str(f1)
+                        
+                        self.zeichneNeueWerte(row, column+1, text, row, column, typ)
 
-                    if z2 == '':
-                        x['bestzeit'] = z1
-                        x['fehlerbest'] = f1
-                        self.zeichneNeueWerte(row, column+3, text, row, column, typ)
+                        if z2 == '':
+                            x['bestzeit'] = z1
+                            x['fehlerbest'] = f1
+                            self.zeichneNeueWerte(row, column+3, text, row, column, typ)
 
-                if z1 != '' and z2 != '':
-                    x['zeit2'] = z2
-                    x['fehler2'] = f2
+                    if z1 != '' and z2 != '':
+                        x['zeit2'] = z2
+                        x['fehler2'] = f2
 
-                    text2 = str(z2)
-                    if f2 > 0:
-                        text2 += ' +' + str(f2)
-                    self.zeichneNeueWerte(row, column+2, text2, row, column, typ)
+                        text2 = str(z2)
+                        if f2 > 0:
+                            text2 += ' +' + str(f2)
+                        self.zeichneNeueWerte(row, column+2, text2, row, column, typ)
 
-                    time1 = self.addiereFehlerZurZeit(z1, f1) 
-                    time2 = self.addiereFehlerZurZeit(z2, f2)
+                        time1 = self.addiereFehlerZurZeit(z1, f1) 
+                        time2 = self.addiereFehlerZurZeit(z2, f2)
 
-                    if self.berechneBestzeit(time1, time2) == 2:
-                        x['bestzeit'] = z2
-                        x['fehlerbest'] = f2
+                        if self.berechneBestzeit(time1, time2) == 2:
+                            x['bestzeit'] = z2
+                            x['fehlerbest'] = f2
 
-                        self.zeichneNeueWerte(row, column+3, text2, row, column, typ)
+                            self.zeichneNeueWerte(row, column+3, text2, row, column, typ)
 
-                if z1 == '' and z2 != '':
-                    messagebox.showwarning('Änderungen', 'Zeit 1 fehlt! \nZeit 2 kann nicht übernomen werden!')
-                    return
+                    if z1 == '' and z2 != '':
+                        messagebox.showwarning('Änderungen', 'Zeit 1 fehlt! \nZeit 2 kann nicht übernomen werden!')
+                        return
 
-                self.changewindow.Z1.delete(0, END)
-                self.changewindow.F1.delete(0, END)
-                self.changewindow.Z2.delete(0, END)
-                self.changewindow.F2.delete(0, END)
+                    self.changewindow.Z1.delete(0, END)
+                    self.changewindow.F1.delete(0, END)
+                    self.changewindow.Z2.delete(0, END)
+                    self.changewindow.F2.delete(0, END)
 
-        self.changewindow.destroy()
-        self.bestzeitPlatzierungBerechnen()
+            self.changewindow.destroy()
+            self.bestzeitPlatzierungBerechnen()
+        else:
+            messagebox.showwarning('Änderung','Die Syntax stimmt nicht!')
+            return
     
     # Validierung
     def isNumber(self, text):
@@ -464,6 +474,21 @@ class Hauptfenster():
             return True
         except ValueError:
             return False
+
+    def validate_time(self, event):
+        test_str  = event.widget.get()
+        pattern_str = r'^\d{2}:\d{2}:\d{2}$'
+
+        if not  re.match(pattern_str, test_str):
+            self.changeWindowIsAenderungFalse = True
+        
+        # TODO: mehrere Time Validierungen hinzufügen
+
+    def validate_number(self, event):
+        test_str  = event.widget.get()
+        test = test_str.isdigit()  
+        if test == False:
+            self.changeWindowIsAenderungFalse = True
 
     # Functions - Allgemein
     def neustart(self, event=None):
@@ -549,7 +574,6 @@ class Hauptfenster():
             json.dump(new_dict, outfile)
 
     def changeRowAndColumnInDurchgaenge(self):
-        #TODO Überschreibe Spalten und Rows mit neuen Werten F, DW 
         row_kf = self.AnzeigeKFStartRow + 1
         col_kf = self.AnzeigeKFStartColumn + 1
         row_f = self.AnzeigeFStartRow + 1
@@ -563,15 +587,13 @@ class Hauptfenster():
                 dg['column'] = col_kf
                 row_kf += 1
             if dg['typ'] == self.TYP_F:
-                # Not work
                 dg['row'] = row_f
                 dg['column'] = col_f
-                row_kf += 1
+                row_f += 1
             if dg['typ'] == self.TYP_DW:
-                # Not work
                 dg['row'] = row_dw
                 dg['column'] = col_dw
-                row_kf += 1
+                row_dw += 1
         
         self.Durchgänge.sort(key=self.sortTime)
     
