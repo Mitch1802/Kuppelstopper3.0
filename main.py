@@ -1325,8 +1325,7 @@ class Hauptfenster():
         self.__root.BtnZeitUebertragen['state'] = DISABLED
 
         self.writeKonsole('Der Angriffbefehl wurde erteilt!')
-        # TODO: Angriffsbefehl
-        # os.system('mpg123 ' + self.file_angriffbefehel)
+        os.system('mpg123 ' + self.FileAngriffsbefehl)
         if self.checked_GPIO.get() == True and self.checked_Bahn_1.get() == True:
             self.GPIO_Start_1 = self.__root.Start_GPIO_1.get()
             self.GPIO_Stop_1 = self.__root.Stop_GPIO_1.get()
