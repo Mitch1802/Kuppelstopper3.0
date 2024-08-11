@@ -88,7 +88,7 @@ class Hauptfenster():
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.checked_Tastatur.set(True)
-        self.checked_GPIO.set(False)
+        self.checked_GPIO.set(True)
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
         
@@ -551,6 +551,10 @@ class Hauptfenster():
         self.GPIO_Stop_1 = buttons['GPIO_Stop_1']
         self.GPIO_Start_2 = buttons['GPIO_Start_2']
         self.GPIO_Stop_2 = buttons['GPIO_Stop_2']
+        self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
+        self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
+        self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
+        self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
         self.Taste_Start_1 = buttons['Taste_Start_1']
         self.Taste_Stop_1 = buttons['Taste_Stop_1']
         self.Taste_Start_2 = buttons['Taste_Start_2']
@@ -1316,28 +1320,21 @@ class Hauptfenster():
             self.anzeige.Z2.pack(expand=1, side=TOP, fill=BOTH)
             self.writeKonsole('Bahn 2 wurde aktiviert!')
 
-    def start(self):   
+    async def start(self):   
         self.ZeitUebertragen = False
         self.__root.BtnStart['state'] = DISABLED
         self.__root.BtnAllesStop['state'] = NORMAL
         self.__root.BtnWechsel['state'] = DISABLED
         self.__root.BtnAnsichtWechseln['state'] = DISABLED
         self.__root.BtnZeitUebertragen['state'] = DISABLED
-
-        self.writeKonsole('Der Angriffbefehl wurde erteilt!')
-        os.system('mpg123 ' + self.FileAngriffsbefehl)
         if self.checked_GPIO.get() == True and self.checked_Bahn_1.get() == True:
             self.GPIO_Start_1 = self.__root.Start_GPIO_1.get()
             self.GPIO_Stop_1 = self.__root.Stop_GPIO_1.get()
-            self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
-            self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
-            self.BuzzerStartBahn1.when_pressed = self.startBuzzer1
+            await self.BuzzerStartBahn1.when_pressed = self.startBuzzer1
 
         if self.checked_GPIO.get() == True and self.checked_Bahn_2.get() == True:
             self.GPIO_Start_2 = self.__root.Start_GPIO_2.get()
             self.GPIO_Stop_2 = self.__root.Stop_GPIO_2.get()
-            self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
-            self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
             self.BuzzerStartBahn2.when_pressed = self.startBuzzer2
 
         if self.checked_Tastatur.get() == True and self.checked_Bahn_1.get() == True:
@@ -1350,7 +1347,10 @@ class Hauptfenster():
             self.Taste_Stop_2 = self.__root.Stop_Taste_2.get()
             self.__root.bind(self.Taste_Start_2, self.startBuzzer2)
 
-    def startBuzzer1(self, event=None):
+        self.writeKonsole('Der Angriffbefehl wurde erteilt!')
+        os.system('mpg123 ' + self.FileAngriffsbefehl)
+
+    async def startBuzzer1(self, event=None):
         if not self.time_is_running_1:
             if self.checked_GPIO.get() == True:
                 self.BuzzerStopBahn1.when_pressed = self.stop_1
@@ -1363,7 +1363,8 @@ class Hauptfenster():
                     self.writeKonsole('Zeit 1 mit Taste ' + event.char + ' gestartet!')
             self.time_is_running_1 = True
             self.start_time_1 = time.time()
-            self.update_time_1()
+            print("Start1", time.strftime('%X'))
+            await self.update_time_1()
 
     def startBuzzer2(self, event=None):
         if not self.time_is_running_2:
@@ -1379,6 +1380,7 @@ class Hauptfenster():
             self.time_is_running_2 = True
             self.start_time_2 = time.time()
             self.update_time_2()
+            print("Start2", time.strftime('%X'))
 
     def allesStop(self):
         self.stop_1('')
