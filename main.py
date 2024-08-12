@@ -2,11 +2,13 @@ from tkinter import *
 from tkinter import messagebox, font, colorchooser
 from tkinter.ttk import *
 from datetime import datetime
-import time, os, json, re
+import time, os, json, re, pygame
 from gpiozero import Button as GPIO_Button
+from threading import Thread
 
 
 class Hauptfenster(): 
+    pygame.init()
     KonfigGruppenFile = './config/anmeldung.json'
     KonfigBewerbFile = './config/bewerb.json'
     KonfigSetupFile = './config/setup.json'
@@ -88,9 +90,15 @@ class Hauptfenster():
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.checked_Tastatur.set(True)
-        self.checked_GPIO.set(True)
+        self.checked_GPIO.set(False)
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
+
+        if self.checked_GPIO.get() == True:
+            self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
+            self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
+            self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
+            self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
         
         # Menü
         self.__root.NbFTabControl = Notebook(self.__root, padding='0')
@@ -301,28 +309,32 @@ class Hauptfenster():
                 count_dw += 1
         
         if count_gd > 0:
-            title = Label(self.anzeige.ERG, text='Grunddurchgang', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
-            title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+            title = Label(self.anzeige.ERG, text='GRUNDDURCHGANG', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(50,0))
         
         if count_vf > 0:
-            title = Label(self.anzeige.ERG, text='Viertelfinale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
-            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+            title = Label(self.anzeige.ERG, text='VIERTELFINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(50,0))
         
         if count_hf > 0:
-            title = Label(self.anzeige.ERG, text='Halbfinale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
-            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+            title = Label(self.anzeige.ERG, text='HALBFINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
         
         if count_kf > 0:
-            title = Label(self.anzeige.ERG, text='Kleines Finale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
-            title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+            title = Label(self.anzeige.ERG, text='KLEINES FINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            if self.FinaleInEinerSpalte == False:
+                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(50,0))
+            else:
+                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
+                
         
         if count_f > 0:
-            title = Label(self.anzeige.ERG, text='Finale', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
-            title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+            title = Label(self.anzeige.ERG, text='FINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
         
         if count_dw > 0:
-            title = Label(self.anzeige.ERG, text='Damenwertung', takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
-            title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0), pady=(1,0))
+            title = Label(self.anzeige.ERG, text='DAMENWERTUNG', takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
 
         for dg in self.Durchgänge:
             if (dg['typ'] == self.TYP_GD or dg['typ'] == self.TYP_DW) and dg['platzierung'] > 0:
@@ -331,33 +343,33 @@ class Hauptfenster():
                     row = dg['platzierung']
                     col = 0
                     if dg['platzierung'] <= 8:
-                        color = '#dbff33'
+                        color = '#4287f5'
                 if dg['typ'] == self.TYP_DW:
                     row = dg['platzierung'] + self.AnzeigeDWStartRow
                     col = self.AnzeigeDWStartColumn + 1
                     if dg['platzierung'] <= 1:
-                        color = '#dbff33'
+                        color = '#4287f5'
 
                 text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
-                w = Label(self.anzeige.ERG, text=text, background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
-                w.grid(row=row, column=col, sticky=(W), padx='10', pady='5')
+                w = Label(self.anzeige.ERG, text=text, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+                w.grid(row=row, column=col, sticky=(W+E+N+S), padx=(50,0), ipady='10')
 
-                time = dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
-                t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
-                t.grid(row=row, column=col+1, sticky=(W), padx='10', pady='5')
+                time = '   ' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+                t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,50), ipady='10')
             
             if (dg['typ'] == self.TYP_VF or dg['typ'] == self.TYP_HF or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
                 color = '#ffffff'
                 if f_durchgang == 0 or f_durchgang < dg['dg']:
                     f_durchgang = dg['dg']
-                    color = '#dbff33'
+                    color = '#4287f5'
         
-                w = Label(self.anzeige.ERG, text=dg['wettkampfgruppe'], background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
-                w.grid(row=dg['row'], column=dg['column'], sticky=(W), padx='10', pady='5')
+                w = Label(self.anzeige.ERG, text=dg['wettkampfgruppe'], background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+                w.grid(row=dg['row'], column=dg['column'], sticky=(W+E+N+S), padx=(50,0), ipady='10')
 
-                time = dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
-                t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.GlobalFontSizeText+5), takefocus = 0)
-                t.grid(row=dg['row'], column=dg['column']+1, sticky=(W), padx='10', pady='5')
+                time = '   ' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+                t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,50), ipady='10')
        
     # Eingabefenster
     def showChangingWindow(self, event, typ, row, column):
@@ -551,10 +563,6 @@ class Hauptfenster():
         self.GPIO_Stop_1 = buttons['GPIO_Stop_1']
         self.GPIO_Start_2 = buttons['GPIO_Start_2']
         self.GPIO_Stop_2 = buttons['GPIO_Stop_2']
-        self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
-        self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
-        self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
-        self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
         self.Taste_Start_1 = buttons['Taste_Start_1']
         self.Taste_Stop_1 = buttons['Taste_Stop_1']
         self.Taste_Start_2 = buttons['Taste_Start_2']
@@ -567,6 +575,8 @@ class Hauptfenster():
         self.GlobalDGBackgroundColor = style['GlobalDGBackgroundColor']
         self.AnzeigeFontSizeGroup = style['AnzeigeFontSizeGroup']
         self.AnzeigeFontSizeTime = style['AnzeigeFontSizeTime']
+        self.AnzeigeFontSizeTitle = style['AnzeigeFontSizeTitle']
+        self.AnzeigeFontSizeGroups = style['AnzeigeFontSizeGroups']
         self.AnzeigeBackgroundColor = style['AnzeigeBackgroundColor']
         self.AnzeigeGroupColor = style['AnzeigeGroupColor']
         self.AnzeigeGroup2Color = style['AnzeigeGroup2Color']
@@ -651,6 +661,11 @@ class Hauptfenster():
         self.anzeige.G2.pack_forget()
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
         self.ladeAuswertungDaten()     
+
+    def playSound(self, file):
+        self.writeKonsole('Ein Sound wurde wiedergegeben!')
+        sound = pygame.mixer.Sound(self.FileAngriffsbefehl)
+        sound.play()
 
     # Functions - Tab Anmeldung
     def addWettkampfgruppe(self, event=None):
@@ -1320,7 +1335,7 @@ class Hauptfenster():
             self.anzeige.Z2.pack(expand=1, side=TOP, fill=BOTH)
             self.writeKonsole('Bahn 2 wurde aktiviert!')
 
-    async def start(self):   
+    def start(self):   
         self.ZeitUebertragen = False
         self.__root.BtnStart['state'] = DISABLED
         self.__root.BtnAllesStop['state'] = NORMAL
@@ -1330,7 +1345,7 @@ class Hauptfenster():
         if self.checked_GPIO.get() == True and self.checked_Bahn_1.get() == True:
             self.GPIO_Start_1 = self.__root.Start_GPIO_1.get()
             self.GPIO_Stop_1 = self.__root.Stop_GPIO_1.get()
-            await self.BuzzerStartBahn1.when_pressed = self.startBuzzer1
+            self.BuzzerStartBahn1.when_pressed = self.startBuzzer1
 
         if self.checked_GPIO.get() == True and self.checked_Bahn_2.get() == True:
             self.GPIO_Start_2 = self.__root.Start_GPIO_2.get()
@@ -1346,11 +1361,11 @@ class Hauptfenster():
             self.Taste_Start_2 = self.__root.Start_Taste_2.get()
             self.Taste_Stop_2 = self.__root.Stop_Taste_2.get()
             self.__root.bind(self.Taste_Start_2, self.startBuzzer2)
+        
+        t = Thread(target=self.playSound, args=[self.FileAngriffsbefehl])
+        t.start()
 
-        self.writeKonsole('Der Angriffbefehl wurde erteilt!')
-        os.system('mpg123 ' + self.FileAngriffsbefehl)
-
-    async def startBuzzer1(self, event=None):
+    def startBuzzer1(self, event=None):
         if not self.time_is_running_1:
             if self.checked_GPIO.get() == True:
                 self.BuzzerStopBahn1.when_pressed = self.stop_1
@@ -1363,8 +1378,7 @@ class Hauptfenster():
                     self.writeKonsole('Zeit 1 mit Taste ' + event.char + ' gestartet!')
             self.time_is_running_1 = True
             self.start_time_1 = time.time()
-            print("Start1", time.strftime('%X'))
-            await self.update_time_1()
+            self.update_time_1()
 
     def startBuzzer2(self, event=None):
         if not self.time_is_running_2:
@@ -1380,7 +1394,6 @@ class Hauptfenster():
             self.time_is_running_2 = True
             self.start_time_2 = time.time()
             self.update_time_2()
-            print("Start2", time.strftime('%X'))
 
     def allesStop(self):
         self.stop_1('')
