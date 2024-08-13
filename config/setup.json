@@ -25,10 +25,10 @@
         "Taste_Stop_2": "w"
     },
     "Files": {
-        "icon": "./Resources/Kuppelstopper.png",
-        "angriffsbefehl": "./Resources/AngriffsbefehlWonie.wav",
-        "stopp": "./Resources/HornHonk.wav",
-        "iconDelete": "./Resources/delete.png"
+        "icon": "Resources/Kuppelstopper.png",
+        "angriffsbefehl": "Resources/AngriffsbefehlWonie.wav",
+        "stopp": "Resources/HornHonk.wav",
+        "iconDelete": "Resources/delete.png"
     },
     "Setup": {
         "Title": "KuppelStopper 3.0",
