@@ -26,7 +26,7 @@
     },
     "Files": {
         "icon": "./Resources/Kuppelstopper.png",
-        "angriffsbefehl": "./Resources/AngriffsbefehlWonie.mp3",
+        "angriffsbefehl": "./Resources/AngriffsbefehlWonie.wav",
         "stopp": "./Resources/HornHonk.wav",
         "iconDelete": "./Resources/delete.png"
     },
