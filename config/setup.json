@@ -6,12 +6,13 @@
         "GlobalDGBackgroundColor": "#98CF8B",
         "AnzeigeFontSizeGroup": 100,
         "AnzeigeFontSizeTime": 300,
-        "AnzeigeFontSizeTitle": 40,
-        "AnzeigeFontSizeGroups": 30,
+        "AnzeigeFontSizeTitle": 25,
+        "AnzeigeFontSizeGroups": 20,
         "AnzeigeBackgroundColor": "#6e6c6b",
         "AnzeigeGroupColor": "#818ef0",
         "AnzeigeGroup2Color": "#93ff8f",
-        "AnzeigeTimeColor": "#ffffff"
+        "AnzeigeTimeColor": "#ffffff",
+        "AnzeigeNextColor": "#ff23ff"
     },
     "Buttons": {
         "GPIO_Start_1": 17,
@@ -26,6 +27,7 @@
     "Files": {
         "icon": "./Resources/Kuppelstopper.png",
         "angriffsbefehl": "./Resources/AngriffsbefehlWonie.mp3",
+        "stopp": "./Resources/HornHonk.wav",
         "iconDelete": "./Resources/delete.png"
     },
     "Setup": {
