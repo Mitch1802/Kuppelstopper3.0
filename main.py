@@ -97,11 +97,7 @@ class Hauptfenster():
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
 
-        if self.checked_GPIO.get() == True:
-            self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
-            self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
-            self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
-            self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
+        self.initGPIO()
         
         # Menü
         self.__root.NbFTabControl = Notebook(self.__root, padding='0')
@@ -187,7 +183,7 @@ class Hauptfenster():
         self.__root.setupEingabe.pack(side='top', fill='x', padx='10', pady='5')
         self.__root.CheckTastatur = Checkbutton(self.__root.setupEingabe, text='Tastatur', variable=self.checked_Tastatur, takefocus = 0)
         self.__root.CheckTastatur.grid(row=0, column=0, padx='10')
-        self.__root.CheckGPIO = Checkbutton(self.__root.setupEingabe, text='GPIO', variable=self.checked_GPIO, takefocus = 0)
+        self.__root.CheckGPIO = Checkbutton(self.__root.setupEingabe, text='GPIO', variable=self.checked_GPIO, command=self.initGPIO, takefocus = 0)
         self.__root.CheckGPIO.grid(row=0, column=1)
         self.__root.CheckRahmen = Checkbutton(self.__root.setupEingabe, text='Rahmen ausblenden', variable=self.checked_Rahmen, takefocus = 0, command=self.updateRahmenAnzeige)
         self.__root.CheckRahmen.grid(row=0, column=2, padx='10')
@@ -273,6 +269,13 @@ class Hauptfenster():
             self.uebernahmeGruppen(True)
         
         self.__root.mainloop()
+
+    def initGPIO(self, event=None):
+        if self.checked_GPIO.get() == True:
+            self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
+            self.BuzzerStopBahn1 = GPIO_Button(self.GPIO_Stop_1)
+            self.BuzzerStartBahn2 = GPIO_Button(self.GPIO_Start_2)
+            self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
 
     # Anzeigefenster
     def showAnzeige(self):
