@@ -9,10 +9,11 @@ from threading import Thread
 
 class Hauptfenster(): 
     pygame.init()
-    LogFile = './log.txt'
-    KonfigGruppenFile = './config/anmeldung.json'
-    KonfigBewerbFile = './config/bewerb.json'
-    KonfigSetupFile = './config/setup.json'
+    pfad = '/home/pi/GitHub/Kuppelstopper3.0/'
+    LogFile = pfad + 'log.txt'
+    KonfigGruppenFile = pfad + 'config/anmeldung.json'
+    KonfigBewerbFile = pfad + 'config/bewerb.json'
+    KonfigSetupFile = pfad + 'config/setup.json'
 
     Status_Anzeige = True # True = Zeit, False Auswertung
 
@@ -615,10 +616,10 @@ class Hauptfenster():
         setup_file.close()
 
         files = setup_data['Files']
-        self.FileAngriffsbefehl = files['angriffsbefehl']
-        self.FileStopp = files['stopp']
-        self.FileIcon = files['icon']
-        self.FileIconDelete = files['iconDelete']
+        self.FileAngriffsbefehl = self.pfad + files['angriffsbefehl']
+        self.FileStopp = self.pfad + files['stopp']
+        self.FileIcon = self.pfad + files['icon']
+        self.FileIconDelete = self.pfad + files['iconDelete']
         
         buttons = setup_data['Buttons']
         self.GPIO_Start_1 = buttons['GPIO_Start_1']
