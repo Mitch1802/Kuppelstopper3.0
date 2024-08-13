@@ -1,14 +1,15 @@
 from tkinter import *
-from tkinter import messagebox, font, colorchooser
+from tkinter import messagebox
 from tkinter.ttk import *
 from datetime import datetime
-import time, os, json, re, pygame
+import time, os, json, re, pygame, random
 from gpiozero import Button as GPIO_Button
 from threading import Thread
 
 
 class Hauptfenster(): 
     pygame.init()
+    LogFile = './log.txt'
     KonfigGruppenFile = './config/anmeldung.json'
     KonfigBewerbFile = './config/bewerb.json'
     KonfigSetupFile = './config/setup.json'
@@ -73,7 +74,9 @@ class Hauptfenster():
         style.configure('TNotebook.FTab', relief=SOLID, borderwidth=0, bordercolor=COLOR_FTab_INACTIVE, darkcolor=COLOR_FTab_INACTIVE, lightcolor=COLOR_FTab_INACTIVE, padding=[10,5], background=COLOR_FTab_INACTIVE)
         style.map('TNotebook.FTab', background=[('selected',COLOR_FTab_ACTIVE),('active',COLOR_FTab_ACTIVE)])
         style.configure('TButton', relief=SOLID, borderwidth=0, bordercolor=COLOR_BUTTON_ACTIVE, darkcolor=COLOR_BUTTON_ACTIVE, lightcolor=COLOR_BUTTON_ACTIVE, padding=[10,5], background=COLOR_BUTTON_ACTIVE)
-        style.map('TButton', background=[('active',COLOR_BUTTON_HOVER),('disabled',COLOR_BUTTON_DISABLED)], foreground=[('disabled',COLOR_BUTTON_DISABLED)])    
+        style.map('TButton', background=[('active',COLOR_BUTTON_HOVER),('disabled',COLOR_BUTTON_DISABLED)], foreground=[('disabled',COLOR_BUTTON_DISABLED)]) 
+        style.configure('Anzeige.TFrame', background=self.AnzeigeBackgroundColor)   
+        style.configure('AnzeigeNext.TFrame', background=self.AnzeigeNextColor)  
 
 
         self.min_font_size = 10
@@ -252,6 +255,15 @@ class Hauptfenster():
         self.__root.SGG.grid(row=0, column=3, padx='10', pady='10')
         self.__root.SGG.set(self.AnzeigeFontSizeGroup)
 
+        self.__root.setupTest = LabelFrame(self.__root.FTab3, text='Style', borderwidth=1, relief=SOLID)
+        self.__root.setupTest.pack(side='bottom', fill='x', padx='10', pady='5')
+        self.__root.LblAnzahlGruppen = Label(self.__root.setupTest, text='Anzahl Testgruppen', takefocus = 0)
+        self.__root.LblAnzahlGruppen.grid(row=0, column=0, padx='10', pady='10')
+        self.__root.SBAnzahlGruppen = Spinbox(self.__root.setupTest, width=3, from_=1, to=30, takefocus = 0)
+        self.__root.SBAnzahlGruppen.grid(row=0, column=1, padx='10', pady='10')
+        self.__root.BtnAnzahlGruppen = Button(self.__root.setupTest, text='Erstellen', width=10, padding=10, command=self.testGruppenErstellen, takefocus = 0)
+        self.__root.BtnAnzahlGruppen.grid(row=0, column=2, padx='10', pady='10')
+
         self.__root.Konsole = Label(self.__root, takefocus = 0, foreground='#8f8e8c')
         self.__root.Konsole.pack(expand=1, side='top', fill='both')
 
@@ -278,8 +290,11 @@ class Hauptfenster():
         self.anzeige.Z2 = Label(self.anzeige.frame, text='00:00:00', anchor='center', foreground=self.AnzeigeTimeColor, background=self.AnzeigeBackgroundColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeTime), takefocus=0)
         self.anzeige.G2 = Label(self.anzeige.frame, text='', anchor='ne', foreground=self.AnzeigeGroup2Color, background=self.AnzeigeBackgroundColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroup), takefocus=0)
         
-        self.anzeige.ERG = Frame(self.anzeige.frame)
+        self.anzeige.ERG = Frame(self.anzeige.frame, style=('Anzeige.TFrame'))
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
+
+        self.anzeige.INFO = Frame(self.anzeige.frame, style=('AnzeigeNext.TFrame'))
+        self.anzeige.INFO.pack(expand=0, side='bottom' , fill='x', ipady=0)
 
     def ladeAuswertungDaten(self):
         for widgets in self.anzeige.ERG.winfo_children():
@@ -309,31 +324,31 @@ class Hauptfenster():
                 count_dw += 1
         
         if count_gd > 0:
-            title = Label(self.anzeige.ERG, text='GRUNDDURCHGANG', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
-            title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(50,0))
+            title = Label(self.anzeige.ERG, text='GRUNDDURCHGANG', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(30,0))
         
         if count_vf > 0:
-            title = Label(self.anzeige.ERG, text='VIERTELFINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
-            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(50,0))
+            title = Label(self.anzeige.ERG, text='VIERTELFINALE', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(30,0))
         
         if count_hf > 0:
-            title = Label(self.anzeige.ERG, text='HALBFINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
-            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
+            title = Label(self.anzeige.ERG, text='HALBFINALE', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(1,0))
         
         if count_kf > 0:
-            title = Label(self.anzeige.ERG, text='KLEINES FINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title = Label(self.anzeige.ERG, text='KLEINES FINALE', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
             if self.FinaleInEinerSpalte == False:
-                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(50,0))
+                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(30,0))
             else:
-                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
+                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(1,0))
                 
         if count_f > 0:
-            title = Label(self.anzeige.ERG, text='FINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
-            title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
+            title = Label(self.anzeige.ERG, text='FINALE', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(1,0))
         
         if count_dw > 0:
-            title = Label(self.anzeige.ERG, text='DAMENWERTUNG', takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
-            title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
+            title = Label(self.anzeige.ERG, text='DAMENWERTUNG', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(1,0))
 
         for dg in self.Durchgänge:
             if (dg['typ'] == self.TYP_GD or dg['typ'] == self.TYP_DW) and dg['platzierung'] > 0:
@@ -342,34 +357,74 @@ class Hauptfenster():
                     row = dg['platzierung']
                     col = 0
                     if dg['platzierung'] <= 8:
-                        color = '#4287f5'
+                        color = self.GlobalDGBackgroundColor
                 if dg['typ'] == self.TYP_DW:
                     row = dg['platzierung'] + self.AnzeigeDWStartRow
                     col = self.AnzeigeDWStartColumn + 1
                     if dg['platzierung'] <= 1:
-                        color = '#4287f5'
+                        color = self.GlobalDGBackgroundColor
 
                 text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
                 w = Label(self.anzeige.ERG, text=text, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
-                w.grid(row=row, column=col, sticky=(W+E+N+S), padx=(50,0), ipady='10')
+                w.grid(row=row, column=col, sticky=(W+E+N+S), padx=(30,0), ipady='2')
 
-                time = '   ' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])+ '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
                 t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
-                t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,50), ipady='10')
+                t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,30), ipady='2')
             
             if (dg['typ'] == self.TYP_VF or dg['typ'] == self.TYP_HF or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
                 color = '#ffffff'
                 if f_durchgang == 0 or f_durchgang < dg['dg']:
                     f_durchgang = dg['dg']
-                    color = '#4287f5'
+                    color = self.GlobalDGBackgroundColor
         
                 w = Label(self.anzeige.ERG, text=dg['wettkampfgruppe'], background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
-                w.grid(row=dg['row'], column=dg['column'], sticky=(W+E+N+S), padx=(50,0), ipady='10')
+                w.grid(row=dg['row'], column=dg['column'], sticky=(W+E+N+S), padx=(30,0), ipady='2')
 
-                time = '   ' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])+ '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
                 t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
-                t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,50), ipady='10')
+                t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,30), ipady='2')
        
+    def showInfo(self):
+        for widgets in self.anzeige.INFO.winfo_children():
+            widgets.grid_remove()
+
+        bahnA = ''
+        bahnB = ''
+        
+        dg_select = self.__root.CBDG.get()
+        if dg_select != '':
+            dg_select = int(dg_select)+1
+        else:
+            dg_select = 1
+
+        self.Durchgänge.sort(key=self.sortTimeByRow)
+        for index, item in enumerate(self.Durchgänge):
+            if item['dg'] == dg_select:
+                if bahnA == '':
+                    bahnA = item['wettkampfgruppe']
+                elif bahnB == '':
+                    bahnB = item['wettkampfgruppe']
+        self.Durchgänge.sort(key=self.sortTime)
+
+
+        lbl = Label(self.anzeige.INFO, text='NÄCHSTER \nDURCHGANG', background=self.AnzeigeNextColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+        lbl.grid(row=0, column=0, rowspan=2, sticky=(W+E+N+S), padx=(50,0))
+
+        lblA = Label(self.anzeige.INFO, text='Bahn A', background=self.AnzeigeNextColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+        lblA.grid(row=0, column=1, sticky=(W+E+N+S), padx=(50,0))
+
+        lblB = Label(self.anzeige.INFO, text='Bahn B', background=self.AnzeigeNextColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+        lblB.grid(row=0, column=2, sticky=(W+E+N+S), padx=(50,0))
+
+        text = bahnA
+        a = Label(self.anzeige.INFO, text=text, background=self.AnzeigeNextColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+        a.grid(row=1, column=1, sticky=(W+E+N+S), padx=(50,0))
+
+        text = bahnB
+        b = Label(self.anzeige.INFO, text=text, background=self.AnzeigeNextColor, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+        b.grid(row=1, column=2, sticky=(W+E+N+S), padx=(50,0))
+
     # Eingabefenster
     def showChangingWindow(self, event, typ, row, column):
         grp_text = ''
@@ -528,6 +583,10 @@ class Hauptfenster():
 
     # Functions - Allgemein    
     def ladeKonfiguration(self):
+        # Lösche alte Log File
+        if os.path.exists(self.LogFile):
+            os.remove(self.LogFile)
+
         # Lade Wettkampfgruppen
         if os.path.exists(self.KonfigGruppenFile):
             anmeldungen_file = open(self.KonfigGruppenFile)
@@ -554,6 +613,7 @@ class Hauptfenster():
 
         files = setup_data['Files']
         self.FileAngriffsbefehl = files['angriffsbefehl']
+        self.FileStopp = files['stopp']
         self.FileIcon = files['icon']
         self.FileIconDelete = files['iconDelete']
         
@@ -579,7 +639,8 @@ class Hauptfenster():
         self.AnzeigeBackgroundColor = style['AnzeigeBackgroundColor']
         self.AnzeigeGroupColor = style['AnzeigeGroupColor']
         self.AnzeigeGroup2Color = style['AnzeigeGroup2Color']
-        self.AnzeigeTimeColor = style['AnzeigeTimeColor']
+        self.AnzeigeTimeColor = style['AnzeigeTimeColor'],
+        self.AnzeigeNextColor = style['AnzeigeNextColor']
 
         setup = setup_data['Setup']
         self.Title = setup['Title']
@@ -645,6 +706,9 @@ class Hauptfenster():
     def writeKonsole(self, text):
         if (self.checked_Konsole.get() == True):
             self.__root.Konsole.config(text='Konsole: ' + text)
+            f = open(self.LogFile, "a")
+            f.write(time.strftime('%X') + ' ' + text + '\n')
+            f.close()
 
     def wechselAnsichtZurZeit(self):
         self.anzeige.ERG.pack_forget()
@@ -652,6 +716,7 @@ class Hauptfenster():
         self.anzeige.Z1.pack(expand=1, side=TOP, fill=BOTH)
         self.anzeige.Z2.pack(expand=1, side=TOP, fill=BOTH)
         self.anzeige.G2.pack(expand=0, side=BOTTOM, fill=X)
+        self.showInfo()   
 
     def wechselAnsichtZurAuswertung(self):
         self.anzeige.G1.pack_forget()
@@ -659,12 +724,36 @@ class Hauptfenster():
         self.anzeige.Z2.pack_forget()
         self.anzeige.G2.pack_forget()
         self.anzeige.ERG.pack(expand=1, side=TOP, fill=BOTH)
-        self.ladeAuswertungDaten()     
+        self.ladeAuswertungDaten()  
+        self.showInfo()   
 
     def playSound(self, file):
         self.writeKonsole('Ein Sound wurde wiedergegeben!')
         sound = pygame.mixer.Sound(file)
         sound.play()
+
+    def testGruppenErstellen(self):
+        anzahl = self.__root.SBAnzahlGruppen.get()
+        
+        if len(self.Wettkampfgruppen) > 0:
+            self.Wettkampfgruppen = []
+        reihenfolge = []
+        
+        
+        for i in range(int(anzahl)):
+            rh = random.randint(1,int(anzahl))
+            while rh in reihenfolge:
+                rh = random.randint(1,int(anzahl))
+
+            reihenfolge.append(rh)
+            val= {
+            'gruppenname': 'Gruppe' + str(i + 1),
+            'reihenfolge': str(rh),
+            'damenwertung': False
+            }
+            self.Wettkampfgruppen.append(val)
+
+        self.zeichneAngemeldeteGruppen()
 
     # Functions - Tab Anmeldung
     def addWettkampfgruppe(self, event=None):
@@ -1401,6 +1490,8 @@ class Hauptfenster():
 
     def stop_1(self, event=None):
         self.time_is_running_1 = False
+        t = Thread(target=self.playSound, args=[self.FileStopp])
+        t.start()
         if self.checked_Tastatur.get() == True:
             self.__root.unbind(self.Taste_Stop_1)
             if event != None and event != '':
@@ -1415,6 +1506,8 @@ class Hauptfenster():
 
     def stop_2(self, event=None):
         self.time_is_running_2 = False
+        t = Thread(target=self.playSound, args=[self.FileStopp])
+        t.start()
         if self.checked_Tastatur.get() == True:
             self.__root.unbind(self.Taste_Stop_2)
             if event != None and event != '':
