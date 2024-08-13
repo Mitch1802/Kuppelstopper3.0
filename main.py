@@ -327,7 +327,6 @@ class Hauptfenster():
             else:
                 title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
                 
-        
         if count_f > 0:
             title = Label(self.anzeige.ERG, text='FINALE', takefocus = 0, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
             title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='50', pady=(1,0))
@@ -664,7 +663,7 @@ class Hauptfenster():
 
     def playSound(self, file):
         self.writeKonsole('Ein Sound wurde wiedergegeben!')
-        sound = pygame.mixer.Sound(self.FileAngriffsbefehl)
+        sound = pygame.mixer.Sound(file)
         sound.play()
 
     # Functions - Tab Anmeldung
