@@ -371,8 +371,11 @@ class Hauptfenster():
                 text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
                 w = Label(self.anzeige.ERG, text=text, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
                 w.grid(row=row, column=col, sticky=(W+E+N+S), padx=(30,0), ipady='2')
+                if dg['zeit2'] == '':
+                    time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                else:
+                    time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2']) + '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
 
-                time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])+ '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
                 t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
                 t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,30), ipady='2')
             
@@ -385,10 +388,27 @@ class Hauptfenster():
                 w = Label(self.anzeige.ERG, text=dg['wettkampfgruppe'], background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
                 w.grid(row=dg['row'], column=dg['column'], sticky=(W+E+N+S), padx=(30,0), ipady='2')
 
-                time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])+ '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                if dg['zeit2'] == '':
+                    time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+                else:
+                    time = '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1']) + '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2']) + '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
                 t = Label(self.anzeige.ERG, text=time, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
                 t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,30), ipady='2')
        
+        if len(self.Durchgänge) > 0:
+            self.Durchgänge.sort(key=self.sortTimeByBesttime)
+            bestgroup = self.Durchgänge[0]['wettkampfgruppe']
+            besttime = self.Durchgänge[0]['bestzeit']
+            bestfehler = str(self.Durchgänge[0]['fehlerbest'])
+            timetext = '   ' + besttime + ' + ' + bestfehler
+            tagessieg_title = Label(self.anzeige.ERG, text='TAGESBESTZEIT', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeTitle))
+            tagessieg_title.grid(row=self.AnzeigeDWStartRow+8, column=self.AnzeigeDWStartColumn+1, columnspan=5, sticky=(W+E+N+S), padx='30', pady=(1,0))
+            tagessieg_group = Label(self.anzeige.ERG, text=bestgroup, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+            tagessieg_group.grid(row=self.AnzeigeDWStartRow+9, column=self.AnzeigeDWStartColumn+1, sticky=(W+E+N+S), padx=(30,0), ipady='2')
+            tagessieg_time = Label(self.anzeige.ERG, text=timetext, background=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeGroups), takefocus = 0)
+            tagessieg_time.grid(row=self.AnzeigeDWStartRow+9, column=self.AnzeigeDWStartColumn+2, sticky=(W+E+N+S), padx=(0,30), ipady='2')
+            self.Durchgänge.sort(key=self.sortTime)
+
     def showInfo(self):
         for widgets in self.anzeige.INFO.winfo_children():
             widgets.grid_remove()
@@ -706,6 +726,12 @@ class Hauptfenster():
     
     def sortTimeByRow(self, timeList):
         return timeList['typ'], timeList['row']
+
+    def sortTimeByBesttime(self, timeList):
+        if timeList['bestzeit'] != '':
+            return self.addiereFehlerZurZeit(timeList['bestzeit'],str(timeList['fehlerbest']))
+        else:
+            return '59:59:99'
     
     def writeKonsole(self, text):
         if (self.checked_Konsole.get() == True):
