@@ -2,12 +2,12 @@
     "Style": {
         "GlobalFontArt": "Arial",
         "GlobalFontSizeText": 10,
-        "GlobalFontSizeTitle": 20,
+        "GlobalFontSizeTitle": 15,
         "GlobalDGBackgroundColor": "#98CF8B",
         "AnzeigeFontSizeGroup": 100,
         "AnzeigeFontSizeTime": 300,
-        "AnzeigeFontSizeTitle": 25,
-        "AnzeigeFontSizeGroups": 20,
+        "AnzeigeFontSizeInfo": 25,
+        "AnzeigeFontSizeAuswertung": 20,
         "AnzeigeBackgroundColor": "#6e6c6b",
         "AnzeigeGroupColor": "#818ef0",
         "AnzeigeGroup2Color": "#93ff8f",
@@ -25,14 +25,17 @@
         "Taste_Stop_2": "w"
     },
     "Files": {
-        "icon": "Resources/Kuppelstopper.png",
-        "angriffsbefehl": "Resources/AngriffsbefehlWonie.wav",
-        "stopp": "Resources/HornHonk.wav",
-        "iconDelete": "Resources/delete.png"
+        "icon": "/Resources/Kuppelstopper.png",
+        "angriffsbefehl": "/Resources/AngriffsbefehlWonie.wav",
+        "stopp": "/Resources/HornHonk.wav",
+        "iconDelete": "/Resources/delete.png"
     },
     "Setup": {
         "Title": "KuppelStopper 3.0",
         "TitleAnzeige": "KuppelStopper 3.0 Anzeige",
-        "FinaleInEinerSpalte": false
+        "FinaleInEinerSpalte": false,
+        "DamenwertungNebenFinale": true,
+        "ZeigeAlleZeiten": false,
+        "Testmodus": true
     }
 }
