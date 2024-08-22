@@ -1,8 +1,0 @@
-23:37:45 Bahn 1 wurde deaktiviert!
-23:37:45 Bahn 2 wurde deaktiviert!
-23:37:45 27 Gruppen wurden übernommen!
-23:37:45 3 Damengruppen wurden übernommen!
-23:37:51 Bahn 1 wurde deaktiviert!
-23:37:51 Bahn 2 wurde deaktiviert!
-23:37:51 Bahn 1 wurde aktiviert!
-23:37:51 Bahn 2 wurde aktiviert!
