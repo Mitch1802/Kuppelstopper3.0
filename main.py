@@ -143,6 +143,10 @@ class Kuppelstopper():
         self.__root.CBDG = Combobox(self.__root.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify='center')
         self.__root.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
         self.__root.CBDG.pack(side='left', padx='10', pady='20', ipady=10)
+        self.__root.BtnVorherigerDG = Button(self.__root.zeitnehmung, text='Vorher. DG', width=15, padding=10, command=self.vorherigerDG, takefocus = 0)
+        self.__root.BtnVorherigerDG.pack(side='left', padx='10', pady='20')
+        self.__root.BtnNaechsterDG = Button(self.__root.zeitnehmung, text='Nächster DG', width=15, padding=10, command=self.naechsterDG, takefocus = 0)
+        self.__root.BtnNaechsterDG.pack(side='left', padx='10', pady='20')
         self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx='10', pady='20')
         self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text='Alles Stop', width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
@@ -427,6 +431,18 @@ class Kuppelstopper():
                 t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
        
         if len(self.Durchgänge) > 0:
+            count = 0
+            for dg in self.Durchgänge:
+                if dg['typ'] == self.TYP_DW:
+                    count += 1
+
+            startRowBestzeit = self.AnzeigeDWStartRow + count + 1
+            startColumnBestzeit = self.AnzeigeDWStartColumn + 1
+
+            startRowQualZeit = startRowBestzeit + 3
+            startColumnQualzeit = startColumnBestzeit
+            
+
             self.Durchgänge.sort(key=self.sortTimeByBesttime)
             bestgroup = self.Durchgänge[0]['wettkampfgruppe']
             besttime = self.Durchgänge[0]['bestzeit']
@@ -434,11 +450,11 @@ class Kuppelstopper():
             if besttime != '':
                 timetext = '   ' + besttime + ' + ' + bestfehler
                 tagessieg_title = Label(self.anzeige.ERG, text='TAGESBESTZEIT', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-                tagessieg_title.grid(row=self.AnzeigeDWStartRow+8, column=self.AnzeigeDWStartColumn+1, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
+                tagessieg_title.grid(row=startRowBestzeit, column=startColumnBestzeit, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
                 tagessieg_group = Label(self.anzeige.ERG, text=bestgroup, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung), takefocus = 0)
-                tagessieg_group.grid(row=self.AnzeigeDWStartRow+9, column=self.AnzeigeDWStartColumn+1, sticky=(W+E+N+S), padx=(20,0), ipady='2')
+                tagessieg_group.grid(row=startRowBestzeit+1, column=startColumnBestzeit, sticky=(W+E+N+S), padx=(20,0), ipady='2')
                 tagessieg_time = Label(self.anzeige.ERG, text=timetext, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung), takefocus = 0)
-                tagessieg_time.grid(row=self.AnzeigeDWStartRow+9, column=self.AnzeigeDWStartColumn+2, sticky=(W+E+N+S), padx=(0,20), ipady='2')
+                tagessieg_time.grid(row=startRowBestzeit+1, column=startColumnBestzeit+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
             
             self.Durchgänge.sort(key=self.sortTime)
             bestgroup = self.Durchgänge[7]['wettkampfgruppe']
@@ -447,11 +463,11 @@ class Kuppelstopper():
             if besttime != '':
                 timetext = '   ' + besttime + ' + ' + bestfehler
                 tagessieg_title = Label(self.anzeige.ERG, text='QUALIFIKATIONSZEIT', background=self.AnzeigeGroupColor, takefocus = 0, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-                tagessieg_title.grid(row=self.AnzeigeDWStartRow+12, column=self.AnzeigeDWStartColumn+1, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
+                tagessieg_title.grid(row=startRowQualZeit, column=startColumnQualzeit, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
                 tagessieg_group = Label(self.anzeige.ERG, text=bestgroup, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung), takefocus = 0)
-                tagessieg_group.grid(row=self.AnzeigeDWStartRow+13, column=self.AnzeigeDWStartColumn+1, sticky=(W+E+N+S), padx=(20,0), ipady='2')
+                tagessieg_group.grid(row=startRowQualZeit+1, column=startColumnQualzeit, sticky=(W+E+N+S), padx=(20,0), ipady='2')
                 tagessieg_time = Label(self.anzeige.ERG, text=timetext, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung), takefocus = 0)
-                tagessieg_time.grid(row=self.AnzeigeDWStartRow+13, column=self.AnzeigeDWStartColumn+2, sticky=(W+E+N+S), padx=(0,20), ipady='2')
+                tagessieg_time.grid(row=startRowQualZeit+1, column=startColumnQualzeit+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
 
     def showInfo(self):
         for widgets in self.anzeige.INFO.winfo_children():
@@ -1051,10 +1067,8 @@ class Kuppelstopper():
                 
             if len(damenWertung) > 0:
                 damen_vorhanden = True
-            if anzahl_gruppen % 2:
-                self.zeichneGrundansicht(True, damen_vorhanden, new_Array)
-            else:
-                self.zeichneGrundansicht(False, damen_vorhanden, new_Array) 
+
+            self.zeichneGrundansicht(damen_vorhanden, new_Array) 
 
             self.__root.NbFTabControl.select(self.__root.FTab2)
             sorted_MixedWertung = sorted(mixedWertung, key=lambda x : int(x['reihenfolge']), reverse=False)
@@ -1104,9 +1118,10 @@ class Kuppelstopper():
 
             self.changeRowAndColumnInDurchgaenge()
             self.bestzeitPlatzierungBerechnen()
+            self.ladeZeitnehmungsDaten()
 
     # Functions - Tab Übersicht - Zeitnehmung
-    def zeichneGrundansicht(self, ungerade_MixedWertung, damenwertung, new_Array):
+    def zeichneGrundansicht(self, damenwertung, new_Array):
         txt = ''
         time = ''
         rh = ''
@@ -1118,8 +1133,6 @@ class Kuppelstopper():
         self.zeichneZeitTable('Finale (Z1/Z2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, self.TYP_F, new_Array)
         if damenwertung == True:
             self.zeichneZeitTable('Damenwertung (Z1/Z2/B)', self.AnzeigeDWStartColumn, self.AnzeigeDWStartRow, txt, time, rh, self.AnzahlDamendurchgänge, True, self.TYP_DW, new_Array)
-        if ungerade_MixedWertung == True and new_Array == True:
-            self.DGNumbers.pop()
         self.__root.CBDG.config(values=self.DGNumbers)
         self.__root.CBDG.current(0)
         
@@ -1470,8 +1483,25 @@ class Kuppelstopper():
         check_time = False
         count = 1
         dg_select = self.__root.CBDG.get()
+        dg_select = int(dg_select)
+
+        max_dg = max(self.DGNumbers)
+        min_dg = 1
+
+        if dg_select == min_dg:
+            self.__root.BtnVorherigerDG['state'] = DISABLED
+            self.__root.BtnNaechsterDG['state'] = NORMAL
+
+        if dg_select > min_dg and dg_select < max_dg:
+            self.__root.BtnVorherigerDG['state'] = NORMAL
+            self.__root.BtnNaechsterDG['state'] = NORMAL
+        
+        if dg_select == max_dg:
+            self.__root.BtnVorherigerDG['state'] = NORMAL
+            self.__root.BtnNaechsterDG['state'] = DISABLED
+
         for dg in self.Durchgänge:
-            if dg['dg'] == int(dg_select):
+            if dg['dg'] == dg_select:
                 if count == 1 and dg['wettkampfgruppe'] != '...' and dg['wettkampfgruppe'] != '':
                     self.checked_Bahn_1.set(True)
                     self.switchBahn1State()
@@ -1704,7 +1734,25 @@ class Kuppelstopper():
                     self.zeichneNeueWerte(dg['row'], dg['column']+4, '', dg['row'], dg['column'], dg['typ'])
         
         self.bestzeitPlatzierungBerechnen()
-                
+
+    def naechsterDG(self):
+        dg_select = self.__root.CBDG.get()
+        dg_select = int(dg_select)
+
+        max_dg = max(self.DGNumbers)
+
+        if dg_select < max_dg:
+            self.__root.CBDG.current(dg_select)
+            self.ladeZeitnehmungsDaten()
+    
+    def vorherigerDG(self):
+        dg_select = self.__root.CBDG.get()
+        dg_select = int(dg_select)
+
+        if dg_select > 0:
+            self.__root.CBDG.current(dg_select-2)
+            self.ladeZeitnehmungsDaten()
+
     # Functions - Tab Einstellungen
     def updateRahmenAnzeige(self):
         if self.checked_Rahmen.get() == True:
