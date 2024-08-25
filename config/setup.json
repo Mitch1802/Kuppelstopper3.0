@@ -25,7 +25,7 @@
         "Taste_Stop_2": "w"
     },
     "Files": {
-        "icon": "/Resources/Kuppelstopper.png",
+        "icon": "/Resources/Kuppelstopper.ico",
         "angriffsbefehl": "/Resources/AngriffsbefehlWonie.wav",
         "stopp": "/Resources/HornHonk.wav",
         "iconDelete": "/Resources/delete.png"
