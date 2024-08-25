@@ -51,10 +51,12 @@ class Kuppelstopper():
     AnzeigeDWStartColumn = 8
 
     ZeitUebertragen = False
+    Buzzer1DarfStarten = False
     time_is_running_1 = False
     start_time_1 = ''
     stop_time_1 = ''
     id_time_1 = ''
+    Buzzer1DarfStarten = False
     time_is_running_2 = False
     start_time_2 = ''
     stop_time_2 = ''
@@ -66,9 +68,9 @@ class Kuppelstopper():
 
         self.__root = CTk()
         self.__root.title(self.Title)
-        self.__root.minsize(self.__root.winfo_screenwidth()/1.5,self.__root.winfo_screenheight()/1.5)
+        # self.__root.minsize(self.__root.winfo_screenwidth()/1.5,self.__root.winfo_screenheight()/1.5)
 
-        self.__root.iconbitmap(self.FileIcon)   
+        # self.__root.iconbitmap(self.FileIcon)   
         self.iconDelete = CTkImage(light_image=Image.open(self.FileIconDelete),dark_image=Image.open(self.FileIconDelete))
 
         self.screen_height = self.__root.winfo_height()
@@ -140,9 +142,9 @@ class Kuppelstopper():
         self.__root.BtnAnsichtWechseln.pack(side='left', padx=5, pady=20, ipady=15) 
         self.__root.CBDG = CTkComboBox(self.__root.zeitnehmung, justify=CENTER, width=100, height=58, corner_radius=0, state='readonly', command=self.ladeZeitnehmungsDaten)
         self.__root.CBDG.pack(side='left', padx=5, pady=20)
-        self.__root.BtnVorherigerDG = CTkButton(self.__root.zeitnehmung, text='DG +', width=50, corner_radius=0, command=self.vorherigerDG)
+        self.__root.BtnVorherigerDG = CTkButton(self.__root.zeitnehmung, text='DG -', width=50, corner_radius=0, command=self.vorherigerDG)
         self.__root.BtnVorherigerDG.pack(side='left', padx=5, pady=20, ipady=15)
-        self.__root.BtnNaechsterDG = CTkButton(self.__root.zeitnehmung, text='DG -', width=50, corner_radius=0, command=self.naechsterDG)
+        self.__root.BtnNaechsterDG = CTkButton(self.__root.zeitnehmung, text='DG +', width=50, corner_radius=0, command=self.naechsterDG)
         self.__root.BtnNaechsterDG.pack(side='left', padx=5, pady=20, ipady=15)
         self.__root.BtnStart = CTkButton(self.__root.zeitnehmung, text='Start', width=70, corner_radius=0, command=self.start, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx=5, pady=20, ipady=15)
@@ -285,7 +287,7 @@ class Kuppelstopper():
         self.anzeige.title(self.TitleAnzeige)
         self.anzeige.minsize(700, 400)
         self.anzeige.configure(fg_color=self.AnzeigeBackgroundColor)
-        self.anzeige.iconbitmap(self.FileIcon)
+        # self.anzeige.iconbitmap(self.FileIcon)
 
         self.anzeige.frame = CTkFrame(self.anzeige, border_width=0, corner_radius=0, fg_color=self.AnzeigeBackgroundColor)
         self.anzeige.frame.pack(expand=1, side=TOP, fill=BOTH, padx=20, pady=20)
@@ -880,13 +882,13 @@ class Kuppelstopper():
         self.changeColorFromButton(self.__root.BtnZeitUebertragen)
         self.changeColorFromButton(self.__root.BtnStopReset)
 
-    def center_window(window):
-        window.update_idletasks()
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-        x = (screen_width) // 2
-        y = (screen_height) // 2
-        window.geometry(f"+{x}+{y}")
+    # def center_window(window):
+    #     window.update_idletasks()
+    #     screen_width = window.winfo_screenwidth()
+    #     screen_height = window.winfo_screenheight()
+    #     x = (screen_width) // 2
+    #     y = (screen_height) // 2
+    #     window.geometry(f"+{x}+{y}")
 
     # Functions - Tab Anmeldung
     def addWettkampfgruppe(self, event=None):
@@ -1578,6 +1580,8 @@ class Kuppelstopper():
 
     def start(self, event=None):   
         self.ZeitUebertragen = False
+        self.Buzzer1DarfStarten = True
+        self.Buzzer2DarfStarten = True
         self.__root.BtnStart.configure(state=DISABLED)
         self.__root.BtnAllesStop.configure(state=NORMAL)
         self.__root.BtnWechsel.configure(state=DISABLED)
@@ -1610,7 +1614,7 @@ class Kuppelstopper():
         t.start()
 
     def startBuzzer1(self, event=None):
-        if not self.time_is_running_1:
+        if not self.time_is_running_1 and self.Buzzer1DarfStarten == True:
             if self.checked_GPIO.get() == True:
                 self.BuzzerStopBahn1.when_pressed = self.stop_1
                 if event == None:
@@ -1625,7 +1629,7 @@ class Kuppelstopper():
             self.update_time_1()
 
     def startBuzzer2(self, event=None):
-        if not self.time_is_running_2:
+        if not self.time_is_running_2 and self.Buzzer2DarfStarten == True:
             if self.checked_GPIO.get() == True:
                 self.BuzzerStopBahn2.when_pressed = self.stop_2
                 if event == None:
@@ -1646,6 +1650,7 @@ class Kuppelstopper():
 
     def stop_1(self, event=None):
         self.time_is_running_1 = False
+        self.Buzzer1DarfStarten = False
         t = Thread(target=self.playSound, args=[self.FileStopp])
         t.start()
         if self.checked_Tastatur.get() == True:
@@ -1664,6 +1669,7 @@ class Kuppelstopper():
 
     def stop_2(self, event=None):
         self.time_is_running_2 = False
+        self.Buzzer2DarfStarten = False
         t = Thread(target=self.playSound, args=[self.FileStopp])
         t.start()
         if self.checked_Tastatur.get() == True:
