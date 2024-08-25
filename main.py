@@ -86,7 +86,7 @@ class Kuppelstopper():
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.checked_Tastatur.set(True)
-        self.checked_GPIO.set(False)
+        self.checked_GPIO.set(True)
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
 
