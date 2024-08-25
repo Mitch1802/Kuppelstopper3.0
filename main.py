@@ -875,6 +875,8 @@ class Kuppelstopper():
             button.configure(fg_color=source_fg_color)
     
     def changeColorFromButtonSummary(self):
+        self.changeColorFromButton(self.__root.BtnVorherigerDG)
+        self.changeColorFromButton(self.__root.BtnNaechsterDG)
         self.changeColorFromButton(self.__root.BtnStart)
         self.changeColorFromButton(self.__root.BtnAllesStop)
         self.changeColorFromButton(self.__root.BtnWechsel)
@@ -1500,7 +1502,14 @@ class Kuppelstopper():
         dg_select = self.__root.CBDG.get()
         dg_select = int(dg_select)
 
-        max_dg = int(max(self.DGNumbers))
+        dg_list = []
+        for item in self.DGNumbers:
+            try:
+                dg_list.append(int(item))
+            except ValueError:
+                pass
+
+        max_dg = max(dg_list)
         min_dg = 1
 
         if dg_select == min_dg:
@@ -1766,8 +1775,14 @@ class Kuppelstopper():
         dg_select = self.__root.CBDG.get()
         dg_select = int(dg_select)
 
-        max_dg = max(self.DGNumbers)
-        max_dg = int(max_dg)
+        dg_list = []
+        for item in self.DGNumbers:
+            try:
+                dg_list.append(int(item))
+            except ValueError:
+                pass
+
+        max_dg = max(dg_list)
 
         if dg_select < max_dg:
             self.__root.CBDG.set(str(dg_select+1))
@@ -1817,7 +1832,7 @@ class Kuppelstopper():
         for widgets in self.anzeige.INFO.winfo_children():
             widgets.configure(font=(self.GlobalFontArt, size_new))
         
-        size_new = int(self.screen_height / 65)
+        size_new = int(self.screen_height / 40)
         self.AnzeigeFontSizeAuswertung = size_new
         for widgets in self.anzeige.INFO.winfo_children():
             widgets.configure(font=(self.GlobalFontArt, size_new))
