@@ -86,7 +86,7 @@ class Kuppelstopper():
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
         self.checked_Tastatur.set(True)
-        self.checked_GPIO.set(True)
+        self.checked_GPIO.set(False)
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
 
@@ -119,20 +119,20 @@ class Kuppelstopper():
     
     def erstelleFTab1(self):
         self.__root.Entry = CTkEntry(self.__root.FTab1, corner_radius=0, placeholder_text='Gruppenname')
-        self.__root.Entry.pack(side='top', fill='x', padx='10', pady='10')
+        self.__root.Entry.pack(side='top', fill='x', padx=10, pady=10)
         self.__root.Entry.bind('<Return>', self.addWettkampfgruppe)
 
         self.__root.LfReihenfolge = CTkScrollableFrame(self.__root.FTab1, border_width=0, corner_radius=0, fg_color='transparent')
-        self.__root.LfReihenfolge.pack(expand=1 ,side='top', fill='both', padx='10', pady='10') 
+        self.__root.LfReihenfolge.pack(expand=1 ,side='top', fill='both', padx=10, pady=10) 
 
         if len(self.Wettkampfgruppen) == 0:
-            self.__root.LNoGroups = CTkLabel(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!')
-            self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+            self.__root.LNoGroups = CTkLabel(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!', anchor='w')
+            self.__root.LNoGroups.grid(row=0, column=0, sticky=(W+E+N+S), padx=10, pady=5)
         else:
             self.zeichneAngemeldeteGruppen()
 
         self.__root.BtnUebernehmen = CTkButton(self.__root.FTab1, text='Gruppen übernehmen', command=lambda:self.uebernahmeGruppen(False), corner_radius=0)
-        self.__root.BtnUebernehmen.pack(side='bottom', fill='x', padx='10', pady='10')
+        self.__root.BtnUebernehmen.pack(side='bottom', fill='x', padx=10, pady=10)
 
     def erstelleFTab2(self):
         self.__root.dg = CTkScrollableFrame(self.__root.FTab2, border_width=0, fg_color='transparent')
@@ -194,34 +194,34 @@ class Kuppelstopper():
 
     def erstelleFTab3(self):
         self.__root.setupEingabe = CTkFrame(self.__root.FTab3, border_width=1, corner_radius=0, fg_color='transparent')
-        self.__root.setupEingabe.pack(side='top', fill='x', padx='10', pady='5')
+        self.__root.setupEingabe.pack(side='top', fill='x', padx=10, pady=5)
         self.__root.CheckTastatur = CTkCheckBox(self.__root.setupEingabe, text='Tastatur', corner_radius=0, variable=self.checked_Tastatur)
-        self.__root.CheckTastatur.grid(row=0, column=0, padx='10', pady='10')
+        self.__root.CheckTastatur.grid(row=0, column=0, padx=10, pady=10)
         self.__root.CheckGPIO = CTkCheckBox(self.__root.setupEingabe, text='GPIO', variable=self.checked_GPIO, corner_radius=0, command=self.initGPIO)
-        self.__root.CheckGPIO.grid(row=0, column=1, pady='10')
+        self.__root.CheckGPIO.grid(row=0, column=1, pady=10)
         self.__root.CheckRahmen = CTkCheckBox(self.__root.setupEingabe, text='Rahmen ausblenden', variable=self.checked_Rahmen, corner_radius=0, command=self.updateRahmenAnzeige)
-        self.__root.CheckRahmen.grid(row=0, column=2, padx='10', pady='10')
+        self.__root.CheckRahmen.grid(row=0, column=2, padx=10, pady=10)
         self.__root.CheckKonsole = CTkCheckBox(self.__root.setupEingabe, text='Konsole', variable=self.checked_Konsole, corner_radius=0)
-        self.__root.CheckKonsole.grid(row=0, column=3, pady='10')
+        self.__root.CheckKonsole.grid(row=0, column=3, pady=10)
 
         self.__root.setupTasten = CTkFrame(self.__root.FTab3, border_width=1, corner_radius=0, fg_color='transparent')
-        self.__root.setupTasten.pack(side='top', fill='x', padx='10', pady='5')
+        self.__root.setupTasten.pack(side='top', fill='x', padx=10, pady=5)
         self.__root.Start_Taste_1_Label = CTkLabel(self.__root.setupTasten, text='Start 1')
-        self.__root.Start_Taste_1_Label.grid(row=0, column=0, padx='10', pady='10')
+        self.__root.Start_Taste_1_Label.grid(row=0, column=0, padx=10, pady=10)
         self.__root.Start_Taste_1 = CTkEntry(self.__root.setupTasten, width=30, corner_radius=0)
-        self.__root.Start_Taste_1.grid(row=0, column=1, pady='10')
+        self.__root.Start_Taste_1.grid(row=0, column=1, pady=10)
         self.__root.Stop_Taste_1_Label = CTkLabel(self.__root.setupTasten, text='Stop 1')
-        self.__root.Stop_Taste_1_Label.grid(row=0, column=2, padx='10', pady='10')
+        self.__root.Stop_Taste_1_Label.grid(row=0, column=2, padx=10, pady=10)
         self.__root.Stop_Taste_1 = CTkEntry(self.__root.setupTasten, width=30, corner_radius=0)
-        self.__root.Stop_Taste_1.grid(row=0, column=3, pady='10')
+        self.__root.Stop_Taste_1.grid(row=0, column=3, pady=10)
         self.__root.Start_Taste_2_Label = CTkLabel(self.__root.setupTasten, text='Start 2')
-        self.__root.Start_Taste_2_Label.grid(row=0, column=4, padx='10', pady='10')
+        self.__root.Start_Taste_2_Label.grid(row=0, column=4, padx=10, pady=10)
         self.__root.Start_Taste_2 = CTkEntry(self.__root.setupTasten, width=30, corner_radius=0)
-        self.__root.Start_Taste_2.grid(row=0, column=5, pady='10')
+        self.__root.Start_Taste_2.grid(row=0, column=5, pady=10)
         self.__root.Stop_Taste_2_Label = CTkLabel(self.__root.setupTasten, text='Stop 2')
-        self.__root.Stop_Taste_2_Label.grid(row=0, column=6, padx='10',pady='10')
+        self.__root.Stop_Taste_2_Label.grid(row=0, column=6, padx=10,pady=10)
         self.__root.Stop_Taste_2 = CTkEntry(self.__root.setupTasten, width=30, corner_radius=0)
-        self.__root.Stop_Taste_2.grid(row=0, column=7, pady='10')
+        self.__root.Stop_Taste_2.grid(row=0, column=7, pady=10)
 
         self.__root.Start_Taste_1.insert(0, self.Taste_Start_1)
         self.__root.Stop_Taste_1.insert(0, self.Taste_Stop_1)
@@ -229,23 +229,23 @@ class Kuppelstopper():
         self.__root.Stop_Taste_2.insert(0, self.Taste_Stop_2)
 
         self.__root.setupGPIO = CTkFrame(self.__root.FTab3, border_width=1, corner_radius=0, fg_color='transparent')
-        self.__root.setupGPIO.pack(side='top', fill='x', padx='10', pady='5')
+        self.__root.setupGPIO.pack(side='top', fill='x', padx=10, pady=5)
         self.__root.Start_GPIO_1_Label = CTkLabel(self.__root.setupGPIO, text='Start 1')
-        self.__root.Start_GPIO_1_Label.grid(row=0, column=0, padx='10', pady='10')
+        self.__root.Start_GPIO_1_Label.grid(row=0, column=0, padx=10, pady=10)
         self.__root.Start_GPIO_1 = CTkEntry(self.__root.setupGPIO, width=30, corner_radius=0)
-        self.__root.Start_GPIO_1.grid(row=0, column=1, pady='10')
+        self.__root.Start_GPIO_1.grid(row=0, column=1, pady=10)
         self.__root.Stop_GPIO_1_Label = CTkLabel(self.__root.setupGPIO, text='Stop 1')
-        self.__root.Stop_GPIO_1_Label.grid(row=0, column=2, padx='10', pady='10')
+        self.__root.Stop_GPIO_1_Label.grid(row=0, column=2, padx=10, pady=10)
         self.__root.Stop_GPIO_1 = CTkEntry(self.__root.setupGPIO, width=30, corner_radius=0)
-        self.__root.Stop_GPIO_1.grid(row=0, column=3, pady='10')
+        self.__root.Stop_GPIO_1.grid(row=0, column=3, pady=10)
         self.__root.Start_GPIO_2_Label = CTkLabel(self.__root.setupGPIO, text='Start 2')
-        self.__root.Start_GPIO_2_Label.grid(row=0, column=4, padx='10', pady='10')
+        self.__root.Start_GPIO_2_Label.grid(row=0, column=4, padx=10, pady=10)
         self.__root.Start_GPIO_2 = CTkEntry(self.__root.setupGPIO, width=30, corner_radius=0)
-        self.__root.Start_GPIO_2.grid(row=0, column=5, pady='10')
+        self.__root.Start_GPIO_2.grid(row=0, column=5, pady=10)
         self.__root.Stop_GPIO_2_Label = CTkLabel(self.__root.setupGPIO, text='Stop 2')
-        self.__root.Stop_GPIO_2_Label.grid(row=0, column=6, padx='10',pady='10')
+        self.__root.Stop_GPIO_2_Label.grid(row=0, column=6, padx=10,pady=10)
         self.__root.Stop_GPIO_2 = CTkEntry(self.__root.setupGPIO, width=30, corner_radius=0)
-        self.__root.Stop_GPIO_2.grid(row=0, column=7, pady='10')
+        self.__root.Stop_GPIO_2.grid(row=0, column=7, pady=10)
 
         self.__root.Start_GPIO_1.insert(0, self.GPIO_Start_1)
         self.__root.Stop_GPIO_1.insert(0, self.GPIO_Stop_1)
@@ -253,33 +253,60 @@ class Kuppelstopper():
         self.__root.Stop_GPIO_2.insert(0, self.GPIO_Stop_2)
 
         self.__root.setupStyle = CTkFrame(self.__root.FTab3, border_width=1, corner_radius=0, fg_color='transparent')
-        self.__root.setupStyle.pack(side='top', fill='x', padx='10', pady='5')
+        self.__root.setupStyle.pack(side='top', fill='x', padx=10, pady=5)
         self.__root.SGZL = CTkLabel(self.__root.setupStyle, text='Schriftgröße Zeit')
-        self.__root.SGZL.grid(row=0, column=0, padx='10', pady='10')
+        self.__root.SGZL.grid(row=0, column=0, padx=10, pady=10, sticky=(W))
         self.__root.SGZ = IntSpinbox(self.__root.setupStyle, command=self.updateFontSizeZeit)
-        self.__root.SGZ.grid(row=0, column=1, padx='10', pady='10')
+        self.__root.SGZ.grid(row=0, column=1, padx=10, pady=10)
         self.__root.SGZ.set(self.AnzeigeFontSizeTime)
         self.__root.SGGL = CTkLabel(self.__root.setupStyle, text='Schriftgröße Gruppe')
-        self.__root.SGGL.grid(row=0, column=2, padx='10', pady='10')
+        self.__root.SGGL.grid(row=0, column=2, padx=10, pady=10, sticky=(W))
         self.__root.SGG = IntSpinbox(self.__root.setupStyle, command=self.updateFontSizeGruppe)
-        self.__root.SGG.grid(row=0, column=3, padx='10', pady='10')
+        self.__root.SGG.grid(row=0, column=3, padx=10, pady=10)
         self.__root.SGG.set(self.AnzeigeFontSizeGroup)
-        self.__root.BtnChangeStyle = CTkButton(self.__root.setupStyle, text='Schriftgröße Autopassung', corner_radius=0, command=self.changeFontSizeFromWindowSize)
-        self.__root.BtnChangeStyle.grid(row=0, column=4, padx='10', pady='10')
+
+        self.__root.setupAutoAnpassung = CTkFrame(self.__root.FTab3, border_width=1, corner_radius=0, fg_color='transparent')
+        self.__root.setupAutoAnpassung.pack(side='top', fill='x', padx=10, pady=5)
+        self.__root.LblAnpassungTitel = CTkLabel(self.__root.setupAutoAnpassung, text='Aktuelle Fensterhöhe')
+        self.__root.LblAnpassungTitel.grid(row=0, column=0, padx=10, pady=10, sticky=(W))
+        self.__root.LblAnpassungWert = CTkLabel(self.__root.setupAutoAnpassung, text=self.screen_height)
+        self.__root.LblAnpassungWert.grid(row=0, column=1, padx=10, pady=10, sticky=(W))
+        self.__root.LblFaktorZeit = CTkLabel(self.__root.setupAutoAnpassung, text='Faktor Zeit')
+        self.__root.LblFaktorZeit.grid(row=1, column=0, padx=10, pady=2, sticky=(W))
+        self.__root.SBFaktorZeit = IntSpinbox(self.__root.setupAutoAnpassung)
+        self.__root.SBFaktorZeit.grid(row=1, column=1, padx=10, pady=2)
+        self.__root.SBFaktorZeit.set(3)
+        self.__root.LblFaktorGruppen = CTkLabel(self.__root.setupAutoAnpassung, text='Faktor Gruppen')
+        self.__root.LblFaktorGruppen.grid(row=2, column=0, padx=10, pady=2, sticky=(W))
+        self.__root.SBFaktorGruppen = IntSpinbox(self.__root.setupAutoAnpassung)
+        self.__root.SBFaktorGruppen.grid(row=2, column=1, padx=10, pady=2)
+        self.__root.SBFaktorGruppen.set(20)
+        self.__root.LblFaktorInfo = CTkLabel(self.__root.setupAutoAnpassung, text='Faktor Info')
+        self.__root.LblFaktorInfo.grid(row=3, column=0, padx=10, pady=2, sticky=(W))
+        self.__root.SBFaktorInfo = IntSpinbox(self.__root.setupAutoAnpassung)
+        self.__root.SBFaktorInfo.grid(row=3, column=1, padx=10, pady=2)
+        self.__root.SBFaktorInfo.set(65)
+        self.__root.LblFaktorAuswertung = CTkLabel(self.__root.setupAutoAnpassung, text='Faktor Auswertung')
+        self.__root.LblFaktorAuswertung.grid(row=4, column=0, padx=10, pady=2, sticky=(W))
+        self.__root.SBFaktorAuswertung = IntSpinbox(self.__root.setupAutoAnpassung)
+        self.__root.SBFaktorAuswertung.grid(row=4, column=1, padx=10, pady=2)
+        self.__root.SBFaktorAuswertung.set(40)
+        self.__root.BtnChangeStyle = CTkButton(self.__root.setupAutoAnpassung, text='Anzeige Autoanpassung', corner_radius=0, command=self.changeFontSizeFromWindowSize)
+        self.__root.BtnChangeStyle.grid(row=5, column=0, padx=10, pady=10, ipadx=10)
 
         if self.Testmodus == True:
             self.__root.setupTest = CTkFrame(self.__root.FTab3, border_width=1, corner_radius=0, fg_color='transparent')
-            self.__root.setupTest.pack(side='bottom', fill='x', padx='10', pady='5')
+            self.__root.setupTest.pack(side='bottom', fill='x', padx=10, pady=5)
             self.__root.LblAnzahlGruppen = CTkLabel(self.__root.setupTest, text='Anzahl Testgruppen')
-            self.__root.LblAnzahlGruppen.grid(row=0, column=0, padx='10', pady='10')
+            self.__root.LblAnzahlGruppen.grid(row=0, column=0, padx=10, pady=10)
             self.__root.SBAnzahlGruppen = IntSpinbox(self.__root.setupTest)
-            self.__root.SBAnzahlGruppen.grid(row=0, column=1, padx='10', pady='10')
+            self.__root.SBAnzahlGruppen.grid(row=0, column=1, padx=10, pady=10)
             self.__root.LblAnzahlDamenGruppen = CTkLabel(self.__root.setupTest, text='Anzahl Testdamengruppen')
-            self.__root.LblAnzahlDamenGruppen.grid(row=0, column=2, padx='10', pady='10')
+            self.__root.LblAnzahlDamenGruppen.grid(row=0, column=2, padx=10, pady=10)
             self.__root.SBAnzahlDamenGruppen = IntSpinbox(self.__root.setupTest)
-            self.__root.SBAnzahlDamenGruppen.grid(row=0, column=3, padx='10', pady='10')
+            self.__root.SBAnzahlDamenGruppen.grid(row=0, column=3, padx=10, pady=10)
             self.__root.BtnAnzahlGruppen = CTkButton(self.__root.setupTest, text='Erstellen', corner_radius=0, command=self.testGruppenErstellen)
-            self.__root.BtnAnzahlGruppen.grid(row=0, column=4, padx='10', pady='10')
+            self.__root.BtnAnzahlGruppen.grid(row=0, column=4, padx=10, pady=10)
          
     # Anzeigefenster
     def showAnzeige(self):
@@ -334,33 +361,33 @@ class Kuppelstopper():
         
         if count_gd > 0:
             title = CTkLabel(self.anzeige.ERG, text='GRUNDDURCHGANG', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(30,0))
+            title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
         
         if count_vf > 0:
             title = CTkLabel(self.anzeige.ERG, text='VIERTELFINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(30,0))
+            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
         
         if count_hf > 0:
             title = CTkLabel(self.anzeige.ERG, text='HALBFINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
+            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
         
         if count_kf > 0:
             title = CTkLabel(self.anzeige.ERG, text='KLEINES FINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
             if self.FinaleInEinerSpalte == False:
-                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(30,0))
+                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
             else:
-                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
+                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
                 
         if count_f > 0:
             title = CTkLabel(self.anzeige.ERG, text='FINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
+            title.grid(row=self.AnzeigeFStartRow, column=self.AnzeigeFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
         
         if count_dw > 0:
             title = CTkLabel(self.anzeige.ERG, text='DAMENWERTUNG', fg_color=self.AnzeigeGroupColor, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
             if self.DamenwertungNebenFinale == True:
-                title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(30,0))
+                title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
             else:
-                title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
+                title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
 
         for dg in self.Durchgänge:
             if (dg['typ'] == self.TYP_GD or dg['typ'] == self.TYP_DW) and dg['platzierung'] > 0:
@@ -377,7 +404,7 @@ class Kuppelstopper():
                         color = self.GlobalDGBackgroundColor
 
                 text = str(dg['platzierung']) + '. ' + dg['wettkampfgruppe']
-                w = CTkLabel(self.anzeige.ERG, text=text, fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                w = CTkLabel(self.anzeige.ERG, text=text, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 w.grid(row=row, column=col, sticky=(W+E+N+S), padx=(20,0), ipady='2')
                 time = ''
                 if self.ZeigeAlleZeiten == True:
@@ -388,7 +415,7 @@ class Kuppelstopper():
                 
                 time += '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
 
-                t = CTkLabel(self.anzeige.ERG, text=time, fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                t = CTkLabel(self.anzeige.ERG, text=time, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
             
             if (dg['typ'] == self.TYP_VF or dg['typ'] == self.TYP_HF or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
@@ -407,7 +434,7 @@ class Kuppelstopper():
                         time += '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])
                 
                 time += '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
-                t = CTkLabel(self.anzeige.ERG, text=time, fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                t = CTkLabel(self.anzeige.ERG, text=time, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
        
         if len(self.Durchgänge) > 0:
@@ -430,10 +457,10 @@ class Kuppelstopper():
             if besttime != '':
                 timetext = '   ' + besttime + ' + ' + bestfehler
                 tagessieg_title = CTkLabel(self.anzeige.ERG, text='TAGESBESTZEIT', fg_color=self.AnzeigeGroupColor, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-                tagessieg_title.grid(row=startRowBestzeit, column=startColumnBestzeit, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
-                tagessieg_group = CTkLabel(self.anzeige.ERG, text=bestgroup, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                tagessieg_title.grid(row=startRowBestzeit, column=startColumnBestzeit, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
+                tagessieg_group = CTkLabel(self.anzeige.ERG, text=bestgroup, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 tagessieg_group.grid(row=startRowBestzeit+1, column=startColumnBestzeit, sticky=(W+E+N+S), padx=(20,0), ipady='2')
-                tagessieg_time = CTkLabel(self.anzeige.ERG, text=timetext, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                tagessieg_time = CTkLabel(self.anzeige.ERG, text=timetext, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 tagessieg_time.grid(row=startRowBestzeit+1, column=startColumnBestzeit+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
             
             self.Durchgänge.sort(key=self.sortTime)
@@ -443,10 +470,10 @@ class Kuppelstopper():
             if besttime != '':
                 timetext = '   ' + besttime + ' + ' + bestfehler
                 tagessieg_title = CTkLabel(self.anzeige.ERG, text='QUALIFIKATIONSZEIT', fg_color=self.AnzeigeGroupColor, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-                tagessieg_title.grid(row=startRowQualZeit, column=startColumnQualzeit, columnspan=5, sticky=(W+E+N+S), padx='20', pady=(1,0))
-                tagessieg_group = CTkLabel(self.anzeige.ERG, text=bestgroup, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                tagessieg_title.grid(row=startRowQualZeit, column=startColumnQualzeit, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
+                tagessieg_group = CTkLabel(self.anzeige.ERG, text=bestgroup, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 tagessieg_group.grid(row=startRowQualZeit+1, column=startColumnQualzeit, sticky=(W+E+N+S), padx=(20,0), ipady='2')
-                tagessieg_time = CTkLabel(self.anzeige.ERG, text=timetext, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+                tagessieg_time = CTkLabel(self.anzeige.ERG, text=timetext, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 tagessieg_time.grid(row=startRowQualZeit+1, column=startColumnQualzeit+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
 
     def showInfo(self):
@@ -525,7 +552,7 @@ class Kuppelstopper():
             self.changewindow.LF2 = CTkLabel(self.changewindow.frame, text='Feh. 2')
             self.changewindow.LF2.grid(row=0, column=4, padx=(0,20), pady=(20,0))
 
-            self.changewindow.GRP = CTkLabel(self.changewindow.frame, text=grp_text)
+            self.changewindow.GRP = CTkLabel(self.changewindow.frame, text=grp_text, anchor='w')
             self.changewindow.GRP.grid(row=1, column=0, sticky=(W), padx=(20,5), pady=(0,20))
 
             self.changewindow.Z1 = CTkEntry(self.changewindow.frame, width=10)
@@ -929,19 +956,19 @@ class Kuppelstopper():
         
         if len(self.Wettkampfgruppen) == 0:
             self.__root.LNoGroups = CTkLabel(self.__root.LfReihenfolge, text='Keine Gruppen angemeldet!')
-            self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx='10', pady='5')
+            self.__root.LNoGroups.grid(row=0, column=0, sticky=(W), padx=10, pady=5)
         else:
             w = CTkLabel(self.__root.LfReihenfolge, text='Gruppenname')
-            w.grid(row=0, column=0, sticky=(W), padx='10', pady='2')
+            w.grid(row=0, column=0, sticky=(W), padx=10, pady='2')
 
             e = CTkLabel(self.__root.LfReihenfolge, text='Reihenf.')
-            e.grid(row=0, column=1, sticky=(W), padx='10', pady='2')
+            e.grid(row=0, column=1, sticky=(W), padx=10, pady='2')
 
             cb = CTkLabel(self.__root.LfReihenfolge, text='Damen')
-            cb.grid(row=0, column=2, sticky=(W), padx='10', pady='2')
+            cb.grid(row=0, column=2, sticky=(W), padx=10, pady='2')
 
             x = CTkLabel(self.__root.LfReihenfolge, text='#')
-            x.grid(row=0, column=3, sticky=(W), padx='10', pady='2')
+            x.grid(row=0, column=3, sticky=(W), padx=10, pady='2')
 
         for index, i in enumerate(self.Wettkampfgruppen):
             row = index + 1
@@ -952,19 +979,19 @@ class Kuppelstopper():
                 damenwertung = 'JA'
 
             w = CTkLabel(self.__root.LfReihenfolge, text=gruppenname)
-            w.grid(row=row, column=0, sticky=(W), padx='10', pady='2')
+            w.grid(row=row, column=0, sticky=(W), padx=10, pady='2')
 
             e = CTkEntry(self.__root.LfReihenfolge, width=50, justify = 'center')
-            e.grid(row=row, column=1, sticky=(W), padx='10', pady='2')
+            e.grid(row=row, column=1, sticky=(W), padx=10, pady='2')
             e.insert(0, reihenfolge)
             e.bind('<KeyRelease>', lambda event, name=gruppenname: self.reihenfolgeSpeichern(event, name))
 
             cb = CTkLabel(self.__root.LfReihenfolge, text=damenwertung)
-            cb.grid(row=row, column=2, sticky=(W), padx='10', pady='2')            
+            cb.grid(row=row, column=2, sticky=(W+E+N+S), padx=10, pady='2')            
             cb.bind('<Button-1>', lambda event,  name=gruppenname, value=i['damenwertung']: self.eintragDamenwertung(event, name, value))
 
             x = CTkLabel(self.__root.LfReihenfolge, text='', image=self.iconDelete)
-            x.grid(row=row, column=3, sticky=(W), padx='10', pady='2')
+            x.grid(row=row, column=3, sticky=(W), padx=10, pady='2')
             x.bind('<Button-1>', lambda event, name=gruppenname: self.deleteWettkampfgruppe(event, name))
 
     def reihenfolgeSpeichern(self, event, name):
@@ -1032,10 +1059,11 @@ class Kuppelstopper():
             self.__root.BtnWechsel.configure(state=DISABLED)
             self.__root.BtnZeitUebertragen.configure(state=DISABLED)
             self.__root.BtnStopReset .configure(state=DISABLED)
+            self.changeColorFromButtonSummary()
 
             self.__root.dg.pack_forget()
             self.__root.dg = CTkScrollableFrame(self.__root.FTab2, border_width=0, fg_color='transparent')
-            self.__root.dg.pack(expand=1, side='top', fill='both', padx=10, pady=10, ipady=10)
+            self.__root.dg.pack(expand=1, side='bottom', fill='both', padx=10, pady=10, ipady=10)
             self.__root.zeitnehmung.pack_forget()
             self.__root.zeitnehmung.pack(side='left', padx=5)
             self.__root.LfBahnen.pack_forget()
@@ -1153,7 +1181,7 @@ class Kuppelstopper():
         self.__root.CBDG.set('1')
         
     def zeichneZeitTable(self, title, startcolumn, startrow, gruppe_txt, time_txt, rh_text, anzahl_gruppen, show_rh, typ, new_Array):
-        title = CTkLabel(self.__root.dg, text=title, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        title = CTkLabel(self.__root.dg, text=title, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), anchor='w')
         title.grid(row=startrow, column=startcolumn, columnspan=5, sticky=(W+E+N+S), padx=(5,0))
         col1 = startcolumn + 1
         col2 = startcolumn + 2
@@ -1203,23 +1231,23 @@ class Kuppelstopper():
             if rh % 2:
                 if new_Array == True:
                     self.konvertiereArray(self.DurchgangNummer, gruppe_txt, typ, row, col1, hinweis_text)
-                durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(1,0), ipadx='5')
-                text.grid(row=row, column=col1, sticky=(W), pady=(1,0), ipady='2', ipadx='10')
-                time1.grid(row=row, column=col2, sticky=(W), pady=(1,0), ipady='2', ipadx='10')
-                time2.grid(row=row, column=col3, sticky=(W), pady=(1,0), ipady='2', ipadx='10')
-                time3.grid(row=row, column=col4, sticky=(W), pady=(1,0), ipady='2', ipadx='10')
+                durchgang.grid(row=row, column=startcolumn, rowspan=2, sticky=(W+E+N+S), padx=(5,0), pady=(1,0), ipadx=5)
+                text.grid(row=row, column=col1, sticky=(W), pady=(1,0), ipady='2', ipadx=10)
+                time1.grid(row=row, column=col2, sticky=(W), pady=(1,0), ipady='2', ipadx=10)
+                time2.grid(row=row, column=col3, sticky=(W), pady=(1,0), ipady='2', ipadx=10)
+                time3.grid(row=row, column=col4, sticky=(W), pady=(1,0), ipady='2', ipadx=10)
                 if show_rh == True:
-                    lrh.grid(row=row, column=col5, sticky=(W), pady=(1,0), ipady='2', ipadx='10')
+                    lrh.grid(row=row, column=col5, sticky=(W), pady=(1,0), ipady='2', ipadx=10)
                 self.DurchgangNummer += 1
             else:
                 if new_Array == True:
                     self.konvertiereArray(self.DurchgangNummer-1, gruppe_txt, typ, row, col1, hinweis_text)    
-                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='2', ipadx='10') 
-                time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='2', ipadx='10') 
-                time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='2', ipadx='10')
-                time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='2', ipadx='10')
+                text.grid(row=row, column=col1, sticky=(W), pady='0', ipady='2', ipadx=10) 
+                time1.grid(row=row, column=col2, sticky=(W), pady='0', ipady='2', ipadx=10) 
+                time2.grid(row=row, column=col3, sticky=(W), pady='0', ipady='2', ipadx=10)
+                time3.grid(row=row, column=col4, sticky=(W), pady='0', ipady='2', ipadx=10)
                 if show_rh == True:
-                    lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='2', ipadx='10')
+                    lrh.grid(row=row, column=col5, sticky=(W), pady='0', ipady='2', ipadx=10)
                 
     def konvertiereArray(self, dg_nummer, wettkampfgruppe, typ, row, column, hinweis):
         if str(dg_nummer) not in self.DGNumbers:
@@ -1813,26 +1841,26 @@ class Kuppelstopper():
 
     def changeFontSizeFromWindowSize(self):
         self.screen_height = self.anzeige.winfo_height()
-        self.screen_width = self.anzeige.winfo_width()
+        self.__root.LblAnpassungWert.configure(text=str(self.screen_height))
 
-        size_new = int(self.screen_height / 4)
+        size_new = int(self.screen_height) / int(self.__root.SBFaktorZeit.get())
         self.__root.SGZ.set(size_new)
         self.anzeige.Z1.configure(font=(self.GlobalFontArt, size_new))
         self.anzeige.Z2.configure(font=(self.GlobalFontArt, size_new))
         self.AnzeigeFontSizeTime = size_new
 
-        size_new = int(self.screen_height / 20)
+        size_new = int(self.screen_height) / int(self.__root.SBFaktorGruppen.get())
         self.__root.SGG.set(size_new)
         self.anzeige.G1.configure(font=(self.GlobalFontArt, size_new))
         self.anzeige.G2.configure(font=(self.GlobalFontArt, size_new))
         self.AnzeigeFontSizeGroup = size_new
 
-        size_new = int(self.screen_height / 65)
+        size_new = int(self.screen_height) / int(self.__root.SBFaktorInfo.get())
         self.AnzeigeFontSizeInfo = size_new
         for widgets in self.anzeige.INFO.winfo_children():
             widgets.configure(font=(self.GlobalFontArt, size_new))
         
-        size_new = int(self.screen_height / 40)
+        size_new = int(self.screen_height) / int(self.__root.SBFaktorAuswertung.get())
         self.AnzeigeFontSizeAuswertung = size_new
         for widgets in self.anzeige.INFO.winfo_children():
             widgets.configure(font=(self.GlobalFontArt, size_new))
