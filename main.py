@@ -535,7 +535,7 @@ class Kuppelstopper():
             self.changewindow = CTkToplevel()
             self.changewindow.title('Änderung')
 
-            self.changewindow.iconphoto(False, self.icon)
+            # self.changewindow.iconphoto(False, self.icon)
 
             self.changewindow.frame = CTkFrame(self.changewindow)
             self.changewindow.frame.pack(expand=1, side=TOP, fill=BOTH)
@@ -555,19 +555,19 @@ class Kuppelstopper():
             self.changewindow.GRP = CTkLabel(self.changewindow.frame, text=grp_text, anchor='w')
             self.changewindow.GRP.grid(row=1, column=0, sticky=(W), padx=(20,5), pady=(0,20))
 
-            self.changewindow.Z1 = CTkEntry(self.changewindow.frame, width=10)
+            self.changewindow.Z1 = CTkEntry(self.changewindow.frame, width=80)
             self.changewindow.Z1.grid(row=1, column=1, padx=(0,5), pady=(0,20))
             self.changewindow.Z1.insert(0, zeit1_text)
             
-            self.changewindow.F1 = CTkEntry(self.changewindow.frame, width=5)
+            self.changewindow.F1 = CTkEntry(self.changewindow.frame, width=30)
             self.changewindow.F1.grid(row=1, column=2, padx=(0,5), pady=(0,20))
             self.changewindow.F1.insert(0, fehler1_text)
 
-            self.changewindow.Z2 = CTkEntry(self.changewindow.frame, width=10)
+            self.changewindow.Z2 = CTkEntry(self.changewindow.frame, width=80)
             self.changewindow.Z2.grid(row=1, column=3, padx=(0,5), pady=(0,20))
             self.changewindow.Z2.insert(0, zeit2_text)
             
-            self.changewindow.F2 = CTkEntry(self.changewindow.frame, width=5)
+            self.changewindow.F2 = CTkEntry(self.changewindow.frame, width=30)
             self.changewindow.F2.grid(row=1, column=4, padx=(0,20), pady=(0,20))
             self.changewindow.F2.insert(0, fehler2_text)
 
