@@ -23,12 +23,13 @@ class Kuppelstopper():
 
     Status_Anzeige = True # True = Zeit, False Auswertung
 
-    TYP_GD = '1_gd'
-    TYP_VF = '2_vf'
-    TYP_HF = '3_hf'
-    TYP_KF = '4_kf'
-    TYP_F = '5_f'
-    TYP_DW = '6_dw'
+    TYP_GD = '1_GD'
+    TYP_KO16 = '2_KO16'
+    TYP_KO8 = '3_KO8'
+    TYP_KO4 = '4_KO4'
+    TYP_KF = '5_KLF'
+    TYP_F = '6_F'
+    TYP_DW = '7_DW'
 
     NAME_TAB1 = 'Anmeldung'
     NAME_TAB2 = 'Übersicht - Zeitnehmung'
@@ -39,16 +40,20 @@ class Kuppelstopper():
 
     AnzeigeGDStartRow = 0
     AnzeigeGDStartColumn = 0
-    AnzeigeVFStartRow = 0
-    AnzeigeVFStartColumn = 8
-    AnzeigeHFStartRow = 10
-    AnzeigeHFStartColumn = 8
-    AnzeigeKFStartRow = 16
-    AnzeigeKFStartColumn = 8
-    AnzeigeFStartRow = 20
-    AnzeigeFStartColumn = 8
-    AnzeigeDWStartRow = 24
-    AnzeigeDWStartColumn = 8
+
+    AnzeigeKO16StartRow = 0
+    AnzeigeKO16StartColum = 8
+    AnzeigeKO8StartRow = 18
+    AnzeigeKO8StartColumn = 8
+    AnzeigeKO4StartRow = 30
+    AnzeigeKO4StartColumn = 8
+    
+    AnzeigeKFStartRow = 0
+    AnzeigeKFStartColumn = 17
+    AnzeigeFStartRow = 4
+    AnzeigeFStartColumn = 17
+    AnzeigeDWStartRow = 8
+    AnzeigeDWStartColumn = 17
 
     ZeitUebertragen = False
     Buzzer1DarfStarten = False
@@ -348,9 +353,9 @@ class Kuppelstopper():
         for dg in self.Durchgänge:
             if dg['typ'] == self.TYP_GD and dg['platzierung'] > 0:
                 count_gd += 1
-            if dg['typ'] == self.TYP_VF and dg['bestzeitinklfehler'] != '':
+            if dg['typ'] == self.TYP_KO8 and dg['bestzeitinklfehler'] != '':
                 count_vf += 1
-            if dg['typ'] == self.TYP_HF and dg['bestzeitinklfehler'] != '':
+            if dg['typ'] == self.TYP_KO4 and dg['bestzeitinklfehler'] != '':
                 count_hf += 1
             if dg['typ'] == self.TYP_KF and dg['bestzeitinklfehler'] != '':
                 count_kf += 1
@@ -418,7 +423,7 @@ class Kuppelstopper():
                 t = CTkLabel(self.anzeige.ERG, text=time, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
             
-            if (dg['typ'] == self.TYP_VF or dg['typ'] == self.TYP_HF or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
+            if (dg['typ'] == self.TYP_KO8 or dg['typ'] == self.TYP_KO4 or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
                 color = '#ffffff'
                 if f_durchgang == 0 or f_durchgang < dg['dg']:
                     f_durchgang = dg['dg']
@@ -737,30 +742,8 @@ class Kuppelstopper():
         setup = setup_data['Setup']
         self.Title = setup['Title']
         self.TitleAnzeige = setup['TitleAnzeige']
-        self.FinaleInEinerSpalte = setup['FinaleInEinerSpalte']
-        self.DamenwertungNebenFinale = setup['DamenwertungNebenFinale']
         self.ZeigeAlleZeiten = setup['ZeigeAlleZeiten']
         self.Testmodus = setup['Testmodus']
-
-        # Spalten und Reihen Konfig nach dem Setup anpassen
-        if self.FinaleInEinerSpalte == False:
-            self.AnzeigeVFStartRow = 0
-            self.AnzeigeVFStartColumn = 8
-            self.AnzeigeHFStartRow = 10
-            self.AnzeigeHFStartColumn = 8
-            self.AnzeigeKFStartRow = 0
-            self.AnzeigeKFStartColumn = 17
-            self.AnzeigeFStartRow = 4
-            self.AnzeigeFStartColumn = 17
-            self.AnzeigeDWStartRow = 8
-            self.AnzeigeDWStartColumn = 17
-        
-        if self.DamenwertungNebenFinale == True:
-            self.AnzeigeDWStartRow = 0
-            self.AnzeigeDWStartColumn = 26
-
-        if self.FinaleInEinerSpalte == False or self.DamenwertungNebenFinale == True:
-            self.changeRowAndColumnInDurchgaenge()
 
     def exportAnmeldungKonfig(self):
         new_list = self.Wettkampfgruppen
@@ -1079,6 +1062,7 @@ class Kuppelstopper():
                     grp['reihenfolge'] = '0'
                 if grp['damenwertung'] == True:
                     damenWertung.append(grp)
+                    mixedWertung.append(grp) #TODO: DAMENWERTUNG ZUSÄTZLICH ODER EXTRA
                 else:
                     mixedWertung.append(grp)
 
@@ -1100,14 +1084,7 @@ class Kuppelstopper():
 
             space = CTkLabel(self.__root.dg, text='')
             space.grid(row=0, column=7, rowspan=anzahl_gruppen, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
-
-            if self.FinaleInEinerSpalte == False:
-                space = CTkLabel(self.__root.dg, text='')
-                space.grid(row=0, column=16, rowspan=anzahl_gruppen, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
-            
-            if self.DamenwertungNebenFinale == True:
-                space = CTkLabel(self.__root.dg, text='')
-                space.grid(row=0, column=25, rowspan=anzahl_gruppen, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
+            space.grid(row=0, column=16, rowspan=anzahl_gruppen, sticky=(W+E+N+S), padx=(5,0), ipadx=20)
                 
             if len(damenWertung) > 0:
                 damen_vorhanden = True
@@ -1171,8 +1148,9 @@ class Kuppelstopper():
         rh = ''
         self.DurchgangNummer = 1
         self.zeichneZeitTable('Grunddurchgang (Z1/Z2/B)', self.AnzeigeGDStartColumn, self.AnzeigeGDStartRow, txt, time, rh, self.AnzahlGrunddurchgänge, True, self.TYP_GD, new_Array)
-        self.zeichneZeitTable('Viertelfinale (Z1/Z2/B)', self.AnzeigeVFStartColumn, self.AnzeigeVFStartRow, txt, time, rh, 8, True, self.TYP_VF, new_Array)
-        self.zeichneZeitTable('Halbfinale (Z1/Z2/B)', self.AnzeigeHFStartColumn, self.AnzeigeHFStartRow, txt, time, rh, 4, True, self.TYP_HF, new_Array)
+        self.zeichneZeitTable('KO 1-16 (Z1/Z2/B)', self.AnzeigeKO16StartColum, self.AnzeigeKO16StartRow, txt, time, rh, 16, True, self.TYP_KO16, new_Array)
+        self.zeichneZeitTable('KO 1-8 (Z1/Z2/B)', self.AnzeigeKO8StartColumn, self.AnzeigeKO8StartRow, txt, time, rh, 8, True, self.TYP_KO8, new_Array)
+        self.zeichneZeitTable('KO 1-4 (Z1/Z2/B)', self.AnzeigeKO4StartColumn, self.AnzeigeKO4StartRow, txt, time, rh, 4, True, self.TYP_KO4, new_Array)
         self.zeichneZeitTable('Kleines Finale (Z1/Z2/B)', self.AnzeigeKFStartColumn, self.AnzeigeKFStartRow, txt, time, rh, 2, True, self.TYP_KF, new_Array)
         self.zeichneZeitTable('Finale (Z1/Z2/B)', self.AnzeigeFStartColumn, self.AnzeigeFStartRow, txt, time, rh, 2, True, self.TYP_F, new_Array)
         if damenwertung == True:
@@ -1190,7 +1168,7 @@ class Kuppelstopper():
         col5 = startcolumn + 5
         hinweis_text = ''
         for i in range(anzahl_gruppen):
-            if typ == self.TYP_VF :
+            if typ == self.TYP_KO8 :
                 vf_index = i + 1
                 if vf_index == 1: 
                     hinweis_text = 'GD_1'
@@ -1208,7 +1186,7 @@ class Kuppelstopper():
                     hinweis_text = 'GD_4' 
                 elif vf_index == 8: 
                     hinweis_text = 'GD_5' 
-            elif typ == self.TYP_HF :
+            elif typ == self.TYP_KO4 :
                 hf_index = i + 1
                 hinweis_text = 'VF_' + str(hf_index)
             elif typ == self.TYP_KF :
@@ -1281,6 +1259,7 @@ class Kuppelstopper():
 
     def bahnWechsel(self):
         self.werteInAnsichtUebertragen()
+        # TODO: Nur Bahnwechsel wenn noch mindestens eine Zeit offen ist
 
         bahnA = self.__root.G1.cget('text')
         bahnB = self.__root.G2.cget('text')
@@ -1442,11 +1421,18 @@ class Kuppelstopper():
 
         self.Durchgänge.sort(key=self.sortTime)
 
-        vf_durchgang = 0
-        vf_hinweis = ''
-        hf_durchgang = 0
-        hf_hinweis = ''
+        hinweis = ''
+        ko16_durchgang = 0
+        ko8_durchgang = 0
+        ko4_durchgang = 0
+
+        # vf_durchgang = 0
+        # vf_hinweis = ''
+        # hf_durchgang = 0
+        # hf_hinweis = ''
         dw_platzierung_neu = 1
+
+        #TODO: Bestzeit berechnen
         
         for index, item in enumerate(self.Durchgänge):
             if item['typ'] == self.TYP_GD and item['bestzeitinklfehler'] != '':
@@ -1460,8 +1446,24 @@ class Kuppelstopper():
                         if dg['hinweis'] == suchtext:
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
-        
-            if item['typ'] == self.TYP_VF and item['bestzeitinklfehler'] != '':
+            
+            if item['typ'] == self.TYP_KO16 and item['bestzeitinklfehler'] != '':
+                if vf_durchgang == 0 or vf_durchgang < item['dg']:
+                    vf_durchgang = item['dg']
+                    if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
+                        vf_hinweis = 'VF_1'
+                    elif item['hinweis'] == 'GD_2' or item['hinweis'] == 'GD_7':
+                        vf_hinweis = 'VF_2'
+                    elif item['hinweis']  == 'GD_3' or item['hinweis'] == 'GD_6':
+                        vf_hinweis = 'VF_3'
+                    elif item['hinweis'] == 'GD_4' or item['hinweis'] == 'GD_5':
+                        vf_hinweis = 'VF_4'
+                    for dg in self.Durchgänge:
+                        if dg['hinweis'] == vf_hinweis:
+                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
+                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
+
+            if item['typ'] == self.TYP_KO8 and item['bestzeitinklfehler'] != '':
                 if vf_durchgang == 0 or vf_durchgang < item['dg']:
                     vf_durchgang = item['dg']
                     if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
@@ -1477,7 +1479,7 @@ class Kuppelstopper():
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
             
-            if item['typ'] == self.TYP_HF and item['bestzeitinklfehler'] != '':
+            if item['typ'] == self.TYP_KO4 and item['bestzeitinklfehler'] != '':
                 if hf_durchgang == 0 or hf_durchgang < item['dg']:
                     hf_durchgang = item['dg']
                     if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
