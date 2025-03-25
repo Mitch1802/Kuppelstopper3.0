@@ -31,10 +31,8 @@
         "iconDelete": "/Resources/delete.png"
     },
     "Setup": {
-        "Title": "KuppelStopper 3.0",
-        "TitleAnzeige": "KuppelStopper 3.0 Anzeige",
-        "FinaleInEinerSpalte": false,
-        "DamenwertungNebenFinale": true,
+        "Title": "KuppelStopper 4.0",
+        "TitleAnzeige": "KuppelStopper 4.0 Anzeige",
         "ZeigeAlleZeiten": false,
         "Testmodus": true
     }
