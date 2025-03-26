@@ -42,7 +42,7 @@ class Kuppelstopper():
     AnzeigeGDStartColumn = 0
 
     AnzeigeKO16StartRow = 0
-    AnzeigeKO16StartColum = 8
+    AnzeigeKO16StartColumn = 8
     AnzeigeKO8StartRow = 18
     AnzeigeKO8StartColumn = 8
     AnzeigeKO4StartRow = 30
@@ -344,8 +344,9 @@ class Kuppelstopper():
         f_durchgang = 0
 
         count_gd = 0
-        count_vf = 0
-        count_hf = 0
+        count_ko16 = 0
+        count_ko8 = 0
+        count_ko4 = 0
         count_kf = 0
         count_f = 0
         count_dw = 0
@@ -353,10 +354,12 @@ class Kuppelstopper():
         for dg in self.Durchgänge:
             if dg['typ'] == self.TYP_GD and dg['platzierung'] > 0:
                 count_gd += 1
+            if dg['typ'] == self.TYP_K16 and dg['bestzeitinklfehler'] != '':
+                count_ko16 += 1
             if dg['typ'] == self.TYP_KO8 and dg['bestzeitinklfehler'] != '':
-                count_vf += 1
+                count_ko8 += 1
             if dg['typ'] == self.TYP_KO4 and dg['bestzeitinklfehler'] != '':
-                count_hf += 1
+                count_ko4 += 1
             if dg['typ'] == self.TYP_KF and dg['bestzeitinklfehler'] != '':
                 count_kf += 1
             if dg['typ'] == self.TYP_F and dg['bestzeitinklfehler'] != '':
@@ -368,20 +371,22 @@ class Kuppelstopper():
             title = CTkLabel(self.anzeige.ERG, text='GRUNDDURCHGANG', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
             title.grid(row=self.AnzeigeGDStartRow, column=self.AnzeigeGDStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
         
-        if count_vf > 0:
-            title = CTkLabel(self.anzeige.ERG, text='VIERTELFINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            title.grid(row=self.AnzeigeVFStartRow, column=self.AnzeigeVFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
+        if count_ko16 > 0:
+            title = CTkLabel(self.anzeige.ERG, text='KO 1-16', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+            title.grid(row=self.AnzeigeKO16StartRow, column=self.AnzeigeKO16StartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
+
+        if count_ko8 > 0:
+            title = CTkLabel(self.anzeige.ERG, text='KO 1-8', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+            title.grid(row=self.AnzeigeKO8StartRow, column=self.AnzeigeKO4StartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
         
-        if count_hf > 0:
-            title = CTkLabel(self.anzeige.ERG, text='HALBFINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            title.grid(row=self.AnzeigeHFStartRow, column=self.AnzeigeHFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
+        if count_ko4 > 0:
+            title = CTkLabel(self.anzeige.ERG, text='KO 1-4', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+            title.grid(row=self.AnzeigeKO4StartRow, column=self.AnzeigeKO4StartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
         
         if count_kf > 0:
             title = CTkLabel(self.anzeige.ERG, text='KLEINES FINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            if self.FinaleInEinerSpalte == False:
-                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
-            else:
-                title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
+            title.grid(row=self.AnzeigeKFStartRow, column=self.AnzeigeKFStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
+
                 
         if count_f > 0:
             title = CTkLabel(self.anzeige.ERG, text='FINALE', fg_color=self.AnzeigeGroupColor, anchor='w', font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
@@ -389,18 +394,36 @@ class Kuppelstopper():
         
         if count_dw > 0:
             title = CTkLabel(self.anzeige.ERG, text='DAMENWERTUNG', fg_color=self.AnzeigeGroupColor, anchor='w' , font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-            if self.DamenwertungNebenFinale == True:
-                title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
-            else:
-                title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(1,0))
+            title.grid(row=self.AnzeigeDWStartRow, column=self.AnzeigeDWStartColumn, columnspan=5, sticky=(W+E+N+S), padx=20, pady=(30,0))
+
 
         for dg in self.Durchgänge:
-            if (dg['typ'] == self.TYP_GD or dg['typ'] == self.TYP_DW) and dg['platzierung'] > 0:
+            if (dg['typ'] == self.TYP_GD or dg['typ'] == self.TYP_DW or dg['typ'] == self.TYP_KO8 or dg['typ'] == self.TYP_KO4 or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['platzierung'] > 0:
                 color = '#ffffff'
                 if dg['typ'] == self.TYP_GD:
                     row = dg['platzierung']
                     col = 0
+                    if dg['platzierung'] <= 16:
+                        color = self.GlobalDGBackgroundColor
+                if dg['typ'] == self.TYP_KO16:
+                    row = dg['platzierung']
+                    col = 0
                     if dg['platzierung'] <= 8:
+                        color = self.GlobalDGBackgroundColor
+                if dg['typ'] == self.TYP_KO8:
+                    row = dg['platzierung']
+                    col = 0
+                    if dg['platzierung'] <= 4:
+                        color = self.GlobalDGBackgroundColor
+                if dg['typ'] == self.TYP_KO4:
+                    row = dg['platzierung']
+                    col = 0
+                    if dg['platzierung'] <= 2:
+                        color = self.GlobalDGBackgroundColor
+                if dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F:
+                    row = dg['platzierung']
+                    col = 0
+                    if dg['platzierung'] <= 1:
                         color = self.GlobalDGBackgroundColor
                 if dg['typ'] == self.TYP_DW:
                     row = dg['platzierung'] + self.AnzeigeDWStartRow
@@ -423,24 +446,24 @@ class Kuppelstopper():
                 t = CTkLabel(self.anzeige.ERG, text=time, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
                 t.grid(row=row, column=col+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
             
-            if (dg['typ'] == self.TYP_KO8 or dg['typ'] == self.TYP_KO4 or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
-                color = '#ffffff'
-                if f_durchgang == 0 or f_durchgang < dg['dg']:
-                    f_durchgang = dg['dg']
-                    color = self.GlobalDGBackgroundColor
+            # if (dg['typ'] == self.TYP_KO8 or dg['typ'] == self.TYP_KO4 or dg['typ'] == self.TYP_KF or dg['typ'] == self.TYP_F) and dg['bestzeitinklfehler'] != '':
+            #     color = '#ffffff'
+            #     if f_durchgang == 0 or f_durchgang < dg['dg']:
+            #         f_durchgang = dg['dg']
+            #         color = self.GlobalDGBackgroundColor
         
-                w = CTkLabel(self.anzeige.ERG, text=dg['wettkampfgruppe'], fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-                w.grid(row=dg['row'], column=dg['column'], sticky=(W+E+N+S), padx=(20,0), ipady='2')
-                time = ''
-                if self.ZeigeAlleZeiten == True:
-                    if dg['zeit1'] != '':
-                        time += '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1'])
-                    if dg['zeit2'] != '':
-                        time += '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])
+            #     w = CTkLabel(self.anzeige.ERG, text=dg['wettkampfgruppe'], fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+            #     w.grid(row=dg['row'], column=dg['column'], sticky=(W+E+N+S), padx=(20,0), ipady='2')
+            #     time = ''
+            #     if self.ZeigeAlleZeiten == True:
+            #         if dg['zeit1'] != '':
+            #             time += '   ' + dg['zeit1'] + ' + ' + str(dg['fehler1'])
+            #         if dg['zeit2'] != '':
+            #             time += '   ' + dg['zeit2'] + ' + ' + str(dg['fehler2'])
                 
-                time += '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
-                t = CTkLabel(self.anzeige.ERG, text=time, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
-                t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
+            #     time += '   BZ_' + dg['bestzeit'] + ' + ' + str(dg['fehlerbest'])
+            #     t = CTkLabel(self.anzeige.ERG, text=time, anchor='w', fg_color=color, font=(self.GlobalFontArt, self.AnzeigeFontSizeAuswertung))
+            #     t.grid(row=dg['row'], column=dg['column']+1, sticky=(W+E+N+S), padx=(0,20), ipady='2')
        
         if len(self.Durchgänge) > 0:
             count = 0
@@ -744,6 +767,7 @@ class Kuppelstopper():
         self.TitleAnzeige = setup['TitleAnzeige']
         self.ZeigeAlleZeiten = setup['ZeigeAlleZeiten']
         self.Testmodus = setup['Testmodus']
+        self.PlaySound = setup['PlaySound']
 
     def exportAnmeldungKonfig(self):
         new_list = self.Wettkampfgruppen
@@ -830,11 +854,13 @@ class Kuppelstopper():
         self.showInfo()   
 
     def playSound(self, file):
-        self.writeKonsole('Ein Sound wurde wiedergegeben!')
-        sound = pygame.mixer.Sound(file)
-        sound.play()
+        if self.PlaySound == True:
+            self.writeKonsole('Ein Sound wurde wiedergegeben!')
+            sound = pygame.mixer.Sound(file)
+            sound.play()
 
     def testGruppenErstellen(self):
+        # TODO: inkl Zeiten wenn angehakt
         anzahl = self.__root.SBAnzahlGruppen.get()
         damenAnzahl = self.__root.SBAnzahlDamenGruppen.get()
         
@@ -1168,33 +1194,80 @@ class Kuppelstopper():
         col5 = startcolumn + 5
         hinweis_text = ''
         for i in range(anzahl_gruppen):
-            if typ == self.TYP_KO8 :
-                vf_index = i + 1
-                if vf_index == 1: 
+            if typ == self.TYP_KO16:
+                ko16_index = i + 1
+                if ko16_index == 1: 
                     hinweis_text = 'GD_1'
-                elif vf_index == 2: 
-                    hinweis_text = 'GD_8' 
-                elif vf_index == 3: 
-                    hinweis_text = 'GD_2' 
-                elif vf_index == 4: 
-                    hinweis_text = 'GD_7' 
-                elif vf_index == 5: 
-                    hinweis_text = 'GD_3' 
-                elif vf_index == 6: 
-                    hinweis_text = 'GD_6' 
-                elif vf_index == 7: 
-                    hinweis_text = 'GD_4' 
-                elif vf_index == 8: 
-                    hinweis_text = 'GD_5' 
+                elif ko16_index == 2: 
+                    hinweis_text = 'GD_16'
+                elif ko16_index == 3: 
+                    hinweis_text = 'GD_2'
+                elif ko16_index == 4: 
+                    hinweis_text = 'GD_15'
+                elif ko16_index == 5: 
+                    hinweis_text = 'GD_3'
+                elif ko16_index == 6: 
+                    hinweis_text = 'GD_14'
+                elif ko16_index == 7: 
+                    hinweis_text = 'GD_4'
+                elif ko16_index == 8: 
+                    hinweis_text = 'GD_13'
+                elif ko16_index == 9: 
+                    hinweis_text = 'GD_5'
+                elif ko16_index == 10: 
+                    hinweis_text = 'GD_12'
+                elif ko16_index == 11: 
+                    hinweis_text = 'GD_6'
+                elif ko16_index == 12: 
+                    hinweis_text = 'GD_11'
+                elif ko16_index == 13: 
+                    hinweis_text = 'GD_7'
+                elif ko16_index == 14: 
+                    hinweis_text = 'GD_10'
+                elif ko16_index == 15: 
+                    hinweis_text = 'GD_8'
+                elif ko16_index == 16: 
+                    hinweis_text = 'GD_9'  
+            elif typ == self.TYP_KO8:
+                ko8_index = i + 1
+                if ko8_index == 1: 
+                    hinweis_text = 'KO16_1'
+                elif ko8_index == 2: 
+                    hinweis_text = 'KO16_8'
+                elif ko8_index == 3: 
+                    hinweis_text = 'KO16_2'
+                elif ko8_index == 4: 
+                    hinweis_text = 'KO16_7'
+                elif ko8_index == 5: 
+                    hinweis_text = 'KO16_3'
+                elif ko8_index == 6: 
+                    hinweis_text = 'KO16_6'
+                elif ko8_index == 7: 
+                    hinweis_text = 'KO16_4'
+                elif ko8_index == 8: 
+                    hinweis_text = 'KO16_5'
             elif typ == self.TYP_KO4 :
-                hf_index = i + 1
-                hinweis_text = 'VF_' + str(hf_index)
+                ho4_index = i + 1
+                if ho4_index == 1: 
+                    hinweis_text = 'KO8_1'
+                elif ho4_index == 2: 
+                    hinweis_text = 'KO8_4'
+                elif ho4_index == 3: 
+                    hinweis_text = 'KO8_2'
+                elif ho4_index == 4: 
+                    hinweis_text = 'KO8_3'
             elif typ == self.TYP_KF :
                 kf_index = i + 1
-                hinweis_text = 'KF_' + str(kf_index)
+                if kf_index == 1: 
+                    hinweis_text = 'KO4_3'
+                elif kf_index == 2: 
+                    hinweis_text = 'KO4_4'
             elif typ == self.TYP_F :
                 f_index = i + 1
-                hinweis_text = 'F_' + str(f_index)
+                if f_index == 1: 
+                    hinweis_text = 'KO4_1'
+                elif f_index == 2: 
+                    hinweis_text = 'KO4_2'
             else:
                 hinweis_text=''
             row = startrow + i + 1
@@ -1426,6 +1499,8 @@ class Kuppelstopper():
         ko8_durchgang = 0
         ko4_durchgang = 0
 
+        platzierung_KO16_neu = 1
+
         # vf_durchgang = 0
         # vf_hinweis = ''
         # hf_durchgang = 0
@@ -1436,11 +1511,11 @@ class Kuppelstopper():
         
         for index, item in enumerate(self.Durchgänge):
             if item['typ'] == self.TYP_GD and item['bestzeitinklfehler'] != '':
-                platzierung_neu = index + 1
-                item['platzierung'] = platzierung_neu
-                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_neu, item['row'], item['column'], item['typ'])
+                platzierung_GD_neu = index + 1
+                item['platzierung'] = platzierung_GD_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_GD_neu, item['row'], item['column'], item['typ'])
         
-                if item['platzierung'] >= 1 and item['platzierung'] <= 8:
+                if item['platzierung'] >= 1 and item['platzierung'] <= 16:
                     for dg in self.Durchgänge:
                         suchtext = 'GD_' + str(item['platzierung'])
                         if dg['hinweis'] == suchtext:
@@ -1448,57 +1523,77 @@ class Kuppelstopper():
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
             
             if item['typ'] == self.TYP_KO16 and item['bestzeitinklfehler'] != '':
-                if vf_durchgang == 0 or vf_durchgang < item['dg']:
-                    vf_durchgang = item['dg']
-                    if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
-                        vf_hinweis = 'VF_1'
-                    elif item['hinweis'] == 'GD_2' or item['hinweis'] == 'GD_7':
-                        vf_hinweis = 'VF_2'
-                    elif item['hinweis']  == 'GD_3' or item['hinweis'] == 'GD_6':
-                        vf_hinweis = 'VF_3'
-                    elif item['hinweis'] == 'GD_4' or item['hinweis'] == 'GD_5':
-                        vf_hinweis = 'VF_4'
+                item['platzierung'] = platzierung_KO16_neu
+                self.zeichneNeueWerte(item['row'], item['column'] + 4, platzierung_KO16_neu, item['row'], item['column'], item['typ'])
+                platzierung_KO16_neu += 1
+        
+                if item['platzierung'] >= 1 and item['platzierung'] <= 8:
                     for dg in self.Durchgänge:
-                        if dg['hinweis'] == vf_hinweis:
-                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
-
-            if item['typ'] == self.TYP_KO8 and item['bestzeitinklfehler'] != '':
-                if vf_durchgang == 0 or vf_durchgang < item['dg']:
-                    vf_durchgang = item['dg']
-                    if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
-                        vf_hinweis = 'VF_1'
-                    elif item['hinweis'] == 'GD_2' or item['hinweis'] == 'GD_7':
-                        vf_hinweis = 'VF_2'
-                    elif item['hinweis']  == 'GD_3' or item['hinweis'] == 'GD_6':
-                        vf_hinweis = 'VF_3'
-                    elif item['hinweis'] == 'GD_4' or item['hinweis'] == 'GD_5':
-                        vf_hinweis = 'VF_4'
-                    for dg in self.Durchgänge:
-                        if dg['hinweis'] == vf_hinweis:
+                        suchtext = 'KO16_' + str(item['platzierung'])
+                        if dg['hinweis'] == suchtext:
                             dg['wettkampfgruppe'] = item['wettkampfgruppe']
                             self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
             
-            if item['typ'] == self.TYP_KO4 and item['bestzeitinklfehler'] != '':
-                if hf_durchgang == 0 or hf_durchgang < item['dg']:
-                    hf_durchgang = item['dg']
-                    if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
-                        hf_hinweis = 'F_1'
-                    elif item['hinweis'] == 'VF_3' or item['hinweis'] == 'VF_4':
-                        hf_hinweis = 'F_2'
-                    for dg in self.Durchgänge:
-                        if dg['hinweis'] == hf_hinweis:
-                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
-                elif hf_durchgang == item['dg']:
-                    if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
-                        hf_hinweis = 'KF_1'
-                    elif item['hinweis'] == 'VF_3' or item['hinweis'] == 'VF_4':
-                        hf_hinweis = 'KF_2'
-                    for dg in self.Durchgänge:
-                        if dg['hinweis'] == hf_hinweis:
-                            dg['wettkampfgruppe'] = item['wettkampfgruppe']
-                            self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
+            # if item['typ'] == self.TYP_KO16 and item['bestzeitinklfehler'] != '':
+            #     if ko16_durchgang == 0 or ko16_durchgang < item['dg']:
+            #         ko16_durchgang = item['dg']
+            #         if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_16':
+            #             hinweis = 'KO8_1'
+            #         elif item['hinweis'] == 'GD_2' or item['hinweis'] == 'GD_15':
+            #             hinweis = 'KO8_2'
+            #         elif item['hinweis']  == 'GD_3' or item['hinweis'] == 'GD_14':
+            #             hinweis = 'KO8_3'
+            #         elif item['hinweis'] == 'GD_4' or item['hinweis'] == 'GD_13':
+            #             hinweis = 'KO8_4'
+            #         elif item['hinweis'] == 'GD_5' or item['hinweis'] == 'GD_12':
+            #             hinweis = 'KO8_5'
+            #         elif item['hinweis']  == 'GD_6' or item['hinweis'] == 'GD_11':
+            #             hinweis = 'KO8_6'
+            #         elif item['hinweis'] == 'GD_7' or item['hinweis'] == 'GD_10':
+            #             hinweis = 'KO8_7'
+            #         elif item['hinweis'] == 'GD_8' or item['hinweis'] == 'GD_9':
+            #             hinweis = 'KO8_8'
+            #         for dg in self.Durchgänge:
+            #             if dg['hinweis'] == hinweis:
+            #                 dg['wettkampfgruppe'] = item['wettkampfgruppe']
+            #                 self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
+
+            # if item['typ'] == self.TYP_KO8 and item['bestzeitinklfehler'] != '':
+            #     if vf_durchgang == 0 or vf_durchgang < item['dg']:
+            #         vf_durchgang = item['dg']
+            #         if item['hinweis'] == 'GD_1' or item['hinweis'] == 'GD_8':
+            #             vf_hinweis = 'VF_1'
+            #         elif item['hinweis'] == 'GD_2' or item['hinweis'] == 'GD_7':
+            #             vf_hinweis = 'VF_2'
+            #         elif item['hinweis']  == 'GD_3' or item['hinweis'] == 'GD_6':
+            #             vf_hinweis = 'VF_3'
+            #         elif item['hinweis'] == 'GD_4' or item['hinweis'] == 'GD_5':
+            #             vf_hinweis = 'VF_4'
+            #         for dg in self.Durchgänge:
+            #             if dg['hinweis'] == vf_hinweis:
+            #                 dg['wettkampfgruppe'] = item['wettkampfgruppe']
+            #                 self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
+            
+            # if item['typ'] == self.TYP_KO4 and item['bestzeitinklfehler'] != '':
+            #     if hf_durchgang == 0 or hf_durchgang < item['dg']:
+            #         hf_durchgang = item['dg']
+            #         if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
+            #             hf_hinweis = 'F_1'
+            #         elif item['hinweis'] == 'VF_3' or item['hinweis'] == 'VF_4':
+            #             hf_hinweis = 'F_2'
+            #         for dg in self.Durchgänge:
+            #             if dg['hinweis'] == hf_hinweis:
+            #                 dg['wettkampfgruppe'] = item['wettkampfgruppe']
+            #                 self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
+            #     elif hf_durchgang == item['dg']:
+            #         if item['hinweis'] == 'VF_1' or item['hinweis'] == 'VF_2':
+            #             hf_hinweis = 'KF_1'
+            #         elif item['hinweis'] == 'VF_3' or item['hinweis'] == 'VF_4':
+            #             hf_hinweis = 'KF_2'
+            #         for dg in self.Durchgänge:
+            #             if dg['hinweis'] == hf_hinweis:
+            #                 dg['wettkampfgruppe'] = item['wettkampfgruppe']
+            #                 self.zeichneNeueWerte(dg['row'], dg['column'], item['wettkampfgruppe'], dg['row'], dg['column'], dg['typ'])
 
             if item['typ'] == self.TYP_DW and item['bestzeitinklfehler'] != '':
                 item['platzierung'] = dw_platzierung_neu
