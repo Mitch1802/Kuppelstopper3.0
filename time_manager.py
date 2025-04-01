@@ -5,9 +5,9 @@ def update_time_1(app):
     if app.time_is_running_1:
         elapsed_time = time.time() - app.start_time_1
         dt = datetime.fromtimestamp(elapsed_time).strftime('%M:%S:%f')[:-4]
-        app.__root.T1.configure(text=dt)
+        app.root.T1.configure(text=dt)
         app.anzeige.Z1.configure(text=dt)
-        app.__root.T1.after(50, lambda: update_time_1(app))
+        app.root.T1.after(50, lambda: update_time_1(app))
     else:
         app.stop_time_1 = time.time()
 
@@ -15,9 +15,9 @@ def update_time_2(app):
     if app.time_is_running_2:
         elapsed_time = time.time() - app.start_time_2
         dt = datetime.fromtimestamp(elapsed_time).strftime('%M:%S:%f')[:-4]
-        app.__root.T2.configure(text=dt)
+        app.root.T2.configure(text=dt)
         app.anzeige.Z2.configure(text=dt)
-        app.__root.T2.after(50, lambda: update_time_2(app))
+        app.root.T2.after(50, lambda: update_time_2(app))
     else:
         app.stop_time_2 = time.time()
 
@@ -39,7 +39,7 @@ def bestzeit_platzierung_berechnen(app):
     pass
 
 def reset_timers(app):
-    app.__root.T1.configure(text='00:00:00')
-    app.__root.T2.configure(text='00:00:00')
+    app.root.T1.configure(text='00:00:00')
+    app.root.T2.configure(text='00:00:00')
     app.anzeige.Z1.configure(text='00:00:00')
     app.anzeige.Z2.configure(text='00:00:00')

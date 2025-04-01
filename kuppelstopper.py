@@ -48,13 +48,13 @@ class Kuppelstopper:
         self.NAME_TAB3 = 'Einstellungen'
 
         # Weitere Variablen initialisieren ...
-        self.Durchgänge = []
-        self.Wettkampfgruppen = []
-        self.DGNumbers = []
+        # self.Durchgänge = []
+        # self.Wettkampfgruppen = []
+        # self.DGNumbers = []
         
         # Erstelle das Hauptfenster
-        self.__root = CTk()
-        self.__root.title(self.Title)
+        self.root = CTk()
+        self.root.title(self.Title)
         # Beispiel: Icon laden (Dateipfad muss in der Konfiguration definiert sein)
         self.iconDelete = CTkImage(light_image=Image.open(self.FileIconDelete), dark_image=Image.open(self.FileIconDelete))
 
@@ -82,35 +82,68 @@ class Kuppelstopper:
             uebernahme_gruppen(self, True)
         
     def ladeKonfiguration(self):
-        # Lade Konfigurationen über die Funktion aus config.py
-        config_data = lade_konfiguration(self.KonfigSetupFile)
-        # Setze relevante Attribute, z. B.:
-        self.Title = config_data.get('Title', 'Kuppelstopper')
-        self.TitleAnzeige = config_data.get('TitleAnzeige', 'Anzeige')
-        self.PlaySound = config_data.get('PlaySound', False)
-        # ... weitere Attribute setzen (Dateipfade, Tastenbelegungen, Style, etc.)
-        # Ebenso: Lade Wettkampfgruppen und Durchgänge aus den entsprechenden Dateien
+        # Lösche alte Log File
+        if os.path.exists(self.LogFile):
+            os.remove(self.LogFile)
+
+        # Lade Wettkampfgruppen
         if os.path.exists(self.KonfigGruppenFile):
-            with open(self.KonfigGruppenFile, "r") as f:
-                self.Wettkampfgruppen = json.load(f)
+            self.Wettkampfgruppen = lade_konfiguration(self.KonfigGruppenFile)
         else:
             self.Wettkampfgruppen = []
+
+        # Lade Bewerbsdaten
         if os.path.exists(self.KonfigBewerbFile):
-            with open(self.KonfigBewerbFile, "r") as f:
-                data = json.load(f)
-                self.Durchgänge = data.get('Bewerb', [])
-                self.DGNumbers = data.get('DGNumbers', [])
+            data = lade_konfiguration(self.KonfigBewerbFile)
+            self.Durchgänge = data.get('Bewerb', [])
+            self.DGNumbers = data.get('DGNumbers', [])
         else:
             self.Durchgänge = []
             self.DGNumbers = []
         
         # Setze weitere Attribute wie GPIO/PINs, Tasten etc.
         # (Diese Informationen müssen aus deiner Setup-Konfiguration übernommen werden.)
-        # Beispiel:
-        self.FileIconDelete = config_data['Files'].get('iconDelete')
-        self.GPIO_Start_1 = config_data['Buttons'].get('GPIO_Start_1')
-        # usw.
-    
+
+        config_data = lade_konfiguration(self.KonfigSetupFile)
+        
+        setup = config_data.get('Setup')
+        self.Title = setup.get('Title', 'Kuppelstopper')
+        self.TitleAnzeige = setup.get('TitleAnzeige', 'Anzeige')
+        self.ZeigeAlleZeiten = setup.get('ZeigeAlleZeiten', False)
+        self.Testmodus = setup.get('Testmodus', False)
+        self.PlaySound = setup.get('PlaySound', False)
+
+        files = config_data.get('Files')
+        self.FileAngriffsbefehl = os.path.join(self.pfad, 'Resources', files.get('angriffsbefehl'))
+        self.FileStopp = os.path.join(self.pfad, 'Resources', files.get('stopp'))
+        self.FileIcon = os.path.join(self.pfad, 'Resources', files.get('icon'))
+        self.FileIconDelete = os.path.join(self.pfad, 'Resources', files.get('iconDelete'))
+
+        buttons = config_data.get('Buttons')
+        self.GPIO_Start_1 = buttons.get('GPIO_Start_1', 17)
+        self.GPIO_Stop_1 = buttons.get('GPIO_Stop_1', 27)
+        self.GPIO_Start_2 = buttons.get('GPIO_Start_2', 19)
+        self.GPIO_Stop_2 = buttons.get('GPIO_Stop_2', 26)
+        self.Taste_Start_1 = buttons.get('Taste_Start_1', 'a')
+        self.Taste_Stop_1 = buttons.get('Taste_Stop_1', 'q')
+        self.Taste_Start_2 = buttons.get('Taste_Start_2', 's')
+        self.Taste_Stop_2 = buttons.get('Taste_Stop_2', 'w')
+
+        style = config_data.get('Style')
+        self.GlobalFontArt = style.get('GlobalFontArt', 'Arial')
+        self.GlobalFontSizeText = style.get('GlobalFontSizeText', 10)
+        self.GlobalFontSizeTitle = style.get('GlobalFontSizeTitle', 15)
+        self.GlobalDGBackgroundColor = style.get('GlobalDGBackgroundColor', '#FFFFFF')
+        self.AnzeigeFontSizeGroup = style.get('AnzeigeFontSizeGroup', 100)
+        self.AnzeigeFontSizeTime = style.get('AnzeigeFontSizeTime', 300)
+        self.AnzeigeFontSizeInfo = style.get('AnzeigeFontSizeInfo', 25)
+        self.AnzeigeFontSizeAuswertung = style.get('AnzeigeFontSizeAuswertung', 20)
+        self.AnzeigeBackgroundColor = style.get('AnzeigeBackgroundColor', '#FFFFFF')
+        self.AnzeigeGroupColor = style.get('AnzeigeGroupColor', '#000000')
+        self.AnzeigeGroup2Color = style.get('AnzeigeGroup2Color', '#000000')
+        self.AnzeigeTimeColor = style.get('AnzeigeTimeColor', '#000000')
+        self.AnzeigeNextColor = style.get('AnzeigeNextColor', '#FFFFFF')
+
     def initGPIO(self, event=None):
         if self.checked_GPIO.get():
             self.BuzzerStartBahn1 = GPIO_Button(self.GPIO_Start_1)
@@ -119,7 +152,7 @@ class Kuppelstopper:
             self.BuzzerStopBahn2 = GPIO_Button(self.GPIO_Stop_2)
     
     def run(self):
-        self.__root.mainloop()
+        self.root.mainloop()
     
     # Die restlichen Methoden (z. B. Start, Stop, Timer-Updates, Event-Handler) können
     # entweder direkt in dieser Klasse bleiben oder über Funktionen in time_manager.py und events.py abgewickelt werden.
