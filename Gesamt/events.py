@@ -367,7 +367,6 @@ def wechsel_ansicht_zur_zeit(self):
     self.anzeige.G2.pack(expand=0, side=BOTTOM, fill=X)
     gui.show_info(self)   
 
-
 def lade_zeitnehmungs_daten(self, event=None):
     wechsel_ansicht_zur_zeit(self)
     self.checked_Bahn_1.set(False)
@@ -542,7 +541,7 @@ def test_gruppen_erstellen(self):
             val['damenwertung'] = True
         self.Wettkampfgruppen.append(val)
 
-    gui.zeichne_angemeldete_gruppen()
+    gui.zeichne_angemeldete_gruppen(self)
     self.root.TabView.set(self.NAME_TAB1)
 
 def change_color_from_button(self, button):

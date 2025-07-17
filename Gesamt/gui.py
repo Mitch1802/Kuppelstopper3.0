@@ -5,8 +5,8 @@ from spinbox import *
 import events, time_manager, utils
 
 
-def init_gui(app):
-    pass
+# def init_gui(app):
+#     pass
 
 def init_gpio(app, event=None):
     if app.checked_GPIO.get():
