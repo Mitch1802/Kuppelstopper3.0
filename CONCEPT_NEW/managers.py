@@ -1,4 +1,4 @@
-import json
+import json, os
 from models import Gruppe, Durchgang
 
 class GruppenManager:
@@ -6,9 +6,12 @@ class GruppenManager:
         self.gruppen = []
 
     def lade_gruppen(self, pfad):
-        with open(pfad, 'r') as f:
-            data = json.load(f)
-        self.gruppen = [Gruppe(**g) for g in data]
+        if os.path.exists(pfad):
+            with open(pfad, 'r') as f:
+                data = json.load(f)
+            self.gruppen = [Gruppe(**g) for g in data]
+        else:
+            self.gruppen = []
 
     def speichere_gruppen(self, pfad):
         with open(pfad, 'w') as f:

@@ -1,12 +1,14 @@
-import tkinter as tk
+from tkinter import *
+import ttkbootstrap as tb
 
-class AuswertungView(tk.Toplevel):
+
+class AuswertungView(tb.Window):
     def __init__(self, master):
         super().__init__(master)
         self.title("Auswertung")
         self.geometry("300x200")
-        label = tk.Label(self, text="Auswertung - Bestzeiten", font=("Arial", 12))
+        label = tb.Label(self, text="Auswertung - Bestzeiten", font=("Arial", 12))
         label.pack(pady=10)
         # Beispielhafte Anzeige, in echt würdest du die Daten aus dem Manager nehmen
-        tk.Label(self, text="Gruppe 1: 25.77s").pack()
-        tk.Label(self, text="Gruppe 2: 27.22s").pack()
+        tb.Label(self, text="Gruppe 1: 25.77s").pack()
+        tb.Label(self, text="Gruppe 2: 27.22s").pack()
