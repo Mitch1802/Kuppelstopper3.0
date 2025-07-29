@@ -3,7 +3,6 @@ import ttkbootstrap as tb
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.constants import *
 
-from gui.auswertung_view import AuswertungView
 
 class MainView(tb.Window):
     def __init__(self, gruppen_manager, durchgang_manager):
@@ -46,7 +45,7 @@ class MainView(tb.Window):
         # Tabs anzeigen
         for frame in self.tabs.values():
             frame.pack_forget()
-        self.tabs[name].pack(fill=BOTH, expand=YES)
+        self.tabs[name].pack(fill=BOTH, expand=True)
 
         # Buttons einfärben
         for n, btn in self.tab_buttons.items():
@@ -57,24 +56,24 @@ class MainView(tb.Window):
         frame = tb.Frame(self.tab_container)
 
         label = tb.Label(frame, text="Wettkampfgruppen", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        label.pack(padx=10, pady=(10,0), anchor=W)
 
         entry_frame = tb.Frame(frame)
         entry_frame.pack(fill=X, pady=1, side=TOP)
 
         ent = tb.Entry(entry_frame)
-        ent.pack(side=LEFT, fill='x', padx='10', pady='10', expand=True)
+        ent.pack(side=LEFT, fill=X, padx=10, pady=10, expand=True)
         # ent.bind('<Return>', self.addWettkampfgruppe)
 
         btn = tb.Button(entry_frame, text='Hinzufügen', compound=LEFT)
-        btn.pack(side=LEFT, fill='x', padx='10', pady='10')
+        btn.pack(side=LEFT, fill=X, padx=10, pady=10)
 
 
         #TODO Liste Gruppen
 
 
         btn = tb.Button(frame, text="Auswertung")
-        btn.pack(side=TOP, fill='x', padx='10', pady='10')
+        btn.pack(side=TOP, fill=X, padx=10, pady=10)
 
         return frame
     
@@ -87,7 +86,15 @@ class MainView(tb.Window):
 
         # Container für die "Sub Tabs"
         self.subtab_container = tb.Frame(frame)
-        self.subtab_container.pack(fill=BOTH, expand=YES)
+        self.subtab_container.pack(fill=BOTH, side=TOP, expand=True)
+
+        # Container für Zeitnehmung
+        self.zeitnehmung_frame = tb.Frame(frame)
+        self.zeitnehmung_frame.pack(fill=BOTH, side=TOP)
+        
+        label = tb.Label(self.zeitnehmung_frame, text="Zeitnehmung", font=("Arial", 14))
+        label.pack(padx=10, pady=10, anchor=W)
+
 
         # Erstelle Tab-Inhalte (Frames)
         self.subtabs = {
@@ -114,40 +121,86 @@ class MainView(tb.Window):
     def create_gd_subtab(self):
         frame = tb.Frame(self.subtab_container)
 
-        label = tb.Label(frame, text="Grunddurchgang", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        frame_left = tb.Frame(frame)
+        frame_left.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_left, text="Grunddurchgang", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
+        frame_right = tb.Frame(frame)
+        frame_right.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
 
         return frame
     
     def create_ko16_subtab(self):
         frame = tb.Frame(self.subtab_container)
 
-        label = tb.Label(frame, text="KO 1-16", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        frame_left = tb.Frame(frame)
+        frame_left.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_left, text="KO 1-16", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
+        frame_right = tb.Frame(frame)
+        frame_right.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
 
         return frame
     
     def create_ko8_subtab(self):
         frame = tb.Frame(self.subtab_container)
 
-        label = tb.Label(frame, text="KO 1-8", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        frame_left = tb.Frame(frame)
+        frame_left.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_left, text="KO 1-8", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
+        frame_right = tb.Frame(frame)
+        frame_right.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
 
         return frame
     
     def create_ko4_subtab(self):
         frame = tb.Frame(self.subtab_container)
 
-        label = tb.Label(frame, text="KO 1-4", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        frame_left = tb.Frame(frame)
+        frame_left.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_left, text="KO 1-4", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
+        frame_right = tb.Frame(frame)
+        frame_right.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
 
         return frame
     
     def create_finale_subtab(self):
         frame = tb.Frame(self.subtab_container)
 
-        label = tb.Label(frame, text="Finale", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        frame_left = tb.Frame(frame)
+        frame_left.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_left, text="Finale", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
+        frame_right = tb.Frame(frame)
+        frame_right.pack(side=LEFT, fill=BOTH, expand=True)
+
+        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
 
         return frame
     
@@ -161,11 +214,19 @@ class MainView(tb.Window):
         for n, btn in self.subtab_buttons.items():
             style = SECONDARY if n == name else DARK
             btn.configure(bootstyle=style)
+
+    def create_sub_zeitnehmung(self):
+        frame = tb.Frame(self.subtab_container)
+
+        label = tb.Label(frame, text="Finale", font=("Arial", 14))
+        label.pack(padx=10, pady=(10,0), anchor=W)
+
+        return frame
     
     def create_settings_tab(self):
         frame = tb.Frame(self.tab_container)
 
         label = tb.Label(frame, text="Einstellungen", font=("Arial", 14))
-        label.pack(padx='10', pady=(10,0), anchor=W)
+        label.pack(padx=10, pady=(10,0), anchor=W)
 
         return frame
