@@ -60,9 +60,9 @@ class Kuppelstopper():
         self.__root.title(self.Title)
         self.__root.minsize(1600, 1000)
 
-        self.icon = PhotoImage(file=self.FileIcon)
-        self.__root.iconphoto(False, self.icon)   
-        self.iconDelete = PhotoImage(file=self.FileIconDelete) 
+        # self.icon = PhotoImage(file=self.FileIcon)
+        # self.__root.iconphoto(False, self.icon)   
+        # self.iconDelete = PhotoImage(file=self.FileIconDelete) 
 
         COLOR_FTab_INACTIVE = '#FFFFFF'
         COLOR_FTab_ACTIVE = '#D3C9C6'
@@ -147,13 +147,13 @@ class Kuppelstopper():
         self.__root.BtnVorherigerDG.pack(side='left', padx='10', pady='20')
         self.__root.BtnNaechsterDG = Button(self.__root.zeitnehmung, text='Nächster DG', width=15, padding=10, command=self.naechsterDG, takefocus = 0)
         self.__root.BtnNaechsterDG.pack(side='left', padx='10', pady='20')
-        self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0, state=DISABLED)
+        self.__root.BtnStart = Button(self.__root.zeitnehmung, text='Start', width=10, padding=10, command=self.start, takefocus = 0) #, state=DISABLED)
         self.__root.BtnStart.pack(side='left', padx='10', pady='20')
-        self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text='Alles Stop', width=10, padding=10, command=self.allesStop, takefocus = 0, state=DISABLED)
+        self.__root.BtnAllesStop = Button(self.__root.zeitnehmung, text='Alles Stop', width=10, padding=10, command=self.allesStop, takefocus = 0) #, state=DISABLED)
         self.__root.BtnAllesStop.pack(side='left', pady='20')
-        self.__root.BtnWechsel = Button(self.__root.zeitnehmung, text='Bahn Wechsel', width=15, padding=10, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
+        self.__root.BtnWechsel = Button(self.__root.zeitnehmung, text='Bahn Wechsel', width=15, padding=10, command=self.bahnWechsel, takefocus = 0) #, state=DISABLED)
         self.__root.BtnWechsel.pack(side='left', padx='10', pady='20')
-        self.__root.BtnZeitUebertragen = Button(self.__root.zeitnehmung, text='Zeit übertragen', width=20, padding=10, command=self.werteInAnsichtUebertragen, takefocus = 0, state=DISABLED)
+        self.__root.BtnZeitUebertragen = Button(self.__root.zeitnehmung, text='Zeit übertragen', width=20, padding=10, command=self.werteInAnsichtUebertragen, takefocus = 0) #, state=DISABLED)
         self.__root.BtnZeitUebertragen.pack(side='left', padx='10', pady='20')
 
         self.__root.LfBahnen = LabelFrame(self.__root.FTab2, text='Zeitnehmung', borderwidth=1, relief=SOLID)
@@ -164,30 +164,30 @@ class Kuppelstopper():
         
         self.__root.CB1 = Checkbutton(self.__root.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1, command=self.switchBahn1State, takefocus = 0)
         self.__root.CB1.grid(row=1, column=0, padx='10')
-        self.__root.G1 = Label(self.__root.LfBahnen, text='...', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.__root.G1 = Label(self.__root.LfBahnen, text='...', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0) #, state=DISABLED)
         self.__root.G1 .grid(row=1, column=1, padx='10')
-        self.__root.T1 = Label(self.__root.LfBahnen, text='00:00:00', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.__root.T1 = Label(self.__root.LfBahnen, text='00:00:00', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0) #, state=DISABLED)
         self.__root.T1.grid(row=1, column=2, padx='10')
         self.__root.F1 = Entry(self.__root.LfBahnen, width=5, takefocus = 0)
         self.__root.F1.grid(row=1, column=3, padx='10')
-        self.__root.B1 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_1, takefocus = 0, state=DISABLED)
+        self.__root.B1 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_1, takefocus = 0) #, state=DISABLED)
         self.__root.B1.grid(row=1, column=4)
 
         self.__root.CB2 = Checkbutton(self.__root.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, command=self.switchBahn2State, takefocus = 0)
         self.__root.CB2.grid(row=2, column=0, padx='10')
-        self.__root.G2 = Label(self.__root.LfBahnen, text='...', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.__root.G2 = Label(self.__root.LfBahnen, text='...', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0) #, state=DISABLED)
         self.__root.G2 .grid(row=2, column=1, padx='10')
-        self.__root.T2 = Label(self.__root.LfBahnen, text='00:00:00', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.__root.T2 = Label(self.__root.LfBahnen, text='00:00:00', font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0) #, state=DISABLED)
         self.__root.T2.grid(row=2, column=2, padx='10')
         self.__root.F2 = Entry(self.__root.LfBahnen, width=5, takefocus = 0)
         self.__root.F2.grid(row=2, column=3, padx='10')
-        self.__root.B2 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_2, takefocus = 0, state=DISABLED)
+        self.__root.B2 = Button(self.__root.LfBahnen, text='Stop', width=10, command=self.stop_2, takefocus = 0) #, state=DISABLED)
         self.__root.B2.grid(row=2, column=4)
 
         self.__root.korrektur = LabelFrame(self.__root.FTab2, text='Korrektur', borderwidth=1, relief=SOLID)
         self.__root.korrektur.pack(side='left', padx='10')
 
-        self.__root.BtnStopReset = Button(self.__root.korrektur, text='Stop and Reset', width=20, padding=10, command=self.stopreset, takefocus = 0, state=DISABLED)
+        self.__root.BtnStopReset = Button(self.__root.korrektur, text='Stop and Reset', width=20, padding=10, command=self.stopreset, takefocus = 0) #, state=DISABLED)
         self.__root.BtnStopReset.pack(side='left', padx='10', pady='20') 
         self.__root.BtnLoeZ1 = Button(self.__root.korrektur, text='DG Zeit 1+2 löschen', width=20, padding=10, command=self.zeit1loeschen, takefocus = 0)
         self.__root.BtnLoeZ1.pack(side='left', padx='10', pady='20') 
@@ -307,7 +307,7 @@ class Kuppelstopper():
         self.anzeige.title(self.TitleAnzeige)
         self.anzeige.minsize(700, 400)
         self.anzeige.config(background=self.AnzeigeBackgroundColor)
-        self.anzeige.iconphoto(False, self.icon)
+        # self.anzeige.iconphoto(False, self.icon)
 
         self.anzeige.frame = Frame(self.anzeige, style=('Anzeige.TFrame'))
         self.anzeige.frame.pack(expand=1, side=TOP, fill=BOTH, padx=20, pady=20)
@@ -730,8 +730,10 @@ class Kuppelstopper():
         setup = setup_data['Setup']
         self.Title = setup['Title']
         self.TitleAnzeige = setup['TitleAnzeige']
-        self.FinaleInEinerSpalte = setup['FinaleInEinerSpalte']
-        self.DamenwertungNebenFinale = setup['DamenwertungNebenFinale']
+        # self.FinaleInEinerSpalte = setup['FinaleInEinerSpalte']
+        self.FinaleInEinerSpalte = False
+        # self.DamenwertungNebenFinale = setup['DamenwertungNebenFinale']
+        self.DamenwertungNebenFinale = False
         self.ZeigeAlleZeiten = setup['ZeigeAlleZeiten']
         self.Testmodus = setup['Testmodus']
 

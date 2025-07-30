@@ -2,6 +2,7 @@ from tkinter import *
 import ttkbootstrap as tb
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.constants import *
+from gui.widgets import CustomListbox
 
 
 class MainView(tb.Window):
@@ -10,6 +11,20 @@ class MainView(tb.Window):
         self.title("Kuppelstopper 3.0")
         # self.geometry("500x300")
         self.minsize(1600, 1000)
+
+        self.checked_Bahn_1 = BooleanVar()
+        self.checked_Bahn_2 = BooleanVar()
+        self.checked_Tastatur = BooleanVar()
+        self.checked_GPIO = BooleanVar()
+        self.checked_Rahmen = BooleanVar()
+        self.checked_Konsole = BooleanVar()
+
+        self.checked_Bahn_1.set(False)
+        self.checked_Bahn_2.set(False)
+        self.checked_Tastatur.set(True)
+        self.checked_GPIO.set(False)
+        self.checked_Rahmen.set(False)
+        self.checked_Konsole.set(True)
 
         self.gruppen_manager = gruppen_manager
         self.durchgang_manager = durchgang_manager
@@ -89,12 +104,8 @@ class MainView(tb.Window):
         self.subtab_container.pack(fill=BOTH, side=TOP, expand=True)
 
         # Container für Zeitnehmung
-        self.zeitnehmung_frame = tb.Frame(frame)
-        self.zeitnehmung_frame.pack(fill=BOTH, side=TOP)
-        
-        label = tb.Label(self.zeitnehmung_frame, text="Zeitnehmung", font=("Arial", 14))
-        label.pack(padx=10, pady=10, anchor=W)
-
+        self.zeitnehmung_frame = self.create_sub_zeitnehmung()
+        self.zeitnehmung_frame.pack(fill=BOTH, side=BOTTOM)
 
         # Erstelle Tab-Inhalte (Frames)
         self.subtabs = {
@@ -216,10 +227,67 @@ class MainView(tb.Window):
             btn.configure(bootstyle=style)
 
     def create_sub_zeitnehmung(self):
-        frame = tb.Frame(self.subtab_container)
+        frame = tb.Frame(self.subtab_container, bootstyle="success")
 
-        label = tb.Label(frame, text="Finale", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        self.zeitnehmung = tb.Frame(frame, bootstyle=DANGER)
+        self.zeitnehmung.pack(fill=BOTH, side=LEFT)
+
+        self.BtnAnsichtWechseln = tb.Button(self.zeitnehmung, text='Ansicht wechseln', width=20) #, command=self.anzeigeUmschalten, takefocus = 0)
+        self.BtnAnsichtWechseln.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.CBDG = tb.Combobox(self.zeitnehmung, width=5, takefocus = 0, justify=CENTER)
+        # self.CBDG = CustomListbox(self.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify='center')
+        # self.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
+        self.CBDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.BtnVorherigerDG = tb.Button(self.zeitnehmung, text='Vorher. DG', width=15) #, command=self.vorherigerDG, takefocus = 0)
+        self.BtnVorherigerDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.BtnNaechsterDG = tb.Button(self.zeitnehmung, text='Nächster DG', width=15) #, command=self.naechsterDG, takefocus = 0)
+        self.BtnNaechsterDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.BtnStart = tb.Button(self.zeitnehmung, text='Start', width=15) #, command=self.start, takefocus = 0, state=DISABLED)
+        self.BtnStart.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.BtnAllesStop = tb.Button(self.zeitnehmung, text='Alles Stop', width=15) #, command=self.allesStop, takefocus = 0, state=DISABLED)
+        self.BtnAllesStop.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.BtnWechsel = tb.Button(self.zeitnehmung, text='Bahn Wechsel', width=15) #, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
+        self.BtnWechsel.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+        self.BtnZeitUebertragen = tb.Button(self.zeitnehmung, text='Zeit übertragen', width=15) #, command=self.werteInAnsichtUebertragen, takefocus = 0, state=DISABLED)
+        self.BtnZeitUebertragen.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
+
+        self.LfBahnen = tb.Frame(frame, bootstyle=DANGER)
+        self.LfBahnen.pack(fill=BOTH, side=LEFT)
+
+        # self.LblFehler = tb.Label(self.LfBahnen, text='Fehler', takefocus = 0)
+        # self.LblFehler .grid(row=0, column=3, padx=10, pady=(5,0))
+        
+        self.CB1 = tb.Checkbutton(self.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1) #, command=self.switchBahn1State, takefocus = 0)
+        self.CB1.grid(row=1, column=0, padx=10)
+        self.G1 = tb.Label(self.LfBahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.G1 .grid(row=1, column=1, padx=10)
+        self.T1 = tb.Label(self.LfBahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.T1.grid(row=1, column=2, padx=10)
+        self.F1 = tb.Entry(self.LfBahnen, width=5, takefocus = 0)
+        self.F1.grid(row=1, column=3, padx=10)
+        self.B1 = tb.Button(self.LfBahnen, text='Stop', width=10) #, command=self.stop_1, takefocus = 0, state=DISABLED)
+        self.B1.grid(row=1, column=4)
+
+        self.CB2 = tb.Checkbutton(self.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2) #, command=self.switchBahn2State, takefocus = 0)
+        self.CB2.grid(row=2, column=0, padx=10)
+        self.G2 = tb.Label(self.LfBahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.G2 .grid(row=2, column=1, padx=10)
+        self.T2 = tb.Label(self.LfBahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.T2.grid(row=2, column=2, padx=10)
+        self.F2 = tb.Entry(self.LfBahnen, width=5, takefocus = 0)
+        self.F2.grid(row=2, column=3, padx=10)
+        self.B2 = tb.Button(self.LfBahnen, text='Stop', width=10) #, command=self.stop_2, takefocus = 0, state=DISABLED)
+        self.B2.grid(row=2, column=4)
+
+        self.korrektur = tb.Frame(frame, bootstyle=DANGER)
+        self.korrektur.pack(fill=BOTH, side=LEFT)
+
+        self.BtnStopReset = tb.Button(self.korrektur, text='Stop and Reset', width=20) #, command=self.stopreset, takefocus = 0, state=DISABLED)
+        self.BtnStopReset.pack(side=LEFT, padx=10, pady=20) 
+        self.BtnLoeZ1 = tb.Button(self.korrektur, text='DG Zeit 1+2 löschen', width=20) #, command=self.zeit1loeschen, takefocus = 0)
+        self.BtnLoeZ1.pack(side=LEFT, padx=10, pady=20) 
+        self.BtnLoeZ2 = tb.Button(self.korrektur, text='DG Zeit 2 löschen', width=20) #, command=self.zeit2loeschen, takefocus = 0)
+        self.BtnLoeZ2.pack(side=LEFT, padx=10, pady=20) 
 
         return frame
     
