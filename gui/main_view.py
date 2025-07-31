@@ -1,8 +1,7 @@
 from tkinter import *
 import ttkbootstrap as tb
-from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.constants import *
-from gui.widgets import CustomListbox
+from gui.widgets import CustomTable
 
 
 class MainView(tb.Window):
@@ -43,7 +42,8 @@ class MainView(tb.Window):
         self.tabs = {
             "Anmeldung": self.create_anmeldung_tab(),
             "Bewerb": self.create_bewerb_tab(),
-            "Einstellungen": self.create_settings_tab()
+            "Einstellungen": self.create_settings_tab(),
+            "Info": self.create_info_tab()
         }
 
         # Tab Buttons speichern
@@ -54,7 +54,8 @@ class MainView(tb.Window):
             btn.pack(side=LEFT, ipadx=5, ipady=5)
             self.tab_buttons[name] = btn
 
-        self.show_tab("Anmeldung")  # Standardansicht
+        # self.show_tab("Anmeldung") # Standardansicht
+        self.show_tab("Einstellungen") # Testansicht
     
     def show_tab(self, name):
         # Tabs anzeigen
@@ -70,7 +71,7 @@ class MainView(tb.Window):
     def create_anmeldung_tab(self):
         frame = tb.Frame(self.tab_container)
 
-        label = tb.Label(frame, text="Wettkampfgruppen", font=("Arial", 14))
+        label = tb.Label(frame, text="Wettkampfgruppen", font=("Arial", 20))
         label.pack(padx=10, pady=(10,0), anchor=W)
 
         entry_frame = tb.Frame(frame)
@@ -84,10 +85,18 @@ class MainView(tb.Window):
         btn.pack(side=LEFT, fill=X, padx=10, pady=10)
 
 
-        #TODO Liste Gruppen
+        coldata = ["Gruppenname","Damen","Reihenfolge","#"]
+        rowdata = [] # ("Schwadorf","Ja","0","X")
+        cell_types = ["label","label","entry", "button"]
+        # commands = [None, self.add_test, None, self.add_test]
 
+        # Prozentuale Spaltenbreiten
+        percent_widths = [70,10,10,10]
 
-        btn = tb.Button(frame, text="Auswertung")
+        table = CustomTable(frame, coldata, rowdata, percent_widths, cell_types=cell_types)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+        btn = tb.Button(frame, text="Bewerb starten")
         btn.pack(side=TOP, fill=X, padx=10, pady=10)
 
         return frame
@@ -135,15 +144,26 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_left, text="Grunddurchgang", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        rowdata = []
 
-        frame_right = tb.Frame(frame, bootstyle=SUCCESS)
+        # Prozentuale Spaltenbreiten
+        percent_widths = [5, 20, 20, 5, 20, 5, 20]
+
+        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+        frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
+        rowdata = []
 
+        # Prozentuale Spaltenbreiten
+        percent_widths = [10, 60, 30]
+
+        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         return frame
     
@@ -153,14 +173,26 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_left, text="KO 1-16", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [5, 20, 20, 5, 20, 5, 20]
+
+        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [10, 60, 30]
+
+        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         return frame
     
@@ -170,14 +202,26 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_left, text="KO 1-8", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [5, 20, 20, 5, 20, 5, 20]
+
+        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [10, 60, 30]
+
+        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         return frame
     
@@ -187,14 +231,26 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_left, text="KO 1-4", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [5, 20, 20, 5, 20, 5, 20]
+
+        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [10, 60, 30]
+
+        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         return frame
     
@@ -204,14 +260,26 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_left, text="Finale", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [5, 20, 20, 5, 20, 5, 20]
+
+        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
 
-        label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
+        rowdata = []
+
+        # Prozentuale Spaltenbreiten
+        percent_widths = [10, 60, 30]
+
+        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
+        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         return frame
     
@@ -293,7 +361,150 @@ class MainView(tb.Window):
     def create_settings_tab(self):
         frame = tb.Frame(self.tab_container)
 
-        label = tb.Label(frame, text="Einstellungen", font=("Arial", 14))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        label = tb.Label(frame, text="Einstellungen", font=("Arial", 20))
+        label.pack(padx=10, pady=10, anchor=W)
+
+        label = tb.Label(frame, text="Eingabe", font=("Arial", 15))
+        label.pack(padx=10, pady=10, anchor=W)
+
+        sub_frame = tb.Frame(frame)
+        sub_frame.pack(fill=X, padx=10, pady=10)
+
+        cb = tb.Checkbutton(sub_frame, text="Tastatur", bootstyle="round-toggle")
+        cb.pack(side=LEFT, padx=10, pady=10)
+
+        cb = tb.Checkbutton(sub_frame, text="GPIO", bootstyle="round-toggle")
+        cb.pack(side=LEFT, padx=10, pady=10)
+
+        cb = tb.Checkbutton(sub_frame, text="Rahmen ausblenden", bootstyle="round-toggle")
+        cb.pack(side=LEFT, padx=10, pady=10)
+
+        cb = tb.Checkbutton(sub_frame, text="Konsole", bootstyle="round-toggle")
+        cb.pack(side=LEFT, padx=10, pady=10)
+
+        cb = tb.Checkbutton(sub_frame, text="Testgruppen", bootstyle="round-toggle")
+        cb.pack(side=LEFT, padx=10, pady=10)
+
+        label = tb.Label(frame, text="Tasten", font=("Arial", 15))
+        label.pack(padx=10, pady=(20,10), anchor=W)
+
+        sub_frame = tb.Frame(frame)
+        sub_frame.pack(fill=X, padx=10, pady=10)
+
+        label = tb.Label(sub_frame, text="Start Bahn 1")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Stopp Bahn 1")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Start Bahn 2")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Stopp Bahn 2")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(frame, text="GPIO", font=("Arial", 15))
+        label.pack(padx=10, pady=(20,10), anchor=W)
+
+        sub_frame = tb.Frame(frame)
+        sub_frame.pack(fill=X, padx=10, pady=10)
+
+        label = tb.Label(sub_frame, text="Start Bahn 1")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Stopp Bahn 1")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Start Bahn 2")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Stopp Bahn 2")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(frame, text="Style", font=("Arial", 15))
+        label.pack(padx=10, pady=(20,10), anchor=W)
+
+        sub_frame = tb.Frame(frame)
+        sub_frame.pack(fill=X, padx=10, pady=10)
+
+        label = tb.Label(sub_frame, text="Schriftgröße Zeit")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Schriftgröße Gruppe")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        btn = tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0)
+        btn.pack(side=LEFT, padx=10, pady=10)
+
+        label = tb.Label(frame, text="Test", font=("Arial", 15))
+        label.pack(padx=10, pady=(20,10), anchor=W)
+
+        sub_frame = tb.Frame(frame)
+        sub_frame.pack(fill=X, padx=10, pady=10)
+
+        label = tb.Label(sub_frame, text="Anzahl Testgruppen")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        label = tb.Label(sub_frame, text="Anzahl Damengruppen")
+        label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+
+        ent = tb.Entry(sub_frame, width=5)
+        ent.pack(side=LEFT, padx=(5,10), pady=10)
+
+        btn = tb.Button(sub_frame, text="Erstellen", takefocus=0)
+        btn.pack(side=LEFT, padx=10, pady=10)
+
+
+        return frame
+    
+    def create_info_tab(self):
+        frame = tb.Frame(self.tab_container)
+
+        label = tb.Label(frame, text="Information", font=("Arial", 20))
+        label.pack(padx=10, pady=(10,20), anchor=W)
+
+        label = tb.Label(frame, text="Version: 3.0")
+        label.pack(padx=10, pady=0, anchor=W)
+
+        label = tb.Label(frame, text="Entwickler: Michael Reichenauer, FF Schwadorf")
+        label.pack(padx=10, pady=0, anchor=W)
+
+        label = tb.Label(frame, text="E-Mail: michael.reichenauer@feuerwehr.gv.at")
+        label.pack(padx=10, pady=0, anchor=W)
+
+
 
         return frame
