@@ -138,7 +138,7 @@ class MainView(tb.Window):
         label = tb.Label(frame_left, text="Grunddurchgang", font=("Arial", 14))
         label.pack(padx=10, pady=(10,0), anchor=W)
 
-        frame_right = tb.Frame(frame)
+        frame_right = tb.Frame(frame, bootstyle=SUCCESS)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
 
         label = tb.Label(frame_right, text="Rangliste", font=("Arial", 14))
