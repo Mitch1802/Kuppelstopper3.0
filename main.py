@@ -1,22 +1,13 @@
-from managers import *
+from managers.gruppen_manager import *
 from gui.main_view import MainView
-from gui.auswertung_view import AuswertungView
-import os, sys
+# from gui.auswertung_view import AuswertungView
+from config.paths import *
 
 def main():
-    pfad = os.path.dirname(os.path.abspath(sys.argv[0]))
-    pfad = pfad.replace('\\', '/')
-
-    KonfigGruppenFile = pfad + '/config/anmeldung.json'
-    KonfigBewerbFile = pfad + '/config/bewerb.json'
-
     gruppen_manager = GruppenManager()
-    gruppen_manager.lade_gruppen(KonfigGruppenFile)
+    gruppen_manager.lade_gruppen(ANMELDUNG_JSON)
 
-    durchgang_manager = DurchgangManager()
-    # durchgang_manager.lade_durchgaenge(KonfigBewerbFile)
-
-    app = MainView(gruppen_manager, durchgang_manager)
+    app = MainView()
     app.mainloop()
 
     # TODO: Ansichtfenster

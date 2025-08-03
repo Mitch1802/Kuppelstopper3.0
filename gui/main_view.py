@@ -1,15 +1,18 @@
 from tkinter import *
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
-from gui.widgets import CustomTable
+from gui.custom_table import CustomTable
+from models import Gruppe
+from managers.gruppen_manager import GruppenManager
 
 
 class MainView(tb.Window):
-    def __init__(self, gruppen_manager, durchgang_manager):
+    def __init__(self):
         super().__init__(themename="litera")
         self.title("Kuppelstopper 3.0")
-        # self.geometry("500x300")
         self.minsize(1600, 1000)
+
+        #  TODO Icon App
 
         self.checked_Bahn_1 = BooleanVar()
         self.checked_Bahn_2 = BooleanVar()
@@ -25,11 +28,11 @@ class MainView(tb.Window):
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
 
-        self.gruppen_manager = gruppen_manager
-        self.durchgang_manager = durchgang_manager
-        self.create_widgets()
+        self.gruppen_manager = GruppenManager()
+        # self.durchgang_manager = durchgang_manager
+        self.setup_ui()
 
-    def create_widgets(self):
+    def setup_ui(self):
         # Container für die Buttons
         button_frame = tb.Frame(self, bootstyle="primary")
         button_frame.pack(fill=X, side=TOP)
@@ -54,8 +57,7 @@ class MainView(tb.Window):
             btn.pack(side=LEFT, ipadx=5, ipady=5)
             self.tab_buttons[name] = btn
 
-        # self.show_tab("Anmeldung") # Standardansicht
-        self.show_tab("Einstellungen") # Testansicht
+        self.show_tab("Anmeldung") # Standardansicht
     
     def show_tab(self, name):
         # Tabs anzeigen
@@ -68,6 +70,7 @@ class MainView(tb.Window):
             style = DARK if n == name else PRIMARY
             btn.configure(bootstyle=style)
 
+    # Anmeldung Tab
     def create_anmeldung_tab(self):
         frame = tb.Frame(self.tab_container)
 
@@ -77,30 +80,52 @@ class MainView(tb.Window):
         entry_frame = tb.Frame(frame)
         entry_frame.pack(fill=X, pady=1, side=TOP)
 
-        ent = tb.Entry(entry_frame)
-        ent.pack(side=LEFT, fill=X, padx=10, pady=10, expand=True)
-        # ent.bind('<Return>', self.addWettkampfgruppe)
+        self.ent_anmeldung = tb.Entry(entry_frame)
+        self.ent_anmeldung.pack(side=LEFT, fill=X, padx=10, pady=10, expand=True)
+        # self.ent_anmeldung.bind('<Return>', self.add_wettkampfgruppe)
 
-        btn = tb.Button(entry_frame, text='Hinzufügen', compound=LEFT)
+        btn = tb.Button(entry_frame, text='Hinzufügen', compound=LEFT, command=self.add_wettkampfgruppe, takefocus=0)
         btn.pack(side=LEFT, fill=X, padx=10, pady=10)
-
 
         coldata = ["Gruppenname","Damen","Reihenfolge","#"]
         rowdata = [] # ("Schwadorf","Ja","0","X")
         cell_types = ["label","label","entry", "button"]
-        # commands = [None, self.add_test, None, self.add_test]
+        commands = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
 
         # Prozentuale Spaltenbreiten
         percent_widths = [70,10,10,10]
 
-        table = CustomTable(frame, coldata, rowdata, percent_widths, cell_types=cell_types)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_gruppen = CustomTable(frame, coldata, rowdata, percent_widths, cell_types=cell_types, commands=commands)
+        self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         btn = tb.Button(frame, text="Bewerb starten")
         btn.pack(side=TOP, fill=X, padx=10, pady=10)
 
         return frame
     
+    def add_wettkampfgruppe(self):
+        """Liest Eingaben aus und speichert die Gruppe über den Manager."""
+        name = self.ent_anmeldung.get()
+        if name:
+            gruppe = Gruppe(name, 0, False)
+            self.gruppen_manager.gruppe_hinzufuegen(gruppe)
+            self.update_table_gruppen()
+
+    def update_table_gruppen(self):
+        """Aktualisiert die Anmeldeten Gruppen Tabelle"""
+        daten_neu =self.gruppen_manager.get_gruppen()
+        self.tbl_gruppen.set_data(daten_neu)
+    
+    def change_damentyp(self):
+        """Ändert den Typ der Wettkampgruppe, ob Damengruppe oder nicht"""
+        pass
+
+    def del_wettkampfgruppe(self):
+        """Lösch eine angemeldete Wettkampfgruppe"""
+        pass
+
+
+    # Bewerb Tab
     def create_bewerb_tab(self):
         frame = tb.Frame(self.tab_container)
 
@@ -358,6 +383,7 @@ class MainView(tb.Window):
 
         return frame
     
+    # Einstellungen Tab
     def create_settings_tab(self):
         frame = tb.Frame(self.tab_container)
 
@@ -490,6 +516,7 @@ class MainView(tb.Window):
 
         return frame
     
+    # Info Tab
     def create_info_tab(self):
         frame = tb.Frame(self.tab_container)
 
@@ -505,6 +532,6 @@ class MainView(tb.Window):
         label = tb.Label(frame, text="E-Mail: michael.reichenauer@feuerwehr.gv.at")
         label.pack(padx=10, pady=0, anchor=W)
 
-
-
         return frame
+
+

@@ -15,6 +15,9 @@ class CustomTable:
         self._build_table()
 
     def _build_table(self):
+        print("🔄 Baue Tabelle neu auf mit", len(self.rowdata), "Zeilen")
+
+
         # ScrolledFrame ohne sichtbare Scrollbars
         self.sf = ScrolledFrame(self.master, autohide=False)
         self.table = self.sf.container  # Richtiges Frame für Inhalt
@@ -63,8 +66,23 @@ class CustomTable:
     def destroy(self):
         self.sf.destroy()
 
-    def hide_scrollbars(self):
-        self.sf.hide_scrollbars()
-    
-    def _on_enter(self, event):
-        self.sf.hide_scrollbars()
+    def set_data(self, new_rowdata):
+        """
+        Ersetzt die angezeigten Zeilen durch neue Inhalte.
+        """
+        for gruppe in new_rowdata:
+            gruppe.append("X")
+        
+        if hasattr(self, "sf") and self.sf.winfo_exists():
+            self.table.destroy()
+
+        # Reset intern
+        self.rowdata = new_rowdata
+        self.entry_refs = {}
+
+        # Neuaufbau
+        self._build_table()
+
+
+        # TODO Table neu befüllen
+
