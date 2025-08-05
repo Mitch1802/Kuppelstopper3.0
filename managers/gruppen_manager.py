@@ -1,4 +1,4 @@
-import json, os
+import json, os, random
 from models import Gruppe
 from config.paths import ANMELDUNG_JSON
 
@@ -19,6 +19,37 @@ class GruppenManager:
     def gruppe_hinzufuegen(self, gruppe: Gruppe):
         """Fügt eine Gruppe zur Liste hinzu."""
         self.gruppen.append(gruppe)
+    
+    def testgruppen_hinzufuegen(self, event, anzahl: int, damenAnzahl: int):
+        """Fügt eine Gruppe zur Liste hinzu."""
+        
+        if len(self.gruppen) > 0:
+            self.gruppen = []
+        reihenfolge = []
+        damenReihenfolge = []
+        
+        for i in range(int(anzahl)):
+            rh = random.randint(1,int(anzahl))
+            while rh in reihenfolge:
+                rh = random.randint(1,int(anzahl))
+            reihenfolge.append(rh)
+
+            dwrh = random.randint(1,int(anzahl))
+            while dwrh in damenReihenfolge:
+                dwrh = random.randint(1,int(anzahl))
+            damenReihenfolge.append(dwrh)
+
+            gruppe = Gruppe('Gruppe' + str(i + 1), 'NEIN', str(rh))
+            if dwrh <= int(damenAnzahl):
+                gruppe = Gruppe('Gruppe' + str(i + 1), 'JA', str(rh))
+            self.gruppen.append(gruppe)
+
+    def gruppe_aendern(self, gruppe: Gruppe):
+        """Ändert eine angemeldetete Gruppe"""
+        for grp in self.gruppen:
+            if grp.gruppenname == gruppe[0]:
+                if gruppe[1] == 'JA': grp.damenwertung = 'NEIN'
+                elif gruppe[1] == 'NEIN': grp.damenwertung = 'JA'
 
     def gruppe_loeschen(self, gruppe: Gruppe):
         """Löscht eine angemeldetete Gruppe"""

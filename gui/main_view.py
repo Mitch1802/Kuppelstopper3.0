@@ -75,54 +75,80 @@ class MainView(tb.Window):
         frame = tb.Frame(self.tab_container)
 
         label = tb.Label(frame, text="Wettkampfgruppen", font=("Arial", 20))
-        label.pack(padx=10, pady=(10,0), anchor=W)
+        label.pack(padx=10, pady=(10, 0), anchor=W)
 
         entry_frame = tb.Frame(frame)
         entry_frame.pack(fill=X, pady=1, side=TOP)
 
         self.ent_anmeldung = tb.Entry(entry_frame)
         self.ent_anmeldung.pack(side=LEFT, fill=X, padx=10, pady=10, expand=True)
-        # self.ent_anmeldung.bind('<Return>', self.add_wettkampfgruppe)
+        self.ent_anmeldung.bind('<Return>', self.add_wettkampfgruppe)
 
         btn = tb.Button(entry_frame, text='Hinzufügen', compound=LEFT, command=self.add_wettkampfgruppe, takefocus=0)
         btn.pack(side=LEFT, fill=X, padx=10, pady=10)
 
-        coldata = ["Gruppenname","Damen","Reihenfolge","#"]
-        rowdata = [] # ("Schwadorf","Ja","0","X")
-        cell_types = ["label","label","entry", "button"]
+        coldata = ["Gruppenname", "Damen", "Reihenfolge", "#"]
+        cell_types = ["label", "label", "entry", "button"]
         commands = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
+        percent_widths = [70, 10, 10, 10]
 
-        # Prozentuale Spaltenbreiten
-        percent_widths = [70,10,10,10]
-
-        self.tbl_gruppen = CustomTable(frame, coldata, rowdata, percent_widths, cell_types=cell_types, commands=commands)
+        self.tbl_gruppen = CustomTable(frame, coldata, [], percent_widths, cell_types=cell_types, commands=commands)
         self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
-        btn = tb.Button(frame, text="Bewerb starten")
-        btn.pack(side=TOP, fill=X, padx=10, pady=10)
+        self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten")
+        self.btn_bewerb_starten.pack(side=BOTTOM, fill=X, padx=10, pady=10)
+
+        frame.bind("<Configure>", lambda e: self._delayed_build_table())
 
         return frame
+
+    def _delayed_build_table(self):
+        if not hasattr(self, "_table_built") or not self._table_built:
+            self.after(50, self.update_table_gruppen)
+            self._table_built = True
     
-    def add_wettkampfgruppe(self):
+    def build_and_pack(self):
+        height = self.tbl_gruppen.master.winfo_height()
+        if height < 100:
+            self.after(100, self.build_and_pack)
+            return
+
+        # Tabelle sauber aufbauen (nur 1x)
+        if not self.tbl_gruppen.sf or not self.tbl_gruppen.sf.winfo_exists():
+            self.tbl_gruppen._build_table()
+            self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+        # Jetzt erst Daten setzen
+        self.update_table_gruppen()
+    
+    def add_wettkampfgruppe(self, event=None):
         """Liest Eingaben aus und speichert die Gruppe über den Manager."""
         name = self.ent_anmeldung.get()
         if name:
-            gruppe = Gruppe(name, 0, False)
+            gruppe = Gruppe(name, False, 0)
             self.gruppen_manager.gruppe_hinzufuegen(gruppe)
             self.update_table_gruppen()
+            self.ent_anmeldung.delete(0, END)
 
     def update_table_gruppen(self):
         """Aktualisiert die Anmeldeten Gruppen Tabelle"""
-        daten_neu =self.gruppen_manager.get_gruppen()
-        self.tbl_gruppen.set_data(daten_neu)
+        daten_neu = self.gruppen_manager.get_gruppen()
+        if self.tbl_gruppen and self.tbl_gruppen.sf and self.tbl_gruppen.sf.winfo_exists():
+            self.tbl_gruppen.set_data(daten_neu)
+        else:
+            self.tbl_gruppen.rowdata = daten_neu
+            self.tbl_gruppen._build_table()
+            self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     
-    def change_damentyp(self):
+    def change_damentyp(self, data, row, column):
         """Ändert den Typ der Wettkampgruppe, ob Damengruppe oder nicht"""
-        pass
+        self.gruppen_manager.gruppe_aendern(data)
+        self.update_table_gruppen()
 
-    def del_wettkampfgruppe(self):
+    def del_wettkampfgruppe(self, data, row, column):
         """Lösch eine angemeldete Wettkampfgruppe"""
-        pass
+        self.gruppen_manager.gruppe_loeschen(data)
+        self.update_table_gruppen()
 
 
     # Bewerb Tab
@@ -501,20 +527,28 @@ class MainView(tb.Window):
         label = tb.Label(sub_frame, text="Anzahl Testgruppen")
         label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
 
-        ent = tb.Entry(sub_frame, width=5)
-        ent.pack(side=LEFT, padx=(5,10), pady=10)
+        self.test_gruppen_anzahl = tb.Entry(sub_frame, width=5)
+        self.test_gruppen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
         label = tb.Label(sub_frame, text="Anzahl Damengruppen")
         label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
 
-        ent = tb.Entry(sub_frame, width=5)
-        ent.pack(side=LEFT, padx=(5,10), pady=10)
+        self.test_damen_anzahl = tb.Entry(sub_frame, width=5)
+        self.test_damen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
-        btn = tb.Button(sub_frame, text="Erstellen", takefocus=0)
+        btn = tb.Button(sub_frame, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)
 
 
         return frame
+    
+    def testgruppen_hinzufuegen(self):     
+        """Erstellt die angemeldeteten Gruppen aufgrund der Anzahl"""
+        anzahl = self.test_gruppen_anzahl.get()
+        damenAnzahl = self.test_damen_anzahl.get()
+        self.gruppen_manager.testgruppen_hinzufuegen(self, anzahl, damenAnzahl)
+        self.update_table_gruppen()
+        self.show_tab("Anmeldung")
     
     # Info Tab
     def create_info_tab(self):

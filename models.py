@@ -4,13 +4,13 @@ class Gruppe:
 
     Attribute:
         gruppenname (str): Name der Gruppe.
-        reihenfolge (int): Startreihenfolge im Bewerb.
         damenwertung (bool): True, wenn die Gruppe in der Damenwertung startet.
+        reihenfolge (int): Startreihenfolge im Bewerb.
     """
-    def __init__(self, gruppenname, reihenfolge, damenwertung):
+    def __init__(self, gruppenname, damenwertung, reihenfolge):
         self.gruppenname = gruppenname
-        self.reihenfolge = reihenfolge
         self.damenwertung = damenwertung
+        self.reihenfolge = reihenfolge
     
     def to_dict(self):
         return [
