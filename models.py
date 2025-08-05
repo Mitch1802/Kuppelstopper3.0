@@ -12,7 +12,7 @@ class Gruppe:
         self.damenwertung = damenwertung
         self.reihenfolge = reihenfolge
     
-    def to_dict(self):
+    def to_list(self):
         return [
             self.gruppenname,
             self.damenwertung,

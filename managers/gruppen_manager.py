@@ -63,7 +63,7 @@ class GruppenManager:
 
     def get_gruppen(self):
         """Gibt die Liste der angemeldeteten Gruppen zurück"""
-        return [g.to_dict() for g in self.gruppen]
+        return [grp.to_list() + ['X'] for grp in self.gruppen]
 
 
 

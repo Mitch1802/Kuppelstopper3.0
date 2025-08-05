@@ -98,14 +98,9 @@ class MainView(tb.Window):
         self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten")
         self.btn_bewerb_starten.pack(side=BOTTOM, fill=X, padx=10, pady=10)
 
-        frame.bind("<Configure>", lambda e: self._delayed_build_table())
+        frame.bind("<Configure>", lambda e: self.build_and_pack())
 
         return frame
-
-    def _delayed_build_table(self):
-        if not hasattr(self, "_table_built") or not self._table_built:
-            self.after(50, self.update_table_gruppen)
-            self._table_built = True
     
     def build_and_pack(self):
         height = self.tbl_gruppen.master.winfo_height()
@@ -114,9 +109,8 @@ class MainView(tb.Window):
             return
 
         # Tabelle sauber aufbauen (nur 1x)
-        if not self.tbl_gruppen.sf or not self.tbl_gruppen.sf.winfo_exists():
-            self.tbl_gruppen._build_table()
-            self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_gruppen._build_table()
+        self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         # Jetzt erst Daten setzen
         self.update_table_gruppen()
@@ -133,12 +127,7 @@ class MainView(tb.Window):
     def update_table_gruppen(self):
         """Aktualisiert die Anmeldeten Gruppen Tabelle"""
         daten_neu = self.gruppen_manager.get_gruppen()
-        if self.tbl_gruppen and self.tbl_gruppen.sf and self.tbl_gruppen.sf.winfo_exists():
-            self.tbl_gruppen.set_data(daten_neu)
-        else:
-            self.tbl_gruppen.rowdata = daten_neu
-            self.tbl_gruppen._build_table()
-            self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_gruppen.set_data(daten_neu)
     
     def change_damentyp(self, data, row, column):
         """Ändert den Typ der Wettkampgruppe, ob Damengruppe oder nicht"""
