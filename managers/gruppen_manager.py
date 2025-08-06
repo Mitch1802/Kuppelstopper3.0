@@ -53,8 +53,9 @@ class GruppenManager:
 
     def gruppe_loeschen(self, gruppe: Gruppe):
         """Löscht eine angemeldetete Gruppe"""
-        # self.gruppen.append(gruppe)
-        pass
+        for grp in self.gruppen:
+            if grp.gruppenname == gruppe[0]:
+                self.gruppen.remove(grp)
 
     def speichere_anmeldung(self, pfad=ANMELDUNG_JSON):
         """Speichert die Gruppenliste als JSON."""

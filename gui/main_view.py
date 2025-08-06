@@ -87,7 +87,7 @@ class MainView(tb.Window):
         btn = tb.Button(entry_frame, text='Hinzufügen', compound=LEFT, command=self.add_wettkampfgruppe, takefocus=0)
         btn.pack(side=LEFT, fill=X, padx=10, pady=10)
 
-        coldata = ["Gruppenname", "Damen", "Reihenfolge", "#"]
+        coldata = ["Gruppenname", "Damen", "Reihenfolge", ""]
         cell_types = ["label", "label", "entry", "button"]
         commands = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
         percent_widths = [70, 10, 10, 10]
@@ -119,7 +119,7 @@ class MainView(tb.Window):
         """Liest Eingaben aus und speichert die Gruppe über den Manager."""
         name = self.ent_anmeldung.get()
         if name:
-            gruppe = Gruppe(name, False, 0)
+            gruppe = Gruppe(name, 'NEIN', 0)
             self.gruppen_manager.gruppe_hinzufuegen(gruppe)
             self.update_table_gruppen()
             self.ent_anmeldung.delete(0, END)
@@ -129,12 +129,12 @@ class MainView(tb.Window):
         daten_neu = self.gruppen_manager.get_gruppen()
         self.tbl_gruppen.set_data(daten_neu)
     
-    def change_damentyp(self, data, row, column):
+    def change_damentyp(self, data):
         """Ändert den Typ der Wettkampgruppe, ob Damengruppe oder nicht"""
         self.gruppen_manager.gruppe_aendern(data)
         self.update_table_gruppen()
 
-    def del_wettkampfgruppe(self, data, row, column):
+    def del_wettkampfgruppe(self, data):
         """Lösch eine angemeldete Wettkampfgruppe"""
         self.gruppen_manager.gruppe_loeschen(data)
         self.update_table_gruppen()
@@ -528,7 +528,6 @@ class MainView(tb.Window):
         btn = tb.Button(sub_frame, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)
 
-
         return frame
     
     def testgruppen_hinzufuegen(self):     
@@ -537,6 +536,8 @@ class MainView(tb.Window):
         damenAnzahl = self.test_damen_anzahl.get()
         self.gruppen_manager.testgruppen_hinzufuegen(self, anzahl, damenAnzahl)
         self.update_table_gruppen()
+        self.test_gruppen_anzahl.delete(0, END)
+        self.test_damen_anzahl.delete(0, END)
         self.show_tab("Anmeldung")
     
     # Info Tab

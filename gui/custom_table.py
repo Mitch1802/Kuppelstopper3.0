@@ -29,7 +29,7 @@ class CustomTable(tb.Frame):
         self.header_frame.grid(row=0, column=0, sticky=EW)
 
         # 2) CANVAS in Zeile 1, Spalte 0
-        self.canvas = tk.Canvas(self, height=scroll_height, highlightthickness=0)
+        self.canvas = tb.Canvas(self, height=scroll_height, highlightthickness=0)
         self.canvas.grid(row=1, column=0, sticky=NSEW)
 
         # 3) Scrollbar in Zeile 1, Spalte 1
@@ -43,7 +43,7 @@ class CustomTable(tb.Frame):
 
         # 4) Inneres Frame für die Datenzeilen
         self.inner = tb.Frame(self.canvas)
-        self.window_id = self.canvas.create_window((0,0), window=self.inner, anchor='nw')
+        self.window_id = self.canvas.create_window((0,0), window=self.inner, anchor=NW)
         self.inner.bind('<Configure>', self._on_inner_configure)
 
         # Mausrad-Bindings
@@ -57,15 +57,33 @@ class CustomTable(tb.Frame):
         for w in self.header_frame.winfo_children():
             w.destroy()
         for j, header in enumerate(self.coldata):
-            lbl = tb.Label(self.header_frame, text=header, anchor=W, bootstyle=PRIMARY)
+            lbl = tb.Label(self.header_frame, text=header, justify=LEFT, bootstyle=PRIMARY)
             lbl.grid(row=0, column=j, sticky=EW, padx=2, pady=2)
         for j, w in enumerate(self.percent_widths):
             self.header_frame.grid_columnconfigure(j, weight=w)
 
     def _on_inner_configure(self, event):
-        # Scrollregion & Breite anpassen, wenn sich inner verändert
+        # erst das Scrollregion-Update
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
-        self.canvas.itemconfigure(self.window_id, width=self.canvas.winfo_width())
+
+        # verfügbare Breite im Canvas abfragen
+        total_width = self.canvas.winfo_width()
+
+        # Summe der Gewichte
+        total_weight = sum(self.percent_widths)
+
+        # für jede Spalte pixelgenaues minsize setzen
+        x = 0
+        for j, w in enumerate(self.percent_widths):
+            # Spaltenbreite in Pixel
+            col_w = int(total_width * (w / total_weight))
+            # Header und inner synchron
+            self.header_frame.grid_columnconfigure(j, minsize=col_w, weight=0)
+            self.inner.grid_columnconfigure(j, minsize=col_w, weight=0)
+            x += col_w
+
+        # Fenster-Breite des inner-Frames an Canvas koppeln
+        self.canvas.itemconfigure(self.window_id, width=total_width)
 
     def _on_mousewheel(self, event):
         delta = int(-1*(event.delta/120))
@@ -81,24 +99,27 @@ class CustomTable(tb.Frame):
             cells = list(row) + [''] * (len(self.coldata) - len(row))
             for j, value in enumerate(cells):
                 ctype = self.cell_types[j]
-                if ctype == 'label':
-                    widget = tb.Label(self.inner, text=value, anchor=W)
-                elif ctype == 'entry':
+                command = self.commands[j]
+                if ctype == 'entry':
                     widget = tb.Entry(self.inner)
                     widget.insert(0, value)
                     self.entry_refs[(i-1, j)] = widget
                 elif ctype == 'button':
                     cmd = self.commands[j]
-                    widget = tb.Button(self.inner, text=value,
-                                       command=partial(cmd, row) if cmd else None)
+                    widget = tb.Button(self.inner, text=value, command=partial(cmd, row) if cmd else None)
                 else:
                     widget = tb.Label(self.inner, text=value)
-                widget.grid(row=i, column=j, sticky='ew', padx=2, pady=2)
+                    if command:
+                         widget.bind("<Button-1>", partial(self._on_label_click, command, row))
+                widget.grid(row=i, column=j, sticky=EW, padx=2, pady=2)
 
         # Spaltengewichte in inner UND header synchronisieren
         for j, w in enumerate(self.percent_widths):
             self.inner.grid_columnconfigure(j, weight=w)
-            self.header_frame.grid_columnconfigure(j, weight=w)
+            # self.header_frame.grid_columnconfigure(j, weight=w)
+    
+    def _on_label_click(self, command, value, event):
+        command(value)
 
     def set_data(self, new_rowdata):
         self.rowdata = [list(r) + ['']*(len(self.coldata)-len(r)) for r in new_rowdata]
