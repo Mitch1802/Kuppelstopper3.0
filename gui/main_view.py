@@ -31,6 +31,22 @@ class MainView(tb.Window):
 
         self.gruppen_manager = GruppenManager()
         self.durchgang_manager = DurchgangManager()
+
+        self.coldata_gruppen = ["Gruppenname", "Damen", "Reihenfolge", ""]
+        self.coldata_bewerb = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        self.coldata_rang = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
+
+        
+        self.cell_types_gruppen = ["label", "label", "entry", "button"]
+
+
+        self.commands_gruppen = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
+
+
+        self.percent_widths_gruppen = [70, 10, 10, 10]
+        self.percent_widths_bewerb = [5, 20, 20, 5, 20, 5, 20]
+        self.percent_widths_rang = [10, 60, 30]
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -88,33 +104,14 @@ class MainView(tb.Window):
         btn = tb.Button(entry_frame, text='Hinzufügen', compound=LEFT, command=self.add_wettkampfgruppe, takefocus=0)
         btn.pack(side=LEFT, fill=X, padx=10, pady=10)
 
-        coldata = ["Gruppenname", "Damen", "Reihenfolge", ""]
-        cell_types = ["label", "label", "entry", "button"]
-        commands = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
-        percent_widths = [70, 10, 10, 10]
-
-        self.tbl_gruppen = CustomTable(frame, coldata, [], percent_widths, cell_types=cell_types, commands=commands)
-        self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_gruppen = CustomTable(frame, self.coldata_gruppen, [], self.percent_widths_gruppen, cell_types=self.cell_types_gruppen, commands=self.commands_gruppen)
 
         self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten", command=self.gruppen_uebernehmen)
         self.btn_bewerb_starten.pack(side=BOTTOM, fill=X, padx=10, pady=10)
 
-        frame.bind("<Configure>", lambda e: self.build_and_pack())
+        frame.bind("<Configure>", lambda e, obj=self.tbl_gruppen: self.tbl_build(obj))
 
         return frame
-    
-    def build_and_pack(self):
-        height = self.tbl_gruppen.master.winfo_height()
-        if height < 100:
-            self.after(100, self.build_and_pack)
-            return
-
-        # Tabelle sauber aufbauen (nur 1x)
-        self.tbl_gruppen._build_table()
-        self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-
-        # Jetzt erst Daten setzen
-        self.update_table_gruppen()
     
     def add_wettkampfgruppe(self, event=None):
         """Liest Eingaben aus und speichert die Gruppe über den Manager."""
@@ -122,23 +119,18 @@ class MainView(tb.Window):
         if name:
             gruppe = Gruppe(name, 'NEIN', 0)
             self.gruppen_manager.gruppe_hinzufuegen(gruppe)
-            self.update_table_gruppen()
+            self.tbl_gruppen_update()
             self.ent_anmeldung.delete(0, END)
 
-    def update_table_gruppen(self):
-        """Aktualisiert die Anmeldeten Gruppen Tabelle"""
-        daten_neu = self.gruppen_manager.get_gruppen()
-        self.tbl_gruppen.set_data(daten_neu)
-    
     def change_damentyp(self, data):
         """Ändert den Typ der Wettkampgruppe, ob Damengruppe oder nicht"""
         self.gruppen_manager.gruppe_aendern(data)
-        self.update_table_gruppen()
+        self.tbl_gruppen_update()
 
     def del_wettkampfgruppe(self, data):
         """Lösch eine angemeldete Wettkampfgruppe"""
         self.gruppen_manager.gruppe_loeschen(data)
-        self.update_table_gruppen()
+        self.tbl_gruppen_update()
 
     def gruppen_uebernehmen(self):
         """Übernimmt die angemeldeten Gruppen für den Bewerb"""
@@ -192,26 +184,14 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [5, 20, 20, 5, 20, 5, 20]
-
-        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_gd_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        frame_left.bind("<Configure>", lambda e, obj=self.tbl_gd_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
-
-        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [10, 60, 30]
-
-        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        
+        self.tbl_gd_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        frame_right.bind("<Configure>", lambda e, obj=self.tbl_gd_rang: self.tbl_build(obj))
 
         return frame
     
@@ -221,26 +201,14 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [5, 20, 20, 5, 20, 5, 20]
-
-        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_ko16_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        frame_left.bind("<Configure>", lambda e, obj=self.tbl_ko16_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
-
-        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [10, 60, 30]
-
-        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        
+        self.tbl_ko16_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        frame_right.bind("<Configure>", lambda e, obj=self.tbl_ko16_rang: self.tbl_build(obj))
 
         return frame
     
@@ -250,26 +218,14 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [5, 20, 20, 5, 20, 5, 20]
-
-        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_ko8_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        frame_left.bind("<Configure>", lambda e, obj=self.tbl_ko8_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
-
-        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [10, 60, 30]
-
-        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        
+        self.tbl_ko8_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        frame_right.bind("<Configure>", lambda e, obj=self.tbl_ko8_rang: self.tbl_build(obj))
 
         return frame
     
@@ -279,26 +235,14 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [5, 20, 20, 5, 20, 5, 20]
-
-        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_ko4_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        frame_left.bind("<Configure>", lambda e, obj=self.tbl_ko4_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
-
-        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [10, 60, 30]
-
-        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        
+        self.tbl_ko4_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        frame_right.bind("<Configure>", lambda e, obj=self.tbl_ko4_rang: self.tbl_build(obj))
 
         return frame
     
@@ -308,26 +252,14 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        coldata = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [5, 20, 20, 5, 20, 5, 20]
-
-        table = CustomTable(frame_left, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.tbl_finale_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        frame_left.bind("<Configure>", lambda e, obj=self.tbl_finale_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
-
-        coldata = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
-        rowdata = []
-
-        # Prozentuale Spaltenbreiten
-        percent_widths = [10, 60, 30]
-
-        table = CustomTable(frame_right, coldata, rowdata, percent_widths)
-        table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        
+        self.tbl_finale_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        frame_right.bind("<Configure>", lambda e, obj=self.tbl_finale_rang: self.tbl_build(obj))
 
         return frame
     
@@ -543,7 +475,7 @@ class MainView(tb.Window):
         anzahl = self.test_gruppen_anzahl.get()
         damenAnzahl = self.test_damen_anzahl.get()
         self.gruppen_manager.testgruppen_hinzufuegen(self, anzahl, damenAnzahl)
-        self.update_table_gruppen()
+        self.tbl_gruppen_update()
         self.test_gruppen_anzahl.delete(0, END)
         self.test_damen_anzahl.delete(0, END)
         self.show_tab("Anmeldung")
@@ -566,4 +498,48 @@ class MainView(tb.Window):
 
         return frame
 
+    # Hilfsfunktionen Tables    
+    def tbl_build(self, table_object):
+        """Erstellt und packt eine Tabelle """
+        height = table_object.master.winfo_height()
+        if height < 100:
+            self.after(100, lambda: self.tbl_build(table_object))
+            return
 
+        table_object._build_table()
+        table_object.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+    
+    def tbl_gruppen_update(self):
+        """Holt aktuelle Daten und updaten die Tabellendaten"""
+        daten_neu = self.gruppen_manager.get_gruppen()
+        self.tbl_gruppen.set_data(daten_neu)
+
+    def tbl_gd_bewerb_update(self):
+        pass
+
+    def tbl_gd_rang_update(self):
+        pass
+
+    def tbl_ko16_bewerb_update(self):
+        pass
+
+    def tbl_ko16_rang_update(self):
+        pass
+
+    def tbl_ko8_bewerb_update(self):
+        pass
+
+    def tbl_ko8_rang_update(self):
+        pass
+
+    def tbl_ko4_bewerb_update(self):
+        pass
+
+    def tbl_ko4_rang_update(self):
+        pass
+
+    def tbl_finale_bewerb_update(self):
+        pass
+
+    def tbl_finale_rang_update(self):
+        pass

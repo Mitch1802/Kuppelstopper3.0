@@ -116,7 +116,6 @@ class CustomTable(tb.Frame):
         # Spaltengewichte in inner UND header synchronisieren
         for j, w in enumerate(self.percent_widths):
             self.inner.grid_columnconfigure(j, weight=w)
-            # self.header_frame.grid_columnconfigure(j, weight=w)
     
     def _on_label_click(self, command, value, event):
         command(value)
