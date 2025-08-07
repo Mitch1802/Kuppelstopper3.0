@@ -4,6 +4,7 @@ from models import Durchgang
 class DurchgangManager:
     """Verwaltet Durchgänge und Bestzeiten."""
     def __init__(self):
+        self.gruppen = []
         self.durchgaenge = []
 
     def lade_durchgaenge(self, pfad):
@@ -16,3 +17,11 @@ class DurchgangManager:
         """Berechnet für jeden Durchgang die beste Zeit."""
         for dg in self.durchgaenge:
             dg.bestzeit_wert = dg.bestzeit()
+    
+    def uebernehme_angemeldete_gruppen(self, gruppen):
+        """Übernheme alle angemeldeten Gruppen """
+        self.gruppen = gruppen
+
+    def lade_grunddurchgang(self):
+        """Lade Gruppen für Grunddruchgang"""
+        pass

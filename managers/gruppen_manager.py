@@ -63,8 +63,9 @@ class GruppenManager:
             json.dump([vars(g) for g in self.gruppen], f, indent=2, ensure_ascii=False)
 
     def get_gruppen(self):
-        """Gibt die Liste der angemeldeteten Gruppen zurück"""
+        """Gibt die Liste der angemeldeteten Gruppen zurück für Tabelleneinträge"""
         return [grp.to_list() + ['X'] for grp in self.gruppen]
 
-
-
+    def gruppen_uebernehmen(self):
+        """Gibt die Liste der angemeldeteten Gruppen zurück"""
+        return [grp.to_list() for grp in self.gruppen]

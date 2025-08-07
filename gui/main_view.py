@@ -4,6 +4,7 @@ from ttkbootstrap.constants import *
 from gui.custom_table import CustomTable
 from models import Gruppe
 from managers.gruppen_manager import GruppenManager
+from managers.durchgang_manager import DurchgangManager
 
 
 class MainView(tb.Window):
@@ -29,7 +30,7 @@ class MainView(tb.Window):
         self.checked_Konsole.set(True)
 
         self.gruppen_manager = GruppenManager()
-        # self.durchgang_manager = durchgang_manager
+        self.durchgang_manager = DurchgangManager()
         self.setup_ui()
 
     def setup_ui(self):
@@ -95,7 +96,7 @@ class MainView(tb.Window):
         self.tbl_gruppen = CustomTable(frame, coldata, [], percent_widths, cell_types=cell_types, commands=commands)
         self.tbl_gruppen.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
-        self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten")
+        self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten", command=self.gruppen_uebernehmen)
         self.btn_bewerb_starten.pack(side=BOTTOM, fill=X, padx=10, pady=10)
 
         frame.bind("<Configure>", lambda e: self.build_and_pack())
@@ -139,6 +140,13 @@ class MainView(tb.Window):
         self.gruppen_manager.gruppe_loeschen(data)
         self.update_table_gruppen()
 
+    def gruppen_uebernehmen(self):
+        """Übernimmt die angemeldeten Gruppen für den Bewerb"""
+        self.gruppen_manager.speichere_anmeldung()
+        ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
+        self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
+        self.durchgang_manager.lade_grunddurchgang()
+        self.show_tab("Bewerb")
 
     # Bewerb Tab
     def create_bewerb_tab(self):
