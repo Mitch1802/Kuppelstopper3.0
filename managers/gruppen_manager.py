@@ -22,6 +22,13 @@ class GruppenManager:
     
     def testgruppen_hinzufuegen(self, event, anzahl: int, damenAnzahl: int):
         """Fügt eine Gruppe zur Liste hinzu."""
+
+        if not anzahl.isdigit():
+            anzahl = 0
+        
+        if not damenAnzahl.isdigit():
+            damenAnzahl = 0
+
         
         if len(self.gruppen) > 0:
             self.gruppen = []

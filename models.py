@@ -37,10 +37,8 @@ class Durchgang:
         fehlerbest (int): Fehler der besten Zeit.
         bestzeitinklfehler (str): Beste Zeit inkl. Fehler.
     """
-    def __init__(self, typ, row, column, wettkampfgruppe, zeit1='', fehler1=0, zeit2='', fehler2=0, durchgang=0, hinweis='', platzierung=0):
+    def __init__(self, typ, wettkampfgruppe, zeit1='', fehler1=0, zeit2='', fehler2=0, durchgang=0, hinweis='', platzierung=0):
         self.typ = typ
-        self.row = row
-        self.column = column
         self.dg = durchgang
         self.wettkampfgruppe = wettkampfgruppe
         self.zeit1 = zeit1

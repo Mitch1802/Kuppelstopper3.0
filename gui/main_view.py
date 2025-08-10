@@ -36,12 +36,13 @@ class MainView(tb.Window):
         self.coldata_bewerb = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
         self.coldata_rang = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
 
-        
         self.cell_types_gruppen = ["label", "label", "entry", "button"]
-
+        self.cell_types_bewerb = ["label", "label", "label", "label", "label", "label","button"]
+        self.cell_types_rang = ["label", "label", "label"]
 
         self.commands_gruppen = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
-
+        self.commands_bewerb = [None, self.change_durchgang_gruppe, None, None, None, None, None]
+        self.commands_rang = [None, None, None]
 
         self.percent_widths_gruppen = [70, 10, 10, 10]
         self.percent_widths_bewerb = [5, 20, 20, 5, 20, 5, 20]
@@ -137,7 +138,7 @@ class MainView(tb.Window):
         self.gruppen_manager.speichere_anmeldung()
         ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
         self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
-        self.durchgang_manager.lade_grunddurchgang()
+        self.lade_grunddurchgang()
         self.show_tab("Bewerb")
 
     # Bewerb Tab
@@ -184,13 +185,13 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        self.tbl_gd_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        self.tbl_gd_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb, cell_types=self.cell_types_bewerb, commands=self.commands_bewerb)
         frame_left.bind("<Configure>", lambda e, obj=self.tbl_gd_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
         
-        self.tbl_gd_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        self.tbl_gd_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang, cell_types=self.cell_types_rang, commands=self.commands_rang)
         frame_right.bind("<Configure>", lambda e, obj=self.tbl_gd_rang: self.tbl_build(obj))
 
         return frame
@@ -201,13 +202,13 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        self.tbl_ko16_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        self.tbl_ko16_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb, cell_types=self.cell_types_bewerb, commands=self.commands_bewerb)
         frame_left.bind("<Configure>", lambda e, obj=self.tbl_ko16_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
         
-        self.tbl_ko16_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        self.tbl_ko16_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang, cell_types=self.cell_types_rang, commands=self.commands_rang)
         frame_right.bind("<Configure>", lambda e, obj=self.tbl_ko16_rang: self.tbl_build(obj))
 
         return frame
@@ -218,13 +219,13 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        self.tbl_ko8_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        self.tbl_ko8_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb, cell_types=self.cell_types_bewerb, commands=self.commands_bewerb)
         frame_left.bind("<Configure>", lambda e, obj=self.tbl_ko8_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
         
-        self.tbl_ko8_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        self.tbl_ko8_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang, cell_types=self.cell_types_rang, commands=self.commands_rang)
         frame_right.bind("<Configure>", lambda e, obj=self.tbl_ko8_rang: self.tbl_build(obj))
 
         return frame
@@ -235,13 +236,13 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        self.tbl_ko4_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        self.tbl_ko4_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb, cell_types=self.cell_types_bewerb, commands=self.commands_bewerb)
         frame_left.bind("<Configure>", lambda e, obj=self.tbl_ko4_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
         
-        self.tbl_ko4_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        self.tbl_ko4_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang, cell_types=self.cell_types_rang, commands=self.commands_rang)
         frame_right.bind("<Configure>", lambda e, obj=self.tbl_ko4_rang: self.tbl_build(obj))
 
         return frame
@@ -252,13 +253,13 @@ class MainView(tb.Window):
         frame_left = tb.Frame(frame)
         frame_left.pack(side=LEFT, fill=BOTH, expand=True)
 
-        self.tbl_finale_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb)
+        self.tbl_finale_bewerb = CustomTable(frame_left, self.coldata_bewerb, [], self.percent_widths_bewerb, cell_types=self.cell_types_bewerb, commands=self.commands_bewerb)
         frame_left.bind("<Configure>", lambda e, obj=self.tbl_finale_bewerb: self.tbl_build(obj))
 
         frame_right = tb.Frame(frame)
         frame_right.pack(side=LEFT, fill=BOTH, expand=True)
         
-        self.tbl_finale_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang)
+        self.tbl_finale_rang = CustomTable(frame_right, self.coldata_rang, [], self.percent_widths_rang, cell_types=self.cell_types_rang, commands=self.commands_rang)
         frame_right.bind("<Configure>", lambda e, obj=self.tbl_finale_rang: self.tbl_build(obj))
 
         return frame
@@ -306,7 +307,7 @@ class MainView(tb.Window):
         
         self.CB1 = tb.Checkbutton(self.LfBahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0) #, command=self.switchBahn1State, takefocus = 0)
         self.CB1.grid(row=0, column=0, padx=10)
-        self.G1 = tb.Label(self.LfBahnen, text='Unterwaltersdorf') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.G1 = tb.Label(self.LfBahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.G1 .grid(row=0, column=1, padx=10, sticky=W)
         self.T1 = tb.Label(self.LfBahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.T1.grid(row=0, column=2, padx=10)
@@ -317,7 +318,7 @@ class MainView(tb.Window):
 
         self.CB2 = tb.Checkbutton(self.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0) #, command=self.switchBahn2State, takefocus = 0)
         self.CB2.grid(row=1, column=0, padx=10)
-        self.G2 = tb.Label(self.LfBahnen, text='Eckartsau') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.G2 = tb.Label(self.LfBahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.G2 .grid(row=1, column=1, padx=10, sticky=W)
         self.T2 = tb.Label(self.LfBahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.T2.grid(row=1, column=2, padx=10)
@@ -338,6 +339,12 @@ class MainView(tb.Window):
 
         return frame
     
+    def lade_grunddurchgang(self):
+        self.durchgang_manager.lade_grunddurchgang()
+
+    def change_durchgang_gruppe(self):
+        pass
+
     # Einstellungen Tab
     def create_settings_tab(self):
         frame = tb.Frame(self.tab_container)
@@ -498,7 +505,12 @@ class MainView(tb.Window):
 
         return frame
 
-    # Hilfsfunktionen Tables    
+    # Hilfsfunktionen Tables
+     
+    def tbl_sort(self, bedingung1, bedingung2):
+        """Kann die Tabellen grunddaten sortieren nach Bedingung 1  bzw Bedingung 2"""
+        pass
+
     def tbl_build(self, table_object):
         """Erstellt und packt eine Tabelle """
         height = table_object.master.winfo_height()
@@ -515,7 +527,10 @@ class MainView(tb.Window):
         self.tbl_gruppen.set_data(daten_neu)
 
     def tbl_gd_bewerb_update(self):
-        pass
+        """Holt aktuelle Daten und updaten die Tabellendaten"""
+        # daten_neu = self.durchgang_manager.get_gruppen()
+        daten_neu = []
+        self.tbl_gruppen.set_data(daten_neu)
 
     def tbl_gd_rang_update(self):
         pass
