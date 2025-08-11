@@ -37,7 +37,7 @@ class MainView(tb.Window):
         self.coldata_rang = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
 
         self.cell_types_gruppen = ["label", "label", "entry", "button"]
-        self.cell_types_bewerb = ["label", "label", "label", "label", "label", "label","button"]
+        self.cell_types_bewerb = ["label", "label", "label", "label", "label", "label","label"]
         self.cell_types_rang = ["label", "label", "label"]
 
         self.commands_gruppen = [None, self.change_damentyp, None, self.del_wettkampfgruppe]
@@ -107,7 +107,7 @@ class MainView(tb.Window):
 
         self.tbl_gruppen = CustomTable(frame, self.coldata_gruppen, [], self.percent_widths_gruppen, cell_types=self.cell_types_gruppen, commands=self.commands_gruppen)
 
-        self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten", command=self.gruppen_uebernehmen)
+        self.btn_bewerb_starten = tb.Button(frame, text="Bewerb starten", command=self.gruppen_uebernehmen, takefocus=0)
         self.btn_bewerb_starten.pack(side=BOTTOM, fill=X, padx=10, pady=10)
 
         frame.bind("<Configure>", lambda e, obj=self.tbl_gruppen: self.tbl_build(obj))
@@ -340,7 +340,11 @@ class MainView(tb.Window):
         return frame
     
     def lade_grunddurchgang(self):
-        self.durchgang_manager.lade_grunddurchgang()
+        daten_gd = self.durchgang_manager.lade_grunddurchgang()
+        self.tbl_gd_bewerb_update(daten_gd)
+
+        daten_gd_plazierung = self.durchgang_manager.sort_tbl_rang_daten(daten_gd)
+        self.tbl_gd_rang_update(daten_gd_plazierung)
 
     def change_durchgang_gruppe(self):
         pass
@@ -526,14 +530,15 @@ class MainView(tb.Window):
         daten_neu = self.gruppen_manager.get_gruppen()
         self.tbl_gruppen.set_data(daten_neu)
 
-    def tbl_gd_bewerb_update(self):
-        """Holt aktuelle Daten und updaten die Tabellendaten"""
-        # daten_neu = self.durchgang_manager.get_gruppen()
-        daten_neu = []
-        self.tbl_gruppen.set_data(daten_neu)
+    def tbl_gd_bewerb_update(self, daten):
+        """Filtert Daten und updatet die Tabellendaten"""
+        daten_neu = self.durchgang_manager.filter_tbl_bewerb_daten(daten)
+        self.tbl_gd_bewerb.set_data(daten_neu)
 
-    def tbl_gd_rang_update(self):
-        pass
+    def tbl_gd_rang_update(self, daten):
+        """Filtert Daten und updatet die Tabellendaten"""
+        daten_neu = self.durchgang_manager.filter_tbl_rang_daten(daten)
+        self.tbl_gd_rang.set_data(daten_neu)
 
     def tbl_ko16_bewerb_update(self):
         pass

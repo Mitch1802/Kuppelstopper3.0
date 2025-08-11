@@ -37,21 +37,37 @@ class Durchgang:
         fehlerbest (int): Fehler der besten Zeit.
         bestzeitinklfehler (str): Beste Zeit inkl. Fehler.
     """
-    def __init__(self, typ, wettkampfgruppe, zeit1='', fehler1=0, zeit2='', fehler2=0, durchgang=0, hinweis='', platzierung=0):
-        self.typ = typ
+    def __init__(self, durchgang, typ, wettkampfgruppe, zeit1='', fehler1=0, zeit2='', fehler2=0, bestzeit='', fehlerbest=0, bestzeitinklfehler='', hinweis='', platzierung=0):
         self.dg = durchgang
+        self.typ = typ
         self.wettkampfgruppe = wettkampfgruppe
         self.zeit1 = zeit1
         self.fehler1 = fehler1
         self.zeit2 = zeit2
         self.fehler2 = fehler2
-        self.bestzeit = ''
-        self.fehlerbest = 0
-        self.bestzeitinklfehler = ''
+        self.bestzeit = bestzeit
+        self.fehlerbest = fehlerbest
+        self.bestzeitinklfehler = bestzeitinklfehler
         self.hinweis = hinweis
         self.platzierung = platzierung
+    
+    def to_list(self):
+        return [
+            self.dg,
+            self.typ,
+            self.wettkampfgruppe,
+            self.zeit1,
+            self.fehler1,
+            self.zeit2,
+            self.fehler2,
+            self.bestzeit,
+            self.fehlerbest,
+            self.bestzeitinklfehler,
+            self.hinweis,
+            self.platzierung
+        ]
 
-    def bestzeit(self):
+    def berechne_bestzeit(self):
         """
         Gibt die schnellere der beiden Zeiten zurück (ohne Fehler).
 
