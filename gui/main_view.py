@@ -21,6 +21,7 @@ class MainView(tb.Window):
         self.checked_GPIO = BooleanVar()
         self.checked_Rahmen = BooleanVar()
         self.checked_Konsole = BooleanVar()
+        self.checked_Test = BooleanVar()
 
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
@@ -28,6 +29,7 @@ class MainView(tb.Window):
         self.checked_GPIO.set(False)
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
+        self.checked_Test.set(False)
 
         self.gruppen_manager = GruppenManager()
         self.durchgang_manager = DurchgangManager()
@@ -135,10 +137,11 @@ class MainView(tb.Window):
 
     def gruppen_uebernehmen(self):
         """Übernimmt die angemeldeten Gruppen für den Bewerb"""
+        test = self.checked_Test.get()
         self.gruppen_manager.speichere_anmeldung()
         ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
         self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
-        self.lade_grunddurchgang()
+        self.lade_grunddurchgang(test)
         self.show_tab("Bewerb")
 
     # Bewerb Tab
@@ -339,14 +342,14 @@ class MainView(tb.Window):
 
         return frame
     
-    def lade_grunddurchgang(self):
-        daten_gd = self.durchgang_manager.lade_grunddurchgang()
+    def lade_grunddurchgang(self, test):
+        daten_gd = self.durchgang_manager.lade_grunddurchgang(test)
         self.tbl_gd_bewerb_update(daten_gd)
 
-        daten_gd_plazierung = self.durchgang_manager.sort_tbl_rang_daten(daten_gd)
-        self.tbl_gd_rang_update(daten_gd_plazierung)
+        daten_gd_platzierung = self.durchgang_manager.sort_tbl_rang_daten(self.durchgang_manager.TypGD)
+        self.tbl_gd_rang_update(daten_gd_platzierung)
 
-    def change_durchgang_gruppe(self):
+    def change_durchgang_gruppe(self, data):
         pass
 
     # Einstellungen Tab
@@ -362,19 +365,19 @@ class MainView(tb.Window):
         sub_frame = tb.Frame(frame)
         sub_frame.pack(fill=X, padx=10, pady=10)
 
-        cb = tb.Checkbutton(sub_frame, text="Tastatur", bootstyle="round-toggle")
+        cb = tb.Checkbutton(sub_frame, text="Tastatur", variable=self.checked_Tastatur, bootstyle="round-toggle")
         cb.pack(side=LEFT, padx=10, pady=10)
 
-        cb = tb.Checkbutton(sub_frame, text="GPIO", bootstyle="round-toggle")
+        cb = tb.Checkbutton(sub_frame, text="GPIO", variable=self.checked_GPIO, bootstyle="round-toggle")
         cb.pack(side=LEFT, padx=10, pady=10)
 
-        cb = tb.Checkbutton(sub_frame, text="Rahmen ausblenden", bootstyle="round-toggle")
+        cb = tb.Checkbutton(sub_frame, text="Rahmen ausblenden", variable=self.checked_Rahmen, bootstyle="round-toggle")
         cb.pack(side=LEFT, padx=10, pady=10)
 
-        cb = tb.Checkbutton(sub_frame, text="Konsole", bootstyle="round-toggle")
+        cb = tb.Checkbutton(sub_frame, text="Konsole", variable=self.checked_Konsole, bootstyle="round-toggle")
         cb.pack(side=LEFT, padx=10, pady=10)
 
-        cb = tb.Checkbutton(sub_frame, text="Testgruppen", bootstyle="round-toggle")
+        cb = tb.Checkbutton(sub_frame, text="Testgruppen", variable=self.checked_Test, command=self.testframe_anzeigen, bootstyle="round-toggle")
         cb.pack(side=LEFT, padx=10, pady=10)
 
         label = tb.Label(frame, text="Tasten", font=("Arial", 15))
@@ -458,29 +461,34 @@ class MainView(tb.Window):
         btn = tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0)
         btn.pack(side=LEFT, padx=10, pady=10)
 
-        label = tb.Label(frame, text="Test", font=("Arial", 15))
+        self.frame_test = tb.Frame(frame)
+
+        label = tb.Label(self.frame_test, text="Test", font=("Arial", 15))
         label.pack(padx=10, pady=(20,10), anchor=W)
 
-        sub_frame = tb.Frame(frame)
-        sub_frame.pack(fill=X, padx=10, pady=10)
-
-        label = tb.Label(sub_frame, text="Anzahl Testgruppen")
+        label = tb.Label(self.frame_test, text="Anzahl Testgruppen")
         label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
 
-        self.test_gruppen_anzahl = tb.Entry(sub_frame, width=5)
+        self.test_gruppen_anzahl = tb.Entry(self.frame_test, width=5)
         self.test_gruppen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
-        label = tb.Label(sub_frame, text="Anzahl Damengruppen")
+        label = tb.Label(self.frame_test, text="Anzahl Damengruppen")
         label.pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
 
-        self.test_damen_anzahl = tb.Entry(sub_frame, width=5)
+        self.test_damen_anzahl = tb.Entry(self.frame_test, width=5)
         self.test_damen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
-        btn = tb.Button(sub_frame, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
+        btn = tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)
 
         return frame
     
+    def testframe_anzeigen(self):
+        if self.checked_Test.get():
+            self.frame_test.pack(fill=X, padx=10, pady=10)
+        else: 
+            self.frame_test.destroy()
+
     def testgruppen_hinzufuegen(self):     
         """Erstellt die angemeldeteten Gruppen aufgrund der Anzahl"""
         anzahl = self.test_gruppen_anzahl.get()

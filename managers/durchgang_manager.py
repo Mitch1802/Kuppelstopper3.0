@@ -1,4 +1,4 @@
-import json
+import json, random
 from models import Durchgang
 
 class DurchgangManager:
@@ -24,9 +24,25 @@ class DurchgangManager:
     def berechne_bestzeiten(self):
         """Berechnet für jeden Durchgang die beste Zeit."""
         for dg in self.Bewerb:
-            # dg.bestzeit_wert = dg.berechne_bestzeit()
-            pass
-            # TODO Übertrage Bestzeit und Bestezeit inkl. Fehler
+            if dg[3] != '' and dg[5] == '':
+                dg[7] = dg[3]
+                dg[8] = dg[4]
+                dg[9] = self._addiereFehlerZurZeit(dg[3], dg[4])
+            elif dg[3] != '' and dg[5] != '':
+                zeit1_inkl_fehler = self._addiereFehlerZurZeit(dg[3], dg[4])
+                zeit2_inkl_fehler = self._addiereFehlerZurZeit(dg[5], dg[6])
+
+                zeit1_inkl_fehler_milisekunden = self._berechne_milisekunden(zeit1_inkl_fehler)
+                zeit2_inkl_fehler_milisekunden = self._berechne_milisekunden(zeit2_inkl_fehler)
+
+                if zeit1_inkl_fehler_milisekunden < zeit2_inkl_fehler_milisekunden:
+                    dg[7] = dg[3]
+                    dg[8] = dg[4]
+                    dg[9] = zeit1_inkl_fehler
+                elif zeit1_inkl_fehler_milisekunden >= zeit2_inkl_fehler_milisekunden:
+                    dg[7] = dg[5]
+                    dg[8] = dg[6]
+                    dg[9] = zeit2_inkl_fehler
     
     def uebernehme_angemeldete_gruppen(self, gruppen):
         """Übernehme alle angemeldeten Gruppen """
@@ -34,7 +50,7 @@ class DurchgangManager:
         self.Bewerb = []
         self.DGNumbers = []
 
-    def lade_grunddurchgang(self):
+    def lade_grunddurchgang(self, test: bool):
         """Lade Gruppen für Grunddruchgang"""
         self.gruppen.sort(key=lambda x: int(x[2]))
         anzahl_gruppen = len(self.gruppen)
@@ -46,7 +62,7 @@ class DurchgangManager:
         count = 0
         for grp in self.gruppen:
             gruppen_name = grp[0]
-            durchgang = Durchgang(dg, self.TypGD, gruppen_name)
+            durchgang = Durchgang(dg, self.TypGD, gruppen_name, testzeit=test)
             durchgang = durchgang.to_list()
             self.Bewerb.append(durchgang)
 
@@ -152,6 +168,9 @@ class DurchgangManager:
 
         # TODO Befülle DGNumbers Arary mit Nummern der Durchgänge
 
+        if test:
+            self.berechne_bestzeiten()
+
         data_neu = self.filter_bewerb(self.TypGD)
         return data_neu
 
@@ -177,10 +196,86 @@ class DurchgangManager:
         for dg in data:
             gefiltert = [wert for i, wert in enumerate(dg) if i not in index_zu_entfernen]
             data_return.append(gefiltert)
+        
+        # TODO Spaltenreihenfolge ändern laut Splatenüberschrift
 
         return data_return
 
-    def sort_tbl_rang_daten(self, data):
+    def sort_tbl_rang_daten(self, modus):
         """Sortiert Daten für Platzierung"""
-        data.sort(key=lambda x: int(x[11]))
-        return data
+        # data.sort(key=lambda x: int(x[11]))
+
+        daten_gefiltert = [item for item in self.Bewerb if item[1] == modus]
+        daten_sortiert_nach_zeit = sorted(daten_gefiltert, key=self._time_key)
+ 
+        platzierung_neu = 1
+
+        for index, item in enumerate(daten_sortiert_nach_zeit):
+                platzierung_neu = index + 1
+                item[11] = platzierung_neu
+
+        return daten_sortiert_nach_zeit
+    
+    def generiere_zufallsszeit(self, max_minutes: int = 1) -> str:
+        """Gibt eine zufällige Zeit im Format 'minute:sekunde:millisekunde' zurück."""
+        ms_total = random.randint(0, max_minutes * 60 * 1000 - 1)
+        minute = ms_total // 60000
+        sekunde = (ms_total % 60000) // 1000
+        millisekunde = ms_total % 1000
+        return f"{minute:02}:{sekunde:02}:{millisekunde:02}"
+    
+    def _addiereFehlerZurZeit(self, zeit, fehler):
+        """Addiert die Fehler zur Zeit"""
+        t = zeit.split(':')
+        t_minute = int(t[0])
+        t_sekunden = int(t[1])
+        t_milisekunden = int(t[2])
+        t_fehler = int(fehler)
+        t_sekunden = t_sekunden + t_fehler
+
+        if t_sekunden > 59:
+            t_sekunden = t_sekunden - 60
+            t_minute = t_minute + 1  
+
+        if t_minute < 10:
+            t_minute = '0' + str(t_minute)
+        else:
+            t_minute = str(t_minute)
+
+        if t_sekunden < 10:
+            t_sekunden = '0' + str(t_sekunden)
+        else:
+            t_sekunden = str(t_sekunden)
+        
+        if t_milisekunden < 10:
+            t_milisekunden = '0' + str(t_milisekunden)
+        else:
+            t_milisekunden = str(t_milisekunden)
+
+        zeit_neu = t_minute + ':' + t_sekunden + ':' + t_milisekunden
+        return zeit_neu
+    
+    def _berechne_milisekunden(self, zeit):
+        """Konvertiert 'minute:sekunde:millisekunde' in Millisekunden"""
+        t = zeit.split(':')
+        t_minute = int(t[0])
+        t_sekunden = int(t[1])
+        t_milisekunden = int(t[2])
+        tf = (((t_minute * 60) + t_sekunden) * 100) + t_milisekunden
+
+        return tf
+    
+    def _format_millisekunden(self, ms):
+        """Formatiert Millisekunden in 'minute:sekunde:millisekunde'"""
+        t_minute = ms // 60000
+        t_sekunde = (ms % 60000) // 1000
+        t_millisekunde = ms % 1000
+
+        return f"{t_minute}:{t_sekunde:02}:{t_millisekunde:02}"
+    
+    def _time_key(self, item):
+        # Zeitstring aus Index 9 holen
+        minute, sekunde, millisekunde = map(int, item[9].split(":"))
+        return (minute, sekunde, millisekunde)
+
+
