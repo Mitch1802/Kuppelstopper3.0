@@ -35,7 +35,7 @@ class MainView(tb.Window):
         self.durchgang_manager = DurchgangManager()
 
         self.coldata_gruppen = ["Gruppenname", "Damen", "Reihenfolge", ""]
-        self.coldata_bewerb = ["DG","Gruppe","Zeit1","Fehler1","Zeit2","Fehler2","Bestzeit inkl. Fehler"]
+        self.coldata_bewerb = ["DG","Gruppe","Zeit1","F1","Zeit2","F2","Bestzeit inkl. Fehler"]
         self.coldata_rang = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
 
         self.cell_types_gruppen = ["label", "label", "entry", "button"]
@@ -46,9 +46,9 @@ class MainView(tb.Window):
         self.commands_bewerb = [None, self.change_durchgang_gruppe, None, None, None, None, None]
         self.commands_rang = [None, None, None]
 
-        self.percent_widths_gruppen = [70, 10, 10, 10]
+        self.percent_widths_gruppen = [75, 10, 10, 10]
         self.percent_widths_bewerb = [5, 20, 20, 5, 20, 5, 20]
-        self.percent_widths_rang = [10, 60, 30]
+        self.percent_widths_rang = [5, 60, 30]
 
         self.setup_ui()
 
@@ -284,9 +284,9 @@ class MainView(tb.Window):
         self.zeitnehmung = tb.Frame(frame)
         self.zeitnehmung.pack(fill=BOTH, side=LEFT)
 
-        self.BtnAnsichtWechseln = tb.Button(self.zeitnehmung, text='Ansicht Wechsel', width=20, bootstyle=INFO, takefocus = 0) #, command=self.anzeigeUmschalten, takefocus = 0)
+        self.BtnAnsichtWechseln = tb.Button(self.zeitnehmung, text='Ansicht Wechsel', width=20, bootstyle=INFO, takefocus = 0, command=self.ansicht_umschalten) 
         self.BtnAnsichtWechseln.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
-        self.BtnVorherigerDG = tb.Button(self.zeitnehmung, text='DG -', width=10, bootstyle=WARNING, takefocus = 0) #, command=self.vorherigerDG, takefocus = 0)
+        self.BtnVorherigerDG = tb.Button(self.zeitnehmung, text='DG -', width=10, bootstyle=WARNING, takefocus = 0, command=self.dg_vorheriger) 
         self.BtnVorherigerDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5)  
         # self.CBDG = tb.Combobox(self.zeitnehmung, width=5, takefocus = 0, textvariable=StringVar(), state=READONLY, justify=CENTER)
         # self.CBDG = Combobox(self.zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify='center')
@@ -294,15 +294,15 @@ class MainView(tb.Window):
         # self.CBDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         self.DG = tb.Label(self.zeitnehmung, text="99", font=("Arial", 30)) 
         self.DG.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
-        self.BtnNaechsterDG = tb.Button(self.zeitnehmung, text='DG +', bootstyle=WARNING, width=10, takefocus = 0) #, command=self.naechsterDG, takefocus = 0)
+        self.BtnNaechsterDG = tb.Button(self.zeitnehmung, text='DG +', bootstyle=WARNING, width=10, takefocus = 0, command=self.dg_naechster) 
         self.BtnNaechsterDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
-        self.BtnStart = tb.Button(self.zeitnehmung, text='Start', width=15, takefocus = 0) #, command=self.start, takefocus = 0, state=DISABLED)
+        self.BtnStart = tb.Button(self.zeitnehmung, text='Start', width=15, takefocus = 0, command=self.start) #, state=DISABLED)
         self.BtnStart.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
-        self.BtnAllesStop = tb.Button(self.zeitnehmung, text='Alles Stop', width=15, takefocus = 0) #, command=self.allesStop, takefocus = 0, state=DISABLED)
+        self.BtnAllesStop = tb.Button(self.zeitnehmung, text='Alles Stop', width=15, takefocus = 0, command=self.alles_stop) #, state=DISABLED)
         self.BtnAllesStop.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
-        self.BtnWechsel = tb.Button(self.zeitnehmung, text='Bahn Wechsel', width=15, takefocus = 0) #, command=self.bahnWechsel, takefocus = 0, state=DISABLED)
+        self.BtnWechsel = tb.Button(self.zeitnehmung, text='Bahn Wechsel', width=15, takefocus = 0, command=self.bahnwechsel) #, state=DISABLED)
         self.BtnWechsel.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
-        self.BtnZeitUebertragen = tb.Button(self.zeitnehmung, text='Zeit übertragen', width=15, takefocus = 0) #, command=self.werteInAnsichtUebertragen, takefocus = 0, state=DISABLED)
+        self.BtnZeitUebertragen = tb.Button(self.zeitnehmung, text='Zeit übertragen', width=15, takefocus = 0, command=self.zeit_uebertragen) #, state=DISABLED)
         self.BtnZeitUebertragen.pack(fill=BOTH, side=LEFT, padx=5, pady=5) 
 
         self.LfBahnen = tb.Frame(frame)
@@ -316,7 +316,7 @@ class MainView(tb.Window):
         self.T1.grid(row=0, column=2, padx=10)
         self.F1 = tb.Entry(self.LfBahnen, width=5, takefocus = 0)
         self.F1.grid(row=0, column=3, padx=10)
-        self.B1 = tb.Button(self.LfBahnen, text='Stop', width=10) #, command=self.stop_1, takefocus = 0, state=DISABLED)
+        self.B1 = tb.Button(self.LfBahnen, text='Stop', width=10, command=self.bahn1_stop) #, state=DISABLED)
         self.B1.grid(row=0, column=4)
 
         self.CB2 = tb.Checkbutton(self.LfBahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0) #, command=self.switchBahn2State, takefocus = 0)
@@ -327,17 +327,17 @@ class MainView(tb.Window):
         self.T2.grid(row=1, column=2, padx=10)
         self.F2 = tb.Entry(self.LfBahnen, width=5, takefocus = 0)
         self.F2.grid(row=1, column=3, padx=10)
-        self.B2 = tb.Button(self.LfBahnen, text='Stop', width=10) #, command=self.stop_2, takefocus = 0, state=DISABLED)
+        self.B2 = tb.Button(self.LfBahnen, text='Stop', width=10, command=self.bahn2_stop) #, state=DISABLED)
         self.B2.grid(row=1, column=4)
 
         self.korrektur = tb.Frame(frame)
         self.korrektur.pack(fill=BOTH, side=LEFT)
 
-        self.BtnStopReset = tb.Button(self.korrektur, text='Stop and Reset', width=15, takefocus = 0) #, command=self.stopreset, takefocus = 0, state=DISABLED)
+        self.BtnStopReset = tb.Button(self.korrektur, text='Stop and Reset', width=15, takefocus = 0, command=self.stop_und_reset) #, state=DISABLED)
         self.BtnStopReset.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
-        self.BtnLoeZ1 = tb.Button(self.korrektur, text='Zeit 1+2 löschen', width=15, takefocus = 0) #, command=self.zeit1loeschen, takefocus = 0)
+        self.BtnLoeZ1 = tb.Button(self.korrektur, text='Zeit 1+2 löschen', width=15, takefocus = 0, command=self.zeit_1_und_2_loeschen)
         self.BtnLoeZ1.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
-        self.BtnLoeZ2 = tb.Button(self.korrektur, text='Zeit 2 löschen', width=15, takefocus = 0) #, command=self.zeit2loeschen, takefocus = 0)
+        self.BtnLoeZ2 = tb.Button(self.korrektur, text='Zeit 2 löschen', width=15, takefocus = 0, command=self.zeit_2_loeschen) 
         self.BtnLoeZ2.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
         return frame
@@ -350,6 +350,43 @@ class MainView(tb.Window):
         self.tbl_gd_rang_update(daten_gd_platzierung)
 
     def change_durchgang_gruppe(self, data):
+        pass
+
+    def ansicht_umschalten(self):
+        pass
+
+    def dg_vorheriger(self):
+        pass
+
+    def dg_naechster(self):
+        pass
+
+    def start(self):
+        pass
+
+    def alles_stop(self):
+        pass
+
+    def bahnwechsel(self):
+        pass
+
+    def zeit_uebertragen(self):
+        #TODO Bestzeit berechnen
+        pass
+
+    def bahn1_stop(self):
+        pass
+
+    def bahn2_stop(self):
+        pass
+
+    def stop_und_reset(self):
+        pass
+
+    def zeit_1_und_2_loeschen(self):
+        pass
+
+    def zeit_2_loeschen(self):
         pass
 
     # Einstellungen Tab

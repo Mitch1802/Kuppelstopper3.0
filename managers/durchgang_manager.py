@@ -195,10 +195,12 @@ class DurchgangManager:
         index_zu_entfernen = {0,1,3,4,5,6,7,8,10}  
         for dg in data:
             gefiltert = [wert for i, wert in enumerate(dg) if i not in index_zu_entfernen]
-            data_return.append(gefiltert)
-        
-        # TODO Spaltenreihenfolge ändern laut Splatenüberschrift
-
+            platzierung = gefiltert[2]
+            gruppe = gefiltert[0]
+            zeit = gefiltert[1]
+            reihenfolge_neu = [platzierung, gruppe, zeit]
+            data_return.append(reihenfolge_neu)
+    
         return data_return
 
     def sort_tbl_rang_daten(self, modus):
