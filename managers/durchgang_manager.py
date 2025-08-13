@@ -205,11 +205,8 @@ class DurchgangManager:
 
     def sort_tbl_rang_daten(self, modus):
         """Sortiert Daten für Platzierung"""
-        # data.sort(key=lambda x: int(x[11]))
-
         daten_gefiltert = [item for item in self.Bewerb if item[1] == modus]
         daten_sortiert_nach_zeit = sorted(daten_gefiltert, key=self._time_key)
- 
         platzierung_neu = 1
 
         for index, item in enumerate(daten_sortiert_nach_zeit):
@@ -280,4 +277,12 @@ class DurchgangManager:
         minute, sekunde, millisekunde = map(int, item[9].split(":"))
         return (minute, sekunde, millisekunde)
 
+    def change_werte(self, data):
+        pass
+
+    def zeiten_an_bewerb_uebergeben(self, durchgang, zeit_a, fehler_a, zeit_b, fehler_b):
+        pass
+
+    def wandle_durchgang_in_modus(self, durchgang):
+        pass
 

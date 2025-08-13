@@ -48,7 +48,7 @@ class MainView(tb.Window):
 
         self.percent_widths_gruppen = [75, 10, 10, 10]
         self.percent_widths_bewerb = [5, 20, 20, 5, 20, 5, 20]
-        self.percent_widths_rang = [5, 60, 30]
+        self.percent_widths_rang = [20, 50, 20]
 
         self.setup_ui()
 
@@ -350,7 +350,7 @@ class MainView(tb.Window):
         self.tbl_gd_rang_update(daten_gd_platzierung)
 
     def change_durchgang_gruppe(self, data):
-        pass
+        self.durchgang_manager.change_werte(data)
 
     def ansicht_umschalten(self):
         pass
@@ -359,6 +359,7 @@ class MainView(tb.Window):
         pass
 
     def dg_naechster(self):
+        #TODO Wenn nächster Modus dann Tab umschalten
         pass
 
     def start(self):
@@ -371,7 +372,22 @@ class MainView(tb.Window):
         pass
 
     def zeit_uebertragen(self):
-        #TODO Bestzeit berechnen
+        durchgang = '1' # Wert aus Label
+        zeit_a = '00:00:00'
+        fehler_a = '0'
+        zeit_b = '00:00:00'
+        fehler_b = '0'
+        modus = self.durchgang_manager.wandle_durchgang_in_modus(durchgang)
+
+        self.durchgang_manager.zeiten_an_bewerb_uebergeben(durchgang, zeit_a, fehler_a, zeit_b, fehler_b)
+        self.durchgang_manager.berechne_bestzeiten()
+
+        daten_bewerb = self.durchgang_manager.filter_bewerb(modus)
+        daten_rang = self.durchgang_manager.sort_tbl_rang_daten(modus)
+
+
+
+        # TODO  Tabellen aktueller Modus neu zeichnen und Topgruppen in nächste Runde übertragen
         pass
 
     def bahn1_stop(self):
