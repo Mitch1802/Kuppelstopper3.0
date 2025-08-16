@@ -289,11 +289,7 @@ class MainView(tb.Window):
         btn = tb.Button(frame_zeitnehmung, text='Ansicht Wechsel', width=20, bootstyle=INFO, takefocus = 0, command=self.ansicht_umschalten) 
         btn.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         self.btn_dg_vorheriger = tb.Button(frame_zeitnehmung, text='<<<', width=10, bootstyle=WARNING, takefocus = 0, command=self.dg_vorheriger) 
-        self.btn_dg_vorheriger.pack(fill=BOTH, side=LEFT, padx=5, pady=5)  
-        # self.CBDG = tb.Combobox(frame_zeitnehmung, width=5, takefocus = 0, textvariable=StringVar(), state=READONLY, justify=CENTER)
-        # self.CBDG = Combobox(frame_zeitnehmung, textvariable=StringVar(), state='readonly', width=5, takefocus = 0, justify='center')
-        # self.CBDG.bind('<<ComboboxSelected>>',self.ladeZeitnehmungsDaten)
-        # self.CBDG.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
+        self.btn_dg_vorheriger.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         self.lbl_dg_number = tb.Label(frame_zeitnehmung, text="1", font=("Arial", 30)) 
         self.lbl_dg_number.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         self.btn_naechster_dg = tb.Button(frame_zeitnehmung, text='>>>', bootstyle=WARNING, width=10, takefocus = 0, command=self.dg_naechster) 
@@ -310,8 +306,10 @@ class MainView(tb.Window):
         frame_bahnen = tb.Frame(frame)
         frame_bahnen.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         
-        self.cb_bahn1 = tb.Checkbutton(frame_bahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0) #, command=self.switchBahn1State, takefocus = 0)
-        self.cb_bahn1.grid(row=0, column=0, padx=10)
+        # self.cb_bahn1 = tb.Checkbutton(frame_bahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0) #, command=self.switchBahn1State, takefocus = 0)
+        # self.cb_bahn1.grid(row=0, column=0, padx=10)
+        self.lbl_bahn1_ = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn1_.grid(row=0, column=0, padx=10, sticky=W)
         self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.lbl_bahn1_gruppe .grid(row=0, column=1, padx=10, sticky=W)
         self.lbl_bahn1_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
@@ -321,10 +319,12 @@ class MainView(tb.Window):
         self.btn_bahn1_stop = tb.Button(frame_bahnen, text='Stop', width=10, command=self.bahn1_stop, state=DISABLED)
         self.btn_bahn1_stop.grid(row=0, column=4)
 
-        self.cb_bahn2 = tb.Checkbutton(frame_bahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0) #, command=self.switchBahn2State, takefocus = 0)
-        self.cb_bahn2.grid(row=1, column=0, padx=10)
+        # self.cb_bahn2 = tb.Checkbutton(frame_bahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0) #, command=self.switchBahn2State, takefocus = 0)
+        # self.cb_bahn2.grid(row=1, column=0, padx=10)
+        self.lbl_bahn2_ = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn2_.grid(row=1, column=0, padx=10, sticky=W)
         self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
-        self.lbl_bahn2_gruppe .grid(row=1, column=1, padx=10, sticky=W)
+        self.lbl_bahn2_gruppe.grid(row=1, column=1, padx=10, sticky=W)
         self.lbl_bahn2_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.lbl_bahn2_zeit.grid(row=1, column=2, padx=10)
         self.ent_bahn2_fehler = tb.Entry(frame_bahnen, width=5, takefocus = 0)
@@ -351,29 +351,103 @@ class MainView(tb.Window):
         daten_gd_platzierung = self.durchgang_manager.sort_tbl_rang_daten(self.durchgang_manager.TypGD)
         self.tbl_gd_rang_update(daten_gd_platzierung)
 
-        # Erste Gruppen anzeigen Zeitnhemeung
+        self.btn_dg_vorheriger['state'] = DISABLED
+        gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(1)
+
+        self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
+        self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
+
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def change_durchgang_gruppe(self, data):
         self.durchgang_manager.change_werte(data)
 
     def ansicht_umschalten(self):
+        # TODO Ansicht Umschalten
         pass
 
     def dg_vorheriger(self):
-        pass
+        dg_alt = int(self.lbl_dg_number.cget('text'))
+        dg_neu = dg_alt - 1
+        self.lbl_dg_number.config(text=dg_neu)
+
+        mod_a = self.durchgang_manager.wandle_durchgang_in_modus(dg_alt)
+        mod_b = self.durchgang_manager.wandle_durchgang_in_modus(dg_neu)
+        if mod_a != mod_b:
+            sub_tab_name = self.wandle_typ_in_ansicht(mod_b)
+            self.show_bewerb_subtab(sub_tab_name)
+
+        self.lade_durchgang_von_dgnumber(dg_neu)
 
     def dg_naechster(self):
-        #TODO Wenn nächster Modus dann Tab umschalten
-        pass
+        dg_alt = int(self.lbl_dg_number.cget('text'))
+        dg_neu = dg_alt + 1
+        self.lbl_dg_number.config(text=dg_neu)
+
+        mod_a = self.durchgang_manager.wandle_durchgang_in_modus(dg_alt)
+        mod_b = self.durchgang_manager.wandle_durchgang_in_modus(dg_neu)
+        if mod_a != mod_b:
+            sub_tab_name = self.wandle_typ_in_ansicht(mod_b)
+            self.show_bewerb_subtab(sub_tab_name)
+
+        self.lade_durchgang_von_dgnumber(dg_neu)
+    
+    def wandle_typ_in_ansicht(self, typ):
+        mapping = {
+            self.durchgang_manager.TypGD: 'Grunddurchgang',
+            self.durchgang_manager.TypKO16: 'KO 1-16',
+            self.durchgang_manager.TypKO8: 'KO 1-8',
+            self.durchgang_manager.TypKO4: 'KO 1-4',
+            self.durchgang_manager.TypKF: 'Finale',
+            self.durchgang_manager.TypF: 'Finale'
+
+        }  
+        return mapping.get(typ)
+
+    def lade_durchgang_von_dgnumber(self, durchgang):
+        dg_min = 1
+        dg_max = self.durchgang_manager.get_max_dgnumber()
+
+        if durchgang == dg_min: 
+            self.btn_dg_vorheriger['state'] = DISABLED
+            self.btn_naechster_dg['state'] = NORMAL
+        elif durchgang == dg_max: 
+            self.btn_dg_vorheriger['state'] = NORMAL
+            self.btn_naechster_dg['state'] = DISABLED
+        else: 
+            self.btn_dg_vorheriger['state'] = NORMAL
+            self.btn_naechster_dg['state'] = NORMAL
+
+        gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(durchgang)
+
+        self.checked_Bahn_1 = True
+        self.lbl_bahn1_zeit.config(text='00:00:00')
+        self.ent_bahn1_fehler['state'] = NORMAL
+        self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
+
+        if gruppen_start[1] != '': 
+            self.checked_Bahn_2 = True
+            self.lbl_bahn2_zeit.config(text='00:00:00')
+            self.ent_bahn2_fehler['state'] = NORMAL
+            self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
+        else: 
+            self.checked_Bahn_2 = False
+            self.lbl_bahn2_zeit.config(text='')
+            self.ent_bahn2_fehler['state'] = DISABLED
+            self.lbl_bahn2_gruppe.config(text='')
+
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def start(self):
+        # TODO Start Zeitnehmung
         self.zeitnehmung_buttons_control(False, True, False, False, True, True, True, False, False)
 
     def alles_stop(self):
+        # TODO Stop Zeitnehmung
         self.zeitnehmung_buttons_control(False, False, False, True, False, False, False, True, True)
 
     def bahnwechsel(self):
+        # TODO Bahnwechsel
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def zeit_uebertragen(self):
@@ -390,14 +464,17 @@ class MainView(tb.Window):
         daten_bewerb = self.durchgang_manager.filter_bewerb(modus)
         daten_rang = self.durchgang_manager.sort_tbl_rang_daten(modus)
 
-        # TODO  Tabellen aktueller Modus neu zeichnen und Topgruppen in nächste Runde übertragen
+        # TODO Tabellen aktueller Modus neu zeichnen und Topgruppen in nächste Runde übertragen
+        # TODO Wenn Testzeiten angehakt dann zufallszeiten generieren
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
 
     def bahn1_stop(self):
+        # TODO Bahn 1 Stop
         pass
 
     def bahn2_stop(self):
+        # TODO Bahn 2 Stop
         pass
 
     def zeit_reset(self):
@@ -405,13 +482,16 @@ class MainView(tb.Window):
         self.lbl_bahn2_zeit.config(text='00:00:00')
 
     def stop_und_reset(self):
+        self.alles_stop()
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
         self.zeit_reset()
 
     def zeit_1_und_2_loeschen(self):
+        # TODO DG Alle Zeiten löschen
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def zeit_2_loeschen(self):
+        # TODO DG Zeit 2 löschen
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def zeitnehmung_buttons_control(self, start, alles_stop, bahn_wechsel, zeit_uebertragen, bahn1_stop, bahn2_stop, stop_reset, zeit1_loeschen, zeit2_loeschen):
@@ -555,6 +635,8 @@ class MainView(tb.Window):
 
         self.test_damen_anzahl = tb.Entry(self.frame_test, width=5)
         self.test_damen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
+
+        # TODO Testzeiten während Bewerb erstellen
 
         btn = tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)

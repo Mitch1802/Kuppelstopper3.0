@@ -277,6 +277,16 @@ class DurchgangManager:
         minute, sekunde, millisekunde = map(int, item[9].split(":"))
         return (minute, sekunde, millisekunde)
 
+    def lade_gruppen_von_durchgang(self, durchgangsnummer):
+        gruppe_a = ''
+        gruppe_b = ''
+        for row in self.Bewerb:
+            if row[0] == durchgangsnummer:
+                if gruppe_a == '': gruppe_a = row[2]
+                else: gruppe_b = row[2]
+        
+        return [gruppe_a, gruppe_b]
+
     def change_werte(self, data):
         pass
 
@@ -284,5 +294,13 @@ class DurchgangManager:
         pass
 
     def wandle_durchgang_in_modus(self, durchgang):
-        pass
+        for dg in self.Bewerb:
+            if dg[0] == durchgang:
+                return dg[1]
+
+    def get_max_dgnumber(self):
+        length = len(self.Bewerb)
+        max = self.Bewerb[length-1]
+        max_dg = max[0]
+        return max_dg
 

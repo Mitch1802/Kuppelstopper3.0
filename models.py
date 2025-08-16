@@ -39,7 +39,7 @@ class Durchgang:
         fehlerbest (int): Fehler der besten Zeit.
         bestzeitinklfehler (str): Beste Zeit inkl. Fehler.
     """
-    def __init__(self, durchgang, typ, wettkampfgruppe, zeit1='', fehler1=0, zeit2='', fehler2=0, bestzeit='', fehlerbest=0, bestzeitinklfehler='', hinweis='', platzierung=0, testzeit=False):
+    def __init__(self, durchgang, typ, wettkampfgruppe, zeit1='00:00:00', fehler1=0, zeit2='00:00:00', fehler2=0, bestzeit='00:00:00', fehlerbest=0, bestzeitinklfehler='00:00:00', hinweis='', platzierung=0, testzeit=False):
 
         self.dg = durchgang
         self.typ = typ
