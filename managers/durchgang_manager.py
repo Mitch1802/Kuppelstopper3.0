@@ -24,11 +24,11 @@ class DurchgangManager:
     def berechne_bestzeiten(self):
         """Berechnet für jeden Durchgang die beste Zeit."""
         for dg in self.Bewerb:
-            if dg[3] != '' and dg[5] == '':
+            if dg[3] != '00:00:00' and dg[5] == '00:00:00':
                 dg[7] = dg[3]
                 dg[8] = dg[4]
                 dg[9] = self._addiereFehlerZurZeit(dg[3], dg[4])
-            elif dg[3] != '' and dg[5] != '':
+            elif dg[3] != '00:00:00' and dg[5] != '00:00:00':
                 zeit1_inkl_fehler = self._addiereFehlerZurZeit(dg[3], dg[4])
                 zeit2_inkl_fehler = self._addiereFehlerZurZeit(dg[5], dg[6])
 
@@ -50,7 +50,7 @@ class DurchgangManager:
         self.Bewerb = []
         self.DGNumbers = []
 
-    def lade_grunddurchgang(self, test: bool):
+    def lade_grunddurchgang(self, testzeiten: bool):
         """Lade Gruppen für Grunddruchgang"""
         self.gruppen.sort(key=lambda x: int(x[2]))
         anzahl_gruppen = len(self.gruppen)
@@ -62,7 +62,7 @@ class DurchgangManager:
         count = 0
         for grp in self.gruppen:
             gruppen_name = grp[0]
-            durchgang = Durchgang(dg, self.TypGD, gruppen_name, testzeit=test)
+            durchgang = Durchgang(dg, self.TypGD, gruppen_name, testzeit=testzeiten)
             durchgang = durchgang.to_list()
             self.Bewerb.append(durchgang)
 
@@ -168,14 +168,15 @@ class DurchgangManager:
 
         # TODO Befülle DGNumbers Arary mit Nummern der Durchgänge
 
-        if test:
-            self.berechne_bestzeiten()
+        # if testzeiten:
+        #     self.berechne_bestzeiten()
 
-        data_neu = self.filter_bewerb(self.TypGD)
-        return data_neu
+        # data_neu = self.filter_bewerb(self.TypGD)
+        # return data_neu
 
     def filter_bewerb(self, modus):
         """Filtert alle Duchgänge nach dem aktuellen Modus, zB KO1-16"""
+        # TODO KF und F berücksichtigen 
         daten_gefiltert = [item for item in self.Bewerb if item[1] == modus]
         return daten_gefiltert
 
@@ -205,7 +206,8 @@ class DurchgangManager:
 
     def sort_tbl_rang_daten(self, modus):
         """Sortiert Daten für Platzierung"""
-        daten_gefiltert = [item for item in self.Bewerb if item[1] == modus]
+        # TODO KF und F berücksichtigen 
+        daten_gefiltert = [item for item in self.Bewerb if item[1] == modus and item[9] != '00:00:00']
         daten_sortiert_nach_zeit = sorted(daten_gefiltert, key=self._time_key)
         platzierung_neu = 1
 
@@ -220,7 +222,9 @@ class DurchgangManager:
         ms_total = random.randint(0, max_minutes * 60 * 1000 - 1)
         minute = ms_total // 60000
         sekunde = (ms_total % 60000) // 1000
-        millisekunde = ms_total % 1000
+        millisekunde = round((ms_total % 1000) / 10) 
+        if millisekunde == 100:
+            millisekunde = 99
         return f"{minute:02}:{sekunde:02}:{millisekunde:02}"
     
     def _addiereFehlerZurZeit(self, zeit, fehler):
@@ -290,8 +294,43 @@ class DurchgangManager:
     def change_werte(self, data):
         pass
 
-    def zeiten_an_bewerb_uebergeben(self, durchgang, zeit_a, fehler_a, zeit_b, fehler_b):
-        pass
+    def zeiten_an_bewerb_uebergeben(self, durchgang, gruppe_a, zeit_a, fehler_a, gruppe_b, zeit_b, fehler_b):
+        aktuelle_zeit_a = 0
+        aktuelle_zeit_b = 0
+
+        for dg in self.Bewerb:
+            if gruppe_a != '':
+                if dg[0] == durchgang and dg[2] == gruppe_a:
+                    if dg[3] == '00:00:00' and dg[5] == '00:00:00':
+                        dg[3] = zeit_a
+                        dg[4] = fehler_a
+                        aktuelle_zeit_a = 1
+                    elif dg[3] != '00:00:00' and dg[5] == '00:00:00':
+                        dg[5] = zeit_a
+                        dg[6] = fehler_a
+                        aktuelle_zeit_a = 2
+            else:
+                aktuelle_zeit_a = 0
+            
+            if gruppe_b != '':
+                if dg[0] == durchgang and dg[2] == gruppe_b:
+                    if dg[3] == '00:00:00' and dg[5] == '00:00:00':
+                        dg[3] = zeit_b
+                        dg[4] = fehler_b
+                        aktuelle_zeit_b = 1
+                    elif dg[3] != '00:00:00' and dg[5] == '00:00:00':
+                        dg[5] = zeit_b
+                        dg[6] = fehler_b
+                        aktuelle_zeit_b = 2
+            else:
+                aktuelle_zeit_b = 0
+        if gruppe_a != '' and gruppe_b != '':
+            if aktuelle_zeit_a != aktuelle_zeit_b:
+                return 0
+            else:
+                return aktuelle_zeit_a
+        else:
+            return max(aktuelle_zeit_a, aktuelle_zeit_b)
 
     def wandle_durchgang_in_modus(self, durchgang):
         for dg in self.Bewerb:
@@ -303,4 +342,29 @@ class DurchgangManager:
         max = self.Bewerb[length-1]
         max_dg = max[0]
         return max_dg
+
+    def top_gruppen_naechste_runde(self):
+        for row in self.Bewerb:
+            gruppe = row[2]
+            bestzeit = row[9]
+            platzierung = row[11]
+            modus = row[1]
+            modus = modus.split('_')
+            modus = modus[1]
+            hinweis = modus + '_' + str(platzierung)
+
+            for dg in self.Bewerb:
+                if dg[10] == hinweis and bestzeit != '00:00:00':
+                    dg[2] = gruppe
+
+    def lade_alle_Tabellen_modus(self):
+        data = []
+
+        for dg in self.Bewerb:
+            if dg[1] not in data:
+                data.append(dg[1])
+        
+        return data
+
+
 

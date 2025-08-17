@@ -6,6 +6,7 @@ from models import Gruppe
 from managers.gruppen_manager import GruppenManager
 from managers.durchgang_manager import DurchgangManager
 from managers.zeitnehmung_manager import ZeitManager
+import random
 
 
 class MainView(tb.Window):
@@ -23,6 +24,7 @@ class MainView(tb.Window):
         self.checked_Rahmen = BooleanVar()
         self.checked_Konsole = BooleanVar()
         self.checked_Test = BooleanVar()
+        self.checked_Testzeiten = BooleanVar()
 
         self.checked_Bahn_1.set(False)
         self.checked_Bahn_2.set(False)
@@ -31,6 +33,7 @@ class MainView(tb.Window):
         self.checked_Rahmen.set(False)
         self.checked_Konsole.set(True)
         self.checked_Test.set(False)
+        self.checked_Testzeiten.set(False)
 
         self.gruppen_manager = GruppenManager()
         self.durchgang_manager = DurchgangManager()
@@ -139,20 +142,23 @@ class MainView(tb.Window):
 
     def gruppen_uebernehmen(self):
         """Übernimmt die angemeldeten Gruppen für den Bewerb"""
-        test = self.checked_Test.get()
+        testzeiten = self.checked_Testzeiten.get()
         self.gruppen_manager.speichere_anmeldung()
         ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
         self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
-        self.lade_grunddurchgang(test)
-        self.show_tab("Bewerb")
+        anzahl_gruppen = len(ang_gruppen)
+        self.update_tabs(anzahl_gruppen)
+        self.lade_grunddurchgang(testzeiten)
+        self.show_tab('Bewerb')
+        self.show_bewerb_subtab('Grunddurchgang')
 
     # Bewerb Tab
     def create_bewerb_tab(self):
         frame = tb.Frame(self.tab_container)
 
         # Container für die Buttons
-        button_frame = tb.Frame(frame, bootstyle="dark")
-        button_frame.pack(fill=X, side=TOP)
+        self.button_frame = tb.Frame(frame, bootstyle="dark")
+        self.button_frame.pack(fill=X, side=TOP)
 
         # Container für die "Sub Tabs"
         self.subtab_container = tb.Frame(frame)
@@ -176,11 +182,13 @@ class MainView(tb.Window):
 
         # Buttons zur Auswahl der Tabs
         for name in self.subtabs:
-            btn = tb.Button(button_frame, text=name, command=lambda n=name: self.show_bewerb_subtab(n), compound=LEFT, takefocus=False, bootstyle="dark")
-            btn.pack(fill=X, side=LEFT, ipadx=5, ipady=5, expand=True)
+            btn = tb.Button(self.button_frame, text=name, command=lambda n=name: self.show_bewerb_subtab(n), compound=LEFT, takefocus=False, bootstyle="dark")
+            # btn.pack(fill=X, side=LEFT, ipadx=5, ipady=5, expand=True)
             self.subtab_buttons[name] = btn
+            btn._is_packed = False
 
-        self.show_bewerb_subtab("Grunddurchgang")  # Standardansicht
+        self._show_button("Grunddurchgang")
+        self.show_bewerb_subtab("Grunddurchgang")
 
         return frame
     
@@ -269,6 +277,41 @@ class MainView(tb.Window):
 
         return frame
     
+    def update_tabs(self, counter: int):
+        """
+        Schalte Tab-Buttons je nach Counter sichtbar/unsichtbar.
+        Kann jederzeit (nach Daten-Load) aufgerufen werden.
+        """
+        must_show = {"Grunddurchgang"}
+        if counter >= 16: must_show.add("KO 1-16")
+        if counter >= 8:  must_show.add("KO 1-8")
+        if counter >= 4:  must_show.add("KO 1-4")
+        if counter >= 2:  must_show.add("Finale")
+
+        order = ["Grunddurchgang", "KO 1-16", "KO 1-8", "KO 1-4", "Finale"]
+
+        # 1) ALLE Buttons entpacken -> garantiert sauberer Neuaufbau
+        for btn in self.subtab_buttons.values():
+            if getattr(btn, "_is_packed", False):
+                btn.pack_forget()
+            btn._is_packed = False
+
+        # 2) Sichtbare Buttons in DEFINIERTER Reihenfolge packen
+        for name in order:
+            if name in must_show:
+                self._show_button(name)
+
+        # 3) Falls aktueller Tab nicht mehr sichtbar ist -> auf Grunddurchgang wechseln
+        if getattr(self, "_current_tab_name", "Grunddurchgang") not in must_show:
+            self.show_bewerb_subtab("Grunddurchgang")
+
+    def _show_button(self, name: str):
+        """Button nur packen, wenn noch nicht sichtbar."""
+        btn = self.subtab_buttons[name]
+        if not getattr(btn, "_is_packed", False):
+            btn.pack(fill="x", side="left", ipadx=5, ipady=5, expand=True)
+            btn._is_packed = True
+
     def show_bewerb_subtab(self, name):
         # Tabs anzeigen
         for frame in self.subtabs.values():
@@ -277,8 +320,10 @@ class MainView(tb.Window):
 
         # Buttons einfärben
         for n, btn in self.subtab_buttons.items():
-            style = SECONDARY if n == name else DARK
-            btn.configure(bootstyle=style)
+            if btn._is_packed:
+                style = SECONDARY if n == name else DARK
+                btn.configure(bootstyle=style)
+        self._current_subtab_name = name
 
     def create_sub_zeitnehmung(self):
         frame = tb.Frame(self.subtab_container)
@@ -308,8 +353,8 @@ class MainView(tb.Window):
         
         # self.cb_bahn1 = tb.Checkbutton(frame_bahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0) #, command=self.switchBahn1State, takefocus = 0)
         # self.cb_bahn1.grid(row=0, column=0, padx=10)
-        self.lbl_bahn1_ = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
-        self.lbl_bahn1_.grid(row=0, column=0, padx=10, sticky=W)
+        self.lbl_bahn1 = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn1.grid(row=0, column=0, padx=10, sticky=W)
         self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.lbl_bahn1_gruppe .grid(row=0, column=1, padx=10, sticky=W)
         self.lbl_bahn1_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
@@ -321,8 +366,8 @@ class MainView(tb.Window):
 
         # self.cb_bahn2 = tb.Checkbutton(frame_bahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0) #, command=self.switchBahn2State, takefocus = 0)
         # self.cb_bahn2.grid(row=1, column=0, padx=10)
-        self.lbl_bahn2_ = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
-        self.lbl_bahn2_.grid(row=1, column=0, padx=10, sticky=W)
+        self.lbl_bahn2 = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn2.grid(row=1, column=0, padx=10, sticky=W)
         self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
         self.lbl_bahn2_gruppe.grid(row=1, column=1, padx=10, sticky=W)
         self.lbl_bahn2_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
@@ -344,12 +389,9 @@ class MainView(tb.Window):
 
         return frame
     
-    def lade_grunddurchgang(self, test):
-        daten_gd = self.durchgang_manager.lade_grunddurchgang(test)
-        self.tbl_gd_bewerb_update(daten_gd)
-
-        daten_gd_platzierung = self.durchgang_manager.sort_tbl_rang_daten(self.durchgang_manager.TypGD)
-        self.tbl_gd_rang_update(daten_gd_platzierung)
+    def lade_grunddurchgang(self, testzeiten):
+        self.durchgang_manager.lade_grunddurchgang(testzeiten)
+        self.update_tabelle_von_modus_gesamt()
 
         self.btn_dg_vorheriger['state'] = DISABLED
         gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(1)
@@ -360,7 +402,13 @@ class MainView(tb.Window):
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def change_durchgang_gruppe(self, data):
-        self.durchgang_manager.change_werte(data)
+        # TODO Zeige ein Edit Fenster an, speicher die geänderten Daten
+        daten_neu = data # Nur für Test
+
+        self.durchgang_manager.change_werte(daten_neu)
+        self.durchgang_manager.berechne_bestzeiten()
+        self.durchgang_manager.top_gruppen_naechste_runde()
+        self.update_tabelle_von_modus_gesamt()
 
     def ansicht_umschalten(self):
         # TODO Ansicht Umschalten
@@ -436,38 +484,78 @@ class MainView(tb.Window):
             self.ent_bahn2_fehler['state'] = DISABLED
             self.lbl_bahn2_gruppe.config(text='')
 
+        # TODO Prüfen ob schon zwei Zeiten vorhanden
+
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def start(self):
-        # TODO Start Zeitnehmung
         self.zeitnehmung_buttons_control(False, True, False, False, True, True, True, False, False)
+        if self.checked_Testzeiten.get() == True:
+            self.alles_stop()
+            gruppe_a = self.lbl_bahn1_gruppe.cget('text')
+            gruppe_b = self.lbl_bahn2_gruppe.cget('text')
+
+            if gruppe_a != '':
+                self.ent_bahn1_fehler['state'] = NORMAL
+                zeit_a = self.durchgang_manager.generiere_zufallsszeit()
+                fehler_a = random.choice(range(0, 21, 5))
+                self.lbl_bahn1_zeit.config(text=zeit_a)
+                self.ent_bahn1_fehler.insert(0, fehler_a)
+            else:
+                self.lbl_bahn1_zeit.config(text='')
+                self.ent_bahn1_fehler['state'] = DISABLED
+
+            if gruppe_b != '':
+                self.ent_bahn2_fehler['state'] = NORMAL
+                zeit_b = self.durchgang_manager.generiere_zufallsszeit()
+                fehler_b = random.choice(range(0, 21, 5))
+                self.lbl_bahn2_zeit.config(text=zeit_b)
+                self.ent_bahn2_fehler.insert(0, fehler_b)
+            else:
+                self.lbl_bahn2_zeit.config(text='')
+                self.ent_bahn2_fehler['state'] = DISABLED
+        else:
+            pass
+            # TODO Start Zeitnehmung
 
     def alles_stop(self):
         # TODO Stop Zeitnehmung
         self.zeitnehmung_buttons_control(False, False, False, True, False, False, False, True, True)
 
     def bahnwechsel(self):
-        # TODO Bahnwechsel
+        gruppe_a = self.lbl_bahn1_gruppe.cget('text')
+        gruppe_b = self.lbl_bahn2_gruppe.cget('text')
+
+        self.lbl_bahn1_gruppe.config(text=gruppe_b)
+        self.lbl_bahn2_gruppe.config(text=gruppe_a)
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
     def zeit_uebertragen(self):
-        durchgang = '1' # Wert aus Label
-        zeit_a = '00:00:00'
-        fehler_a = '0'
-        zeit_b = '00:00:00'
-        fehler_b = '0'
-        modus = self.durchgang_manager.wandle_durchgang_in_modus(durchgang)
+        durchgang = int(self.lbl_dg_number.cget('text'))
+        gruppe_a = self.lbl_bahn1_gruppe.cget('text')
+        gruppe_b = self.lbl_bahn2_gruppe.cget('text')
 
-        self.durchgang_manager.zeiten_an_bewerb_uebergeben(durchgang, zeit_a, fehler_a, zeit_b, fehler_b)
+        zeit_a = self.lbl_bahn1_zeit.cget('text')
+        fehler_a = self.ent_bahn1_fehler.get()
+        if fehler_a == '': fehler_a = 0
+        zeit_b = self.lbl_bahn2_zeit.cget('text')
+        fehler_b = self.ent_bahn2_fehler.get()
+        if fehler_b == '': fehler_b = 0
+
+        count_zeit = self.durchgang_manager.zeiten_an_bewerb_uebergeben(durchgang, gruppe_a, zeit_a, fehler_a, gruppe_b, zeit_b, fehler_b)
         self.durchgang_manager.berechne_bestzeiten()
+        self.durchgang_manager.top_gruppen_naechste_runde()
+        self.update_tabelle_von_modus_gesamt()
 
-        daten_bewerb = self.durchgang_manager.filter_bewerb(modus)
-        daten_rang = self.durchgang_manager.sort_tbl_rang_daten(modus)
-
-        # TODO Tabellen aktueller Modus neu zeichnen und Topgruppen in nächste Runde übertragen
-        # TODO Wenn Testzeiten angehakt dann zufallszeiten generieren
+        self.zeit_reset()
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
 
+        if count_zeit == 1:
+            self.bahnwechsel()
+        elif count_zeit == 2:
+            self.dg_naechster()
+        else:
+            print('Es wurden zwei unerschiedliche Zeiten übertragen, zB: Bahn1 -> Zeit1 und Bahn2 -> Zeit2')
 
     def bahn1_stop(self):
         # TODO Bahn 1 Stop
@@ -479,7 +567,9 @@ class MainView(tb.Window):
 
     def zeit_reset(self):
         self.lbl_bahn1_zeit.config(text='00:00:00')
+        self.ent_bahn1_fehler.delete(0, END)
         self.lbl_bahn2_zeit.config(text='00:00:00')
+        self.ent_bahn2_fehler.delete(0, END)
 
     def stop_und_reset(self):
         self.alles_stop()
@@ -636,7 +726,8 @@ class MainView(tb.Window):
         self.test_damen_anzahl = tb.Entry(self.frame_test, width=5)
         self.test_damen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
-        # TODO Testzeiten während Bewerb erstellen
+        cb = tb.Checkbutton(self.frame_test, text="Testzeiten", variable=self.checked_Testzeiten, bootstyle="round-toggle")
+        cb.pack(side=LEFT, padx=10, pady=10)
 
         btn = tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)
@@ -698,36 +789,30 @@ class MainView(tb.Window):
         daten_neu = self.gruppen_manager.get_gruppen()
         self.tbl_gruppen.set_data(daten_neu)
 
-    def tbl_gd_bewerb_update(self, daten):
-        """Filtert Daten und updatet die Tabellendaten"""
-        daten_neu = self.durchgang_manager.filter_tbl_bewerb_daten(daten)
-        self.tbl_gd_bewerb.set_data(daten_neu)
+    def update_tabelle_von_modus_gesamt(self):
+         all_modus = self.durchgang_manager.lade_alle_Tabellen_modus()
+         for modus in all_modus:
+             self.update_tabelle_von_modus(modus)
 
-    def tbl_gd_rang_update(self, daten):
-        """Filtert Daten und updatet die Tabellendaten"""
-        daten_neu = self.durchgang_manager.filter_tbl_rang_daten(daten)
-        self.tbl_gd_rang.set_data(daten_neu)
+    def update_tabelle_von_modus(self, modus):
+        daten_bewerb = self.durchgang_manager.filter_bewerb(modus)
+        tbl_daten_bewerb = self.durchgang_manager.filter_tbl_bewerb_daten(daten_bewerb)
 
-    def tbl_ko16_bewerb_update(self):
-        pass
+        daten_rang = self.durchgang_manager.sort_tbl_rang_daten(modus)
+        tbl_daten_rang = self.durchgang_manager.filter_tbl_rang_daten(daten_rang)
 
-    def tbl_ko16_rang_update(self):
-        pass
-
-    def tbl_ko8_bewerb_update(self):
-        pass
-
-    def tbl_ko8_rang_update(self):
-        pass
-
-    def tbl_ko4_bewerb_update(self):
-        pass
-
-    def tbl_ko4_rang_update(self):
-        pass
-
-    def tbl_finale_bewerb_update(self):
-        pass
-
-    def tbl_finale_rang_update(self):
-        pass
+        if modus ==self.durchgang_manager.TypGD:
+            self.tbl_gd_bewerb.set_data(tbl_daten_bewerb)
+            self.tbl_gd_rang.set_data(tbl_daten_rang)
+        elif modus ==self.durchgang_manager.TypKO16:
+            self.tbl_ko16_bewerb.set_data(tbl_daten_bewerb)
+            self.tbl_ko16_rang.set_data(tbl_daten_rang)
+        elif modus ==self.durchgang_manager.TypKO8:
+            self.tbl_ko8_bewerb.set_data(tbl_daten_bewerb)
+            self.tbl_ko8_rang.set_data(tbl_daten_rang)
+        elif modus ==self.durchgang_manager.TypKO4:
+            self.tbl_ko4_bewerb.set_data(tbl_daten_bewerb)
+            self.tbl_ko4_rang.set_data(tbl_daten_rang)
+        elif modus ==self.durchgang_manager.TypKF or modus ==self.durchgang_manager.TypF:
+            self.tbl_finale_bewerb.set_data(tbl_daten_bewerb)
+            self.tbl_finale_rang.set_data(tbl_daten_rang)

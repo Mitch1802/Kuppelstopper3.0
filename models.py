@@ -74,80 +74,8 @@ class Durchgang:
             self.bestzeitinklfehler,
             self.hinweis,
             self.platzierung
-        ]
-
-    # def berechne_bestzeit(self):
-    #     """
-    #     Gibt die schnellere der beiden Zeiten zurück (ohne Fehler).
-
-    #     Returns:
-    #         str: schnellere Zeit oder die einzige vorhandene.
-    #     """
-    #     if self.zeit1 != '' and self.zeit2 != '':
-    #         zeit1_inkl_fehler = self._addiereFehlerZurZeit(self.zeit1, self.fehler1)
-    #         zeit2_inkl_fehler = self._addiereFehlerZurZeit(self.zeit2, self.fehler2)
-
-    #         zeit1_inkl_fehler_milisekunden = self._berechne_milisekunden(zeit1_inkl_fehler)
-    #         zeit2_inkl_fehler_milisekunden = self._berechne_milisekunden(zeit2_inkl_fehler)
-
-    #         if zeit1_inkl_fehler_milisekunden < zeit2_inkl_fehler_milisekunden:
-    #             self.bestzeit = self.zeit1
-    #             self.fehlerbest = self.fehler1
-    #             self.bestzeitinklfehler = self._format_millisekunden(zeit1_inkl_fehler_milisekunden)
-    #         elif zeit1_inkl_fehler_milisekunden >= zeit2_inkl_fehler_milisekunden:
-    #             self.bestzeit = self.zeit2
-    #             self.fehlerbest = self.fehler2
-    #             self.bestzeitinklfehler = self._format_millisekunden(zeit2_inkl_fehler_milisekunden)
-    
-    # def _addiereFehlerZurZeit(self, zeit, fehler):
-    #     """Addiert die Fehler zur Zeit"""
-    #     t = zeit.split(':')
-    #     t_minute = int(t[0])
-    #     t_sekunden = int(t[1])
-    #     t_milisekunden = int(t[2])
-    #     t_fehler = int(fehler)
-    #     t_sekunden = t_sekunden + t_fehler
-
-    #     if t_sekunden > 59:
-    #         t_sekunden = t_sekunden - 60
-    #         t_minute = t_minute + 1  
-
-    #     if t_minute < 10:
-    #         t_minute = '0' + str(t_minute)
-    #     else:
-    #         t_minute = str(t_minute)
-
-    #     if t_sekunden < 10:
-    #         t_sekunden = '0' + str(t_sekunden)
-    #     else:
-    #         t_sekunden = str(t_sekunden)
+        ] 
         
-    #     if t_milisekunden < 10:
-    #         t_milisekunden = '0' + str(t_milisekunden)
-    #     else:
-    #         t_milisekunden = str(t_milisekunden)
-
-    #     zeit_neu = t_minute + ':' + t_sekunden + ':' + t_milisekunden
-    #     return zeit_neu
-    
-    # def _berechne_milisekunden(self, zeit):
-    #     """Konvertiert 'minute:sekunde:millisekunde' in Millisekunden"""
-    #     t = zeit.split(':')
-    #     t_minute = int(t[0])
-    #     t_sekunden = int(t[1])
-    #     t_milisekunden = int(t[2])
-    #     tf = (((t_minute * 60) + t_sekunden) * 100) + t_milisekunden
-
-    #     return tf
-    
-    # def _format_millisekunden(ms: int) -> str:
-    #     """Formatiert Millisekunden in 'minute:sekunde:millisekunde'"""
-    #     t_minute = ms // 60000
-    #     t_sekunde = (ms % 60000) // 1000
-    #     t_millisekunde = ms % 1000
-
-    #     return f"{t_minute}:{t_sekunde:02}:{t_millisekunde:02}"
-    
     def _generiere_zufallsszeit(self, max_minutes: int = 1) -> str:
         """Gibt eine zufällige Zeit im Format 'minute:sekunde:millisekunde' zurück."""
         ms_total = random.randint(0, max_minutes * 60 * 1000 - 1)
