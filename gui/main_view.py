@@ -351,26 +351,26 @@ class MainView(tb.Window):
         frame_bahnen = tb.Frame(frame)
         frame_bahnen.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         
-        # self.cb_bahn1 = tb.Checkbutton(frame_bahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0) #, command=self.switchBahn1State, takefocus = 0)
+        # self.cb_bahn1 = tb.Checkbutton(frame_bahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0))
         # self.cb_bahn1.grid(row=0, column=0, padx=10)
-        self.lbl_bahn1 = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn1 = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn1.grid(row=0, column=0, padx=10, sticky=W)
-        self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn1_gruppe .grid(row=0, column=1, padx=10, sticky=W)
-        self.lbl_bahn1_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn1_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn1_zeit.grid(row=0, column=2, padx=10)
         self.ent_bahn1_fehler = tb.Entry(frame_bahnen, width=5, takefocus = 0)
         self.ent_bahn1_fehler.grid(row=0, column=3, padx=10)
         self.btn_bahn1_stop = tb.Button(frame_bahnen, text='Stop', width=10, command=self.bahn1_stop, state=DISABLED)
         self.btn_bahn1_stop.grid(row=0, column=4)
 
-        # self.cb_bahn2 = tb.Checkbutton(frame_bahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0) #, command=self.switchBahn2State, takefocus = 0)
+        # self.cb_bahn2 = tb.Checkbutton(frame_bahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0))
         # self.cb_bahn2.grid(row=1, column=0, padx=10)
-        self.lbl_bahn2 = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn2 = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn2.grid(row=1, column=0, padx=10, sticky=W)
-        self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn2_gruppe.grid(row=1, column=1, padx=10, sticky=W)
-        self.lbl_bahn2_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle), takefocus = 0, state=DISABLED)
+        self.lbl_bahn2_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn2_zeit.grid(row=1, column=2, padx=10)
         self.ent_bahn2_fehler = tb.Entry(frame_bahnen, width=5, takefocus = 0)
         self.ent_bahn2_fehler.grid(row=1, column=3, padx=10)
@@ -380,7 +380,7 @@ class MainView(tb.Window):
         frame_korrektur = tb.Frame(frame)
         frame_korrektur.pack(fill=BOTH, side=LEFT)
 
-        self.btn_stop_reset = tb.Button(frame_korrektur, text='Stop and Reset', width=15, takefocus = 0, command=self.stop_und_reset) #, state=DISABLED)
+        self.btn_stop_reset = tb.Button(frame_korrektur, text='Stop and Reset', width=15, takefocus = 0, command=self.stop_und_reset)
         self.btn_stop_reset.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         self.btn_zeit1_loeschen = tb.Button(frame_korrektur, text='Zeit 1+2 löschen', width=15, takefocus = 0, command=self.zeit_1_und_2_loeschen)
         self.btn_zeit1_loeschen.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
@@ -399,7 +399,7 @@ class MainView(tb.Window):
         self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
         self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
 
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def change_durchgang_gruppe(self, data):
         # TODO Zeige ein Edit Fenster an, speicher die geänderten Daten
@@ -486,7 +486,7 @@ class MainView(tb.Window):
 
         # TODO Prüfen ob schon zwei Zeiten vorhanden
 
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def start(self):
         self.zeitnehmung_buttons_control(False, True, False, False, True, True, True, False, False)
@@ -528,7 +528,23 @@ class MainView(tb.Window):
 
         self.lbl_bahn1_gruppe.config(text=gruppe_b)
         self.lbl_bahn2_gruppe.config(text=gruppe_a)
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+
+        if gruppe_b != '':
+            self.ent_bahn1_fehler['state'] = NORMAL
+            self.lbl_bahn1_zeit.config(text='00:00:00')
+        else:
+            self.lbl_bahn1_zeit.config(text='')
+            self.ent_bahn1_fehler['state'] = DISABLED
+
+        if gruppe_a != '':
+            self.ent_bahn2_fehler['state'] = NORMAL
+            self.lbl_bahn2_zeit.config(text='00:00:00')
+        else:
+            self.lbl_bahn2_zeit.config(text='')
+            self.ent_bahn2_fehler['state'] = DISABLED
+
+
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def zeit_uebertragen(self):
         durchgang = int(self.lbl_dg_number.cget('text'))
@@ -573,16 +589,24 @@ class MainView(tb.Window):
 
     def stop_und_reset(self):
         self.alles_stop()
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
         self.zeit_reset()
 
     def zeit_1_und_2_loeschen(self):
-        # TODO DG Alle Zeiten löschen
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+        dg = self.lbl_dg_number.cget('text')
+        self.durchgang_manager.zeit_1_und_2_loeschen(dg)
+        self.durchgang_manager.berechne_bestzeiten()
+        self.durchgang_manager.top_gruppen_naechste_runde()
+        self.update_tabelle_von_modus_gesamt()
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def zeit_2_loeschen(self):
-        # TODO DG Zeit 2 löschen
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+        dg = self.lbl_dg_number.cget('text')
+        self.durchgang_manager.zeit_2_loeschen(dg)
+        self.durchgang_manager.berechne_bestzeiten()
+        self.durchgang_manager.top_gruppen_naechste_runde()
+        self.update_tabelle_von_modus_gesamt()
+        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def zeitnehmung_buttons_control(self, start, alles_stop, bahn_wechsel, zeit_uebertragen, bahn1_stop, bahn2_stop, stop_reset, zeit1_loeschen, zeit2_loeschen):
         button_mapping = [

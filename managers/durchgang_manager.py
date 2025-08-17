@@ -26,23 +26,27 @@ class DurchgangManager:
         for dg in self.Bewerb:
             if dg[3] != '00:00:00' and dg[5] == '00:00:00':
                 dg[7] = dg[3]
-                dg[8] = dg[4]
+                dg[8] = int(dg[4])
                 dg[9] = self._addiereFehlerZurZeit(dg[3], dg[4])
             elif dg[3] != '00:00:00' and dg[5] != '00:00:00':
-                zeit1_inkl_fehler = self._addiereFehlerZurZeit(dg[3], dg[4])
-                zeit2_inkl_fehler = self._addiereFehlerZurZeit(dg[5], dg[6])
+                zeit1_inkl_fehler = self._addiereFehlerZurZeit(dg[3], int(dg[4]))
+                zeit2_inkl_fehler = self._addiereFehlerZurZeit(dg[5], int(dg[6]))
 
                 zeit1_inkl_fehler_milisekunden = self._berechne_milisekunden(zeit1_inkl_fehler)
                 zeit2_inkl_fehler_milisekunden = self._berechne_milisekunden(zeit2_inkl_fehler)
 
                 if zeit1_inkl_fehler_milisekunden < zeit2_inkl_fehler_milisekunden:
                     dg[7] = dg[3]
-                    dg[8] = dg[4]
+                    dg[8] = int(dg[4])
                     dg[9] = zeit1_inkl_fehler
                 elif zeit1_inkl_fehler_milisekunden >= zeit2_inkl_fehler_milisekunden:
                     dg[7] = dg[5]
-                    dg[8] = dg[6]
+                    dg[8] = int(dg[6])
                     dg[9] = zeit2_inkl_fehler
+            else:
+                dg[7] = '00:00:00'
+                dg[8] = 0
+                dg[9] = '00:00:00'
     
     def uebernehme_angemeldete_gruppen(self, gruppen):
         """Übernehme alle angemeldeten Gruppen """
@@ -366,5 +370,16 @@ class DurchgangManager:
         
         return data
 
+    def zeit_1_und_2_loeschen(self, durchgang):
+        for dg in self.Bewerb:
+            if dg[0] == int(durchgang):
+                dg[3] = '00:00:00'
+                dg[4] = 0
+                dg[5] = '00:00:00'
+                dg[6] = 0
 
-
+    def zeit_2_loeschen(self, durchgang):
+        for dg in self.Bewerb:
+            if dg[0] == int(durchgang):
+                dg[5] = '00:00:00'
+                dg[6] = 0
