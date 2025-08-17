@@ -298,6 +298,22 @@ class DurchgangManager:
     def change_werte(self, data):
         pass
 
+    def check_beide_zeiten(self, durchgang):
+        zeiten_a = 0
+        zeiten_b = 0
+        count = 0
+        for dg in self.Bewerb:
+            if dg[0] == int(durchgang):
+                if count == 0:
+                    if dg[3] != '00:00:00': zeiten_a += 1
+                    if dg[5] != '00:00:00': zeiten_a += 1
+                    count += 1
+                elif count == 1:
+                    if dg[3] != '00:00:00': zeiten_b += 1
+                    if dg[5] != '00:00:00': zeiten_b += 1
+        
+        return [zeiten_a, zeiten_b]
+
     def zeiten_an_bewerb_uebergeben(self, durchgang, gruppe_a, zeit_a, fehler_a, gruppe_b, zeit_b, fehler_b):
         aktuelle_zeit_a = 0
         aktuelle_zeit_b = 0

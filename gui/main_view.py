@@ -143,6 +143,7 @@ class MainView(tb.Window):
     def gruppen_uebernehmen(self):
         """Übernimmt die angemeldeten Gruppen für den Bewerb"""
         testzeiten = self.checked_Testzeiten.get()
+        self.lbl_dg_number.config(text=1)
         self.gruppen_manager.speichere_anmeldung()
         ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
         self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
@@ -351,8 +352,6 @@ class MainView(tb.Window):
         frame_bahnen = tb.Frame(frame)
         frame_bahnen.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         
-        # self.cb_bahn1 = tb.Checkbutton(frame_bahnen, text='Bahn 1', variable=self.checked_Bahn_1, takefocus = 0))
-        # self.cb_bahn1.grid(row=0, column=0, padx=10)
         self.lbl_bahn1 = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn1.grid(row=0, column=0, padx=10, sticky=W)
         self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
@@ -364,8 +363,6 @@ class MainView(tb.Window):
         self.btn_bahn1_stop = tb.Button(frame_bahnen, text='Stop', width=10, command=self.bahn1_stop, state=DISABLED)
         self.btn_bahn1_stop.grid(row=0, column=4)
 
-        # self.cb_bahn2 = tb.Checkbutton(frame_bahnen, text='Bahn 2', variable=self.checked_Bahn_2, takefocus = 0))
-        # self.cb_bahn2.grid(row=1, column=0, padx=10)
         self.lbl_bahn2 = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
         self.lbl_bahn2.grid(row=1, column=0, padx=10, sticky=W)
         self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
@@ -393,13 +390,7 @@ class MainView(tb.Window):
         self.durchgang_manager.lade_grunddurchgang(testzeiten)
         self.update_tabelle_von_modus_gesamt()
 
-        self.btn_dg_vorheriger['state'] = DISABLED
-        gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(1)
-
-        self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
-        self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
-
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
+        self.lade_durchgang_von_dgnumber(1)
 
     def change_durchgang_gruppe(self, data):
         # TODO Zeige ein Edit Fenster an, speicher die geänderten Daten
@@ -466,27 +457,39 @@ class MainView(tb.Window):
             self.btn_dg_vorheriger['state'] = NORMAL
             self.btn_naechster_dg['state'] = NORMAL
 
-        gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(durchgang)
+         # TODO Prüfen ob schon zwei Zeiten vorhanden
+        zeiten = self.durchgang_manager.check_beide_zeiten(durchgang)
+        zeiten_a = zeiten[0]
+        zeiten_b = zeiten[1]
 
-        self.checked_Bahn_1 = True
-        self.lbl_bahn1_zeit.config(text='00:00:00')
-        self.ent_bahn1_fehler['state'] = NORMAL
-        self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
-
-        if gruppen_start[1] != '': 
-            self.checked_Bahn_2 = True
-            self.lbl_bahn2_zeit.config(text='00:00:00')
-            self.ent_bahn2_fehler['state'] = NORMAL
-            self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
-        else: 
-            self.checked_Bahn_2 = False
+        if zeiten_a == 2 or zeiten_b == 2:
+            self.lbl_bahn1_gruppe.config(text='')
+            self.lbl_bahn1_zeit.config(text='')
+            self.ent_bahn1_fehler['state'] = DISABLED
+            self.lbl_bahn2_gruppe.config(text='')
             self.lbl_bahn2_zeit.config(text='')
             self.ent_bahn2_fehler['state'] = DISABLED
-            self.lbl_bahn2_gruppe.config(text='')
+            self.zeitnehmung_buttons_control(False, False, False, False, False, False, False, True, True)
+        else:
+            gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(durchgang)
 
-        # TODO Prüfen ob schon zwei Zeiten vorhanden
+            # self.checked_Bahn_1 = True
+            self.lbl_bahn1_zeit.config(text='00:00:00')
+            self.ent_bahn1_fehler['state'] = NORMAL
+            self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
 
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
+            if gruppen_start[1] != '': 
+                # self.checked_Bahn_2 = True
+                self.lbl_bahn2_zeit.config(text='00:00:00')
+                self.ent_bahn2_fehler['state'] = NORMAL
+                self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
+            else: 
+                # self.checked_Bahn_2 = False
+                self.lbl_bahn2_zeit.config(text='')
+                self.ent_bahn2_fehler['state'] = DISABLED
+                self.lbl_bahn2_gruppe.config(text='')
+
+            self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def start(self):
         self.zeitnehmung_buttons_control(False, True, False, False, True, True, True, False, False)
@@ -544,7 +547,7 @@ class MainView(tb.Window):
             self.ent_bahn2_fehler['state'] = DISABLED
 
 
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
+        self.zeitnehmung_buttons_control(True, False, True, False, False, False, False, True, True)
 
     def zeit_uebertragen(self):
         durchgang = int(self.lbl_dg_number.cget('text'))
@@ -564,7 +567,7 @@ class MainView(tb.Window):
         self.update_tabelle_von_modus_gesamt()
 
         self.zeit_reset()
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, False, False)
+        self.zeitnehmung_buttons_control(False, False, False, False, False, False, False, True, True)
 
         if count_zeit == 1:
             self.bahnwechsel()
@@ -572,6 +575,7 @@ class MainView(tb.Window):
             self.dg_naechster()
         else:
             print('Es wurden zwei unerschiedliche Zeiten übertragen, zB: Bahn1 -> Zeit1 und Bahn2 -> Zeit2')
+            # TODO Fehler Anzeige in App
 
     def bahn1_stop(self):
         # TODO Bahn 1 Stop
@@ -598,6 +602,7 @@ class MainView(tb.Window):
         self.durchgang_manager.berechne_bestzeiten()
         self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
+        self.lade_durchgang_von_dgnumber(dg)
         self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
 
     def zeit_2_loeschen(self):
@@ -606,7 +611,8 @@ class MainView(tb.Window):
         self.durchgang_manager.berechne_bestzeiten()
         self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
-        self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
+        self.lade_durchgang_von_dgnumber(dg)
+        self.zeitnehmung_buttons_control(True, False, True, False, False, False, False, True, True)
 
     def zeitnehmung_buttons_control(self, start, alles_stop, bahn_wechsel, zeit_uebertragen, bahn1_stop, bahn2_stop, stop_reset, zeit1_loeschen, zeit2_loeschen):
         button_mapping = [
