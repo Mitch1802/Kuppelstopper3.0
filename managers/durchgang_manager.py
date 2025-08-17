@@ -6,7 +6,6 @@ class DurchgangManager:
     def __init__(self):
         self.Gruppen = []
         self.Bewerb = []
-        self.DGNumbers = []
 
         self.TypGD = '1_GD'
         self.TypKO16 = '2_KO16'
@@ -169,14 +168,6 @@ class DurchgangManager:
         self.Bewerb.append(durchgang)
 
         # TODO Damenwertung
-
-        # TODO Befülle DGNumbers Arary mit Nummern der Durchgänge
-
-        # if testzeiten:
-        #     self.berechne_bestzeiten()
-
-        # data_neu = self.filter_bewerb(self.TypGD)
-        # return data_neu
 
     def filter_bewerb(self, modus):
         """Filtert alle Duchgänge nach dem aktuellen Modus, zB KO1-16"""
