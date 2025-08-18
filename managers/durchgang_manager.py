@@ -49,21 +49,20 @@ class DurchgangManager:
     
     def uebernehme_angemeldete_gruppen(self, gruppen):
         """Übernehme alle angemeldeten Gruppen """
-        self.gruppen = gruppen
+        self.Gruppen = gruppen
         self.Bewerb = []
-        self.DGNumbers = []
 
     def lade_grunddurchgang(self, testzeiten: bool):
         """Lade Gruppen für Grunddruchgang"""
-        self.gruppen.sort(key=lambda x: int(x[2]))
-        anzahl_gruppen = len(self.gruppen)
+        self.Gruppen.sort(key=lambda x: int(x[2]))
+        anzahl_gruppen = len(self.Gruppen)
         ko16 = anzahl_gruppen >= 16
         ko8 = anzahl_gruppen >= 8
         ko4 = anzahl_gruppen >= 4
 
         dg = 1
         count = 0
-        for grp in self.gruppen:
+        for grp in self.Gruppen:
             gruppen_name = grp[0]
             durchgang = Durchgang(dg, self.TypGD, gruppen_name, testzeit=testzeiten)
             durchgang = durchgang.to_list()
@@ -149,21 +148,21 @@ class DurchgangManager:
                 durchgang = durchgang.to_list()
                 self.Bewerb.append(durchgang)
 
-        durchgang = Durchgang(dg, self.TypKF, '')
+        durchgang = Durchgang(dg, self.TypKF, '', hinweis='KO4_3')
         durchgang = durchgang.to_list()
         self.Bewerb.append(durchgang)
 
-        durchgang = Durchgang(dg, self.TypKF, '')
+        durchgang = Durchgang(dg, self.TypKF, '', hinweis='KO4_4')
         durchgang = durchgang.to_list()
         self.Bewerb.append(durchgang)
                 
         dg += 1
 
-        durchgang = Durchgang(dg, self.TypF, '')
+        durchgang = Durchgang(dg, self.TypF, '', hinweis='KO4_1')
         durchgang = durchgang.to_list()
         self.Bewerb.append(durchgang)
 
-        durchgang = Durchgang(dg, self.TypF, '')
+        durchgang = Durchgang(dg, self.TypF, '', hinweis='KO4_2')
         durchgang = durchgang.to_list()
         self.Bewerb.append(durchgang)
 
@@ -171,8 +170,10 @@ class DurchgangManager:
 
     def filter_bewerb(self, modus):
         """Filtert alle Duchgänge nach dem aktuellen Modus, zB KO1-16"""
-        # TODO KF und F berücksichtigen 
-        daten_gefiltert = [item for item in self.Bewerb if item[1] == modus]
+        if modus == self.TypKF or modus == self.TypF:
+            daten_gefiltert = [item for item in self.Bewerb if item[1] == self.TypKF or item[1] == self.TypF]
+        else:
+            daten_gefiltert = [item for item in self.Bewerb if item[1] == modus]
         return daten_gefiltert
 
     def filter_tbl_bewerb_daten(self, data):
@@ -200,17 +201,51 @@ class DurchgangManager:
         return data_return
 
     def sort_tbl_rang_daten(self, modus):
-        """Sortiert Daten für Platzierung"""
-        # TODO KF und F berücksichtigen 
-        daten_gefiltert = [item for item in self.Bewerb if item[1] == modus and item[9] != '00:00:00']
-        daten_sortiert_nach_zeit = sorted(daten_gefiltert, key=self._time_key)
-        platzierung_neu = 1
+        """Setzt Platzierungen je Modus.
+        - Normale Modi: 1..n
+        - TypKF (kleines Finale): nur 3 & 4
+        - TypF  (Finale): nur 1 & 2
+        """
+       # Welche Modi sind in diesem Lauf zu berücksichtigen?
+        if modus in (self.TypKF, self.TypF):
+            involved = (self.TypKF, self.TypF)   # gemeinsam anzeigen
+        else:
+            involved = (modus,)
 
-        for index, item in enumerate(daten_sortiert_nach_zeit):
-                platzierung_neu = index + 1
-                item[11] = platzierung_neu
+        # Platzierungen in den betroffenen Modi zunächst löschen
+        for item in self.Bewerb:
+            if item[1] in involved:
+                item[11] = 0
 
-        return daten_sortiert_nach_zeit
+        # Nur Einträge mit gültiger Bestzeit
+        daten = [it for it in self.Bewerb if it[1] in involved and it[9] != '00:00:00']
+
+        if modus in (self.TypKF, self.TypF):
+            # Finale und kleines Finale getrennt werten...
+            finals = [it for it in daten if it[1] == self.TypF]
+            small  = [it for it in daten if it[1] == self.TypKF]
+
+            finals_sorted = sorted(finals, key=self._time_key)  # schnellste zuerst
+            small_sorted  = sorted(small,  key=self._time_key)
+
+            # ...aber gemeinsam zurückgeben
+            if len(finals_sorted) >= 1: finals_sorted[0][11] = 1
+            if len(finals_sorted) >= 2: finals_sorted[1][11] = 2
+            if len(small_sorted)  >= 1: small_sorted[0][11]  = 3
+            if len(small_sorted)  >= 2: small_sorted[1][11]  = 4
+
+            combined = finals_sorted + small_sorted
+            # Für die Rang-Tabelle sortiert nach Platz (1,2,3,4); Fallback: Zeit
+            return sorted(
+                combined,
+                key=lambda it: (0 if it[11] else 99, it[11]) + self._time_key(it)
+            )
+
+        # Alle anderen Modi: 1..n
+        daten_sortiert = sorted(daten, key=self._time_key)
+        for idx, item in enumerate(daten_sortiert, start=1):
+            item[11] = idx
+        return daten_sortiert
     
     def generiere_zufallsszeit(self, max_minutes: int = 1) -> str:
         """Gibt eine zufällige Zeit im Format 'minute:sekunde:millisekunde' zurück."""
@@ -355,18 +390,26 @@ class DurchgangManager:
         return max_dg
 
     def top_gruppen_naechste_runde(self):
+        # (Optional) Sicherstellen, dass Platzierungen frisch sind:
+        for m in [self.TypGD, self.TypKO16, self.TypKO8, self.TypKO4]:
+            self.sort_tbl_rang_daten(m)
+
+        # 1) Alle Ziel-Slots leeren (KO16/KO8/KO4/KF/F)
+        for dg in self.Bewerb:
+            if dg[1] in (self.TypKO16, self.TypKO8, self.TypKO4, self.TypKF, self.TypF):
+                dg[2] = ''  # Gruppe leer
+
+        # 2) Aus allen gefüllten Läufen die Slots wieder befüllen
         for row in self.Bewerb:
             gruppe = row[2]
             bestzeit = row[9]
             platzierung = row[11]
-            modus = row[1]
-            modus = modus.split('_')
-            modus = modus[1]
-            hinweis = modus + '_' + str(platzierung)
-
-            for dg in self.Bewerb:
-                if dg[10] == hinweis and bestzeit != '00:00:00':
-                    dg[2] = gruppe
+            if bestzeit != '00:00:00' and platzierung:
+                prefix = row[1].split('_')[1]  # 'GD', 'KO16', 'KO8', 'KO4'
+                ziel_hinweis = f"{prefix}_{platzierung}"
+                for ziel in self.Bewerb:
+                    if ziel[10] == ziel_hinweis:
+                        ziel[2] = gruppe
 
     def lade_alle_Tabellen_modus(self):
         data = []

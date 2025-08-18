@@ -23,35 +23,40 @@ class CustomTable(tb.Frame):
         self.commands = commands or [None] * len(coldata)
         self.entry_refs = {}
 
-        # 1) HEADER in Zeile 0, beide Spalten
+        # 1) HEADER
         self.header_frame = tb.Frame(self)
         self._build_header()
         self.header_frame.grid(row=0, column=0, sticky=EW)
 
-        # 2) CANVAS in Zeile 1, Spalte 0
+        # 2) CANVAS
         self.canvas = tb.Canvas(self, height=scroll_height, highlightthickness=0)
         self.canvas.grid(row=1, column=0, sticky=NSEW)
 
-        # 3) Scrollbar in Zeile 1, Spalte 1
+        # 3) Scrollbar
         self.v_scroll = tb.Scrollbar(self, orient='vertical', command=self.canvas.yview)
         self.v_scroll.grid(row=1, column=1, sticky=NS)
         self.canvas.configure(yscrollcommand=self.v_scroll.set)
 
-        # Damit Zeile 1 und Spalte 0 wachsen
+        # Root-Grid expandieren
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # 4) Inneres Frame für die Datenzeilen
+        # 4) Inneres Frame
         self.inner = tb.Frame(self.canvas)
-        self.window_id = self.canvas.create_window((0,0), window=self.inner, anchor=NW)
+        self.window_id = self.canvas.create_window((0, 0), window=self.inner, anchor=NW)
         self.inner.bind('<Configure>', self._on_inner_configure)
 
-        # Mausrad-Bindings
+        # WICHTIG: auch Canvas-Resizes beobachten
+        self.canvas.bind('<Configure>', self._on_canvas_configure)
+
+        # Mausrad
         self.canvas.bind('<Enter>', lambda e: self.canvas.bind_all('<MouseWheel>', self._on_mousewheel))
         self.canvas.bind('<Leave>', lambda e: self.canvas.unbind_all('<MouseWheel>'))
 
-        # 5) Erster Tabellen-Aufbau
+        # 5) Erstaufbau
         self._build_table()
+
+    # ------------------ Layout/Hilfen ------------------
 
     def _build_header(self):
         for w in self.header_frame.winfo_children():
@@ -59,39 +64,42 @@ class CustomTable(tb.Frame):
         for j, header in enumerate(self.coldata):
             lbl = tb.Label(self.header_frame, text=header, justify=LEFT, bootstyle=PRIMARY)
             lbl.grid(row=0, column=j, sticky=EW, padx=2, pady=2)
+            # WICHTIG: keine weight-Verteilung hier; Breiten laufen über minsize
+            self.header_frame.grid_columnconfigure(j, weight=0)
+
+    def _sync_column_widths(self):
+        """Synchronisiere Header/Daten-Spaltenbreiten proportional zur Canvas-Breite."""
+        total_width = max(self.canvas.winfo_width(), 1)
+        total_weight = max(sum(self.percent_widths), 1)
+
         for j, w in enumerate(self.percent_widths):
-            self.header_frame.grid_columnconfigure(j, weight=w)
-
-    def _on_inner_configure(self, event):
-        # erst das Scrollregion-Update
-        self.canvas.configure(scrollregion=self.canvas.bbox('all'))
-
-        # verfügbare Breite im Canvas abfragen
-        total_width = self.canvas.winfo_width()
-
-        # Summe der Gewichte
-        total_weight = sum(self.percent_widths)
-
-        # für jede Spalte pixelgenaues minsize setzen
-        x = 0
-        for j, w in enumerate(self.percent_widths):
-            # Spaltenbreite in Pixel
             col_w = int(total_width * (w / total_weight))
-            # Header und inner synchron
+            # Header & Inner: minsize setzen, weight auf 0 lassen
             self.header_frame.grid_columnconfigure(j, minsize=col_w, weight=0)
             self.inner.grid_columnconfigure(j, minsize=col_w, weight=0)
-            x += col_w
 
-        # Fenster-Breite des inner-Frames an Canvas koppeln
+        # Inner-Container an Canvas-Breite koppeln
         self.canvas.itemconfigure(self.window_id, width=total_width)
 
+    def _on_inner_configure(self, event):
+        # Scrollregion aktualisieren
+        self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+        # Spaltenbreiten synchronisieren
+        self._sync_column_widths()
+
+    def _on_canvas_configure(self, event):
+        # Bei Canvas-Resize Spaltenbreiten ebenfalls anpassen
+        self._sync_column_widths()
+
     def _on_mousewheel(self, event):
-        delta = int(-1*(event.delta/120))
+        delta = int(-1 * (event.delta / 120))
         self.canvas.yview_scroll(delta, 'units')
 
     def _destroy_table(self):
         for w in self.inner.winfo_children():
             w.destroy()
+
+    # ------------------ Aufbau/Refresh ------------------
 
     def _build_table(self):
         self._destroy_table()
@@ -100,30 +108,44 @@ class CustomTable(tb.Frame):
             for j, value in enumerate(cells):
                 ctype = self.cell_types[j]
                 command = self.commands[j]
+
                 if ctype == 'entry':
                     widget = tb.Entry(self.inner)
                     widget.insert(0, value)
                     self.entry_refs[(i-1, j)] = widget
+
                 elif ctype == 'button':
-                    cmd = self.commands[j]
-                    widget = tb.Button(self.inner, text=value, command=partial(cmd, row) if cmd else None)
-                else:
+                    widget = tb.Button(
+                        self.inner,
+                        text=value,
+                        command=partial(command, row) if command else None
+                    )
+
+                else:  # label (default)
                     widget = tb.Label(self.inner, text=value)
                     if command:
-                         widget.bind("<Button-1>", partial(self._on_label_click, command, row))
+                        widget.bind("<Button-1>", partial(self._on_label_click, command, row))
+
                 widget.grid(row=i, column=j, sticky=EW, padx=2, pady=2)
 
-        # Spaltengewichte in inner UND header synchronisieren
-        for j, w in enumerate(self.percent_widths):
-            self.inner.grid_columnconfigure(j, weight=w)
-    
+        # Wichtig: KEINE weight-Verteilung hier setzen (wir nutzen minsize)!
+        for j in range(len(self.coldata)):
+            self.inner.grid_columnconfigure(j, weight=0)
+
+        # Nach Neuaufbau scrollregion neu, Breiten sync
+        self.inner.update_idletasks()
+        self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+        self._sync_column_widths()
+
     def _on_label_click(self, command, value, event):
         command(value)
 
     def set_data(self, new_rowdata):
-        self.rowdata = [list(r) + ['']*(len(self.coldata)-len(r)) for r in new_rowdata]
+        self.rowdata = [list(r) + [''] * (len(self.coldata) - len(r)) for r in new_rowdata]
         self.entry_refs.clear()
         self._build_table()
+        # Scrollposition zurück an den Anfang – nützlich nach Updates
+        self.canvas.yview_moveto(0)
 
     def get_entry_value(self, row, col):
         e = self.entry_refs.get((row, col))

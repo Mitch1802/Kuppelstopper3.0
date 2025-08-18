@@ -303,7 +303,7 @@ class MainView(tb.Window):
                 self._show_button(name)
 
         # 3) Falls aktueller Tab nicht mehr sichtbar ist -> auf Grunddurchgang wechseln
-        if getattr(self, "_current_tab_name", "Grunddurchgang") not in must_show:
+        if getattr(self, "_current_subtab_name", "Grunddurchgang") not in must_show:
             self.show_bewerb_subtab("Grunddurchgang")
 
     def _show_button(self, name: str):
@@ -388,8 +388,11 @@ class MainView(tb.Window):
     
     def lade_grunddurchgang(self, testzeiten):
         self.durchgang_manager.lade_grunddurchgang(testzeiten)
+        self.durchgang_manager.berechne_bestzeiten()
+        for modus in self.durchgang_manager.lade_alle_Tabellen_modus():
+            self.durchgang_manager.sort_tbl_rang_daten(modus)
+        self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
-
         self.lade_durchgang_von_dgnumber(1)
 
     def change_durchgang_gruppe(self, data):
@@ -563,6 +566,8 @@ class MainView(tb.Window):
 
         count_zeit = self.durchgang_manager.zeiten_an_bewerb_uebergeben(durchgang, gruppe_a, zeit_a, fehler_a, gruppe_b, zeit_b, fehler_b)
         self.durchgang_manager.berechne_bestzeiten()
+        for modus in self.durchgang_manager.lade_alle_Tabellen_modus():
+            self.durchgang_manager.sort_tbl_rang_daten(modus)
         self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
 
@@ -600,6 +605,8 @@ class MainView(tb.Window):
         dg = self.lbl_dg_number.cget('text')
         self.durchgang_manager.zeit_1_und_2_loeschen(dg)
         self.durchgang_manager.berechne_bestzeiten()
+        for modus in self.durchgang_manager.lade_alle_Tabellen_modus():
+            self.durchgang_manager.sort_tbl_rang_daten(modus)
         self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
         self.lade_durchgang_von_dgnumber(dg)
@@ -609,6 +616,8 @@ class MainView(tb.Window):
         dg = self.lbl_dg_number.cget('text')
         self.durchgang_manager.zeit_2_loeschen(dg)
         self.durchgang_manager.berechne_bestzeiten()
+        for modus in self.durchgang_manager.lade_alle_Tabellen_modus():
+            self.durchgang_manager.sort_tbl_rang_daten(modus)
         self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
         self.lade_durchgang_von_dgnumber(dg)
@@ -633,6 +642,7 @@ class MainView(tb.Window):
     # Einstellungen Tab
     def create_settings_tab(self):
         frame = tb.Frame(self.tab_container)
+        self.settings_tab = frame
 
         label = tb.Label(frame, text="Einstellungen", font=("Arial", 20))
         label.pack(padx=10, pady=10, anchor=W)
@@ -739,7 +749,7 @@ class MainView(tb.Window):
         btn = tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0)
         btn.pack(side=LEFT, padx=10, pady=10)
 
-        self.frame_test = tb.Frame(frame)
+        self.frame_test = tb.Frame(self.settings_tab)
 
         label = tb.Label(self.frame_test, text="Test", font=("Arial", 15))
         label.pack(padx=10, pady=(20,10), anchor=W)
@@ -766,9 +776,13 @@ class MainView(tb.Window):
     
     def testframe_anzeigen(self):
         if self.checked_Test.get():
+            if not hasattr(self, "frame_test") or not self.frame_test.winfo_exists():
+                self.frame_test = tb.Frame(self.settings_tab)  # <--- sicherer Parent
+                # falls nötig: Controls hier wieder aufbauen
             self.frame_test.pack(fill=X, padx=10, pady=10)
-        else: 
-            self.frame_test.destroy()
+        else:
+            if hasattr(self, "frame_test") and self.frame_test.winfo_exists():
+                self.frame_test.pack_forget()
 
     def testgruppen_hinzufuegen(self):     
         """Erstellt die angemeldeteten Gruppen aufgrund der Anzahl"""
@@ -805,13 +819,11 @@ class MainView(tb.Window):
         pass
 
     def tbl_build(self, table_object):
-        """Erstellt und packt eine Tabelle """
+        """Nur packen, nicht neu bauen – das macht CustomTable selbst."""
         height = table_object.master.winfo_height()
         if height < 100:
             self.after(100, lambda: self.tbl_build(table_object))
             return
-
-        table_object._build_table()
         table_object.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     
     def tbl_gruppen_update(self):
