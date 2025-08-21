@@ -18,10 +18,7 @@ class MainView(tb.Window):
         self.title("Kuppelstopper 3.0")
         self.minsize(1600, 1000)
 
-        #  TODO Icon App
-
-        # LAde Konfiguration wenn vorhanden (Anmeldung, Bewerb, ...)
-
+        # Flags / Einstellungen
         self.checked_Bahn_1 = BooleanVar()
         self.checked_Bahn_2 = BooleanVar()
         self.checked_Tastatur = BooleanVar()
@@ -44,6 +41,16 @@ class MainView(tb.Window):
         self.durchgang_manager = DurchgangManager()
         self.zeit_manager = ZeitManager()
 
+        # === ZeitManager-Callback einhängen (empfohlener Weg) ===
+        if hasattr(self.zeit_manager, "on_tick"):
+            # Der Callback wird im Tk-Thread ausgeführt oder ist zumindest UI-sicher;
+            # falls nicht, kann man via self.after(0, ...) in den Tk-Thread wechseln.
+            self.zeit_manager.on_tick(lambda z1, z2: (
+                self.lbl_bahn1_zeit.config(text=z1),
+                self.lbl_bahn2_zeit.config(text=z2),
+                self._push_times_to_auswertungsfenster(z1, z2)
+            ))
+
         self.coldata_gruppen = ["Gruppenname", "Damen", "Reihenfolge", ""]
         self.coldata_bewerb = ["DG","Gruppe","Zeit1","F1","Zeit2","F2","Bestzeit inkl. Fehler"]
         self.coldata_rang = ["Platzierung", "Gruppe", "Bestzeit inkl. Fehler"]
@@ -62,6 +69,7 @@ class MainView(tb.Window):
 
         self.setup_ui()
 
+        # Zweitfenster beim Start öffnen (Monitor 2), kein Vollbild
         self.after(300, lambda: self.open_auswertung_window(monitor_index=1, fullscreen=False))
 
     def setup_ui(self):
@@ -191,7 +199,6 @@ class MainView(tb.Window):
         # Buttons zur Auswahl der Tabs
         for name in self.subtabs:
             btn = tb.Button(self.button_frame, text=name, command=lambda n=name: self.show_bewerb_subtab(n), compound=LEFT, takefocus=False, bootstyle="dark")
-            # btn.pack(fill=X, side=LEFT, ipadx=5, ipady=5, expand=True)
             self.subtab_buttons[name] = btn
             btn._is_packed = False
 
@@ -298,18 +305,18 @@ class MainView(tb.Window):
 
         order = ["Grunddurchgang", "KO 1-16", "KO 1-8", "KO 1-4", "Finale"]
 
-        # 1) ALLE Buttons entpacken -> garantiert sauberer Neuaufbau
+        # 1) ALLE Buttons entpacken -> sauberer Neuaufbau
         for btn in self.subtab_buttons.values():
             if getattr(btn, "_is_packed", False):
                 btn.pack_forget()
             btn._is_packed = False
 
-        # 2) Sichtbare Buttons in DEFINIERTER Reihenfolge packen
+        # 2) Sichtbare Buttons in definierter Reihenfolge packen
         for name in order:
             if name in must_show:
                 self._show_button(name)
 
-        # 3) Falls aktueller Tab nicht mehr sichtbar ist -> auf Grunddurchgang wechseln
+        # 3) Fallback auf Grunddurchgang, falls aktueller Tab wegfällt
         if getattr(self, "_current_subtab_name", "Grunddurchgang") not in must_show:
             self.show_bewerb_subtab("Grunddurchgang")
 
@@ -359,22 +366,22 @@ class MainView(tb.Window):
         frame_bahnen = tb.Frame(frame)
         frame_bahnen.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
         
-        self.lbl_bahn1 = tb.Label(frame_bahnen, text='B 1') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        self.lbl_bahn1 = tb.Label(frame_bahnen, text='B 1')
         self.lbl_bahn1.grid(row=0, column=0, padx=10, sticky=W)
-        self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        self.lbl_bahn1_gruppe = tb.Label(frame_bahnen, text='...')
         self.lbl_bahn1_gruppe .grid(row=0, column=1, padx=10, sticky=W)
-        self.lbl_bahn1_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        self.lbl_bahn1_zeit = tb.Label(frame_bahnen, text='00:00:00')
         self.lbl_bahn1_zeit.grid(row=0, column=2, padx=10)
         self.ent_bahn1_fehler = tb.Entry(frame_bahnen, width=5, takefocus = 0)
         self.ent_bahn1_fehler.grid(row=0, column=3, padx=10)
         self.btn_bahn1_stop = tb.Button(frame_bahnen, text='Stop', width=10, command=self.bahn1_stop, state=DISABLED)
         self.btn_bahn1_stop.grid(row=0, column=4)
 
-        self.lbl_bahn2 = tb.Label(frame_bahnen, text='B 2') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        self.lbl_bahn2 = tb.Label(frame_bahnen, text='B 2')
         self.lbl_bahn2.grid(row=1, column=0, padx=10, sticky=W)
-        self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        self.lbl_bahn2_gruppe = tb.Label(frame_bahnen, text='...')
         self.lbl_bahn2_gruppe.grid(row=1, column=1, padx=10, sticky=W)
-        self.lbl_bahn2_zeit = tb.Label(frame_bahnen, text='00:00:00') #, font=(self.GlobalFontArt, self.GlobalFontSizeTitle))
+        self.lbl_bahn2_zeit = tb.Label(frame_bahnen, text='00:00:00')
         self.lbl_bahn2_zeit.grid(row=1, column=2, padx=10)
         self.ent_bahn2_fehler = tb.Entry(frame_bahnen, width=5, takefocus = 0)
         self.ent_bahn2_fehler.grid(row=1, column=3, padx=10)
@@ -403,17 +410,19 @@ class MainView(tb.Window):
         self.lade_durchgang_von_dgnumber(1)
 
     def change_durchgang_gruppe(self, data):
-        # TODO Zeige ein Edit Fenster an, speicher die geänderten Daten
-        daten_neu = data # Nur für Test
-
+        # TODO Edit-Fenster, danach speichern
+        daten_neu = data # Test
         self.durchgang_manager.change_werte(daten_neu)
         self.durchgang_manager.berechne_bestzeiten()
         self.durchgang_manager.top_gruppen_naechste_runde()
         self.update_tabelle_von_modus_gesamt()
 
     def ansicht_umschalten(self):
-        # TODO Ansicht Umschalten
-        pass
+        w = getattr(self, "win_auswertung", None)
+        if not (w and w.winfo_exists()):
+            return
+        new_mode = "rang" if w.modus == "zeit" else "zeit"
+        w.set_mode(new_mode)
 
     def dg_vorheriger(self):
         dg_alt = int(self.lbl_dg_number.cget('text'))
@@ -449,7 +458,6 @@ class MainView(tb.Window):
             self.durchgang_manager.TypKO4: 'KO 1-4',
             self.durchgang_manager.TypKF: 'Finale',
             self.durchgang_manager.TypF: 'Finale'
-
         }  
         return mapping.get(typ)
 
@@ -467,7 +475,7 @@ class MainView(tb.Window):
             self.btn_dg_vorheriger['state'] = NORMAL
             self.btn_naechster_dg['state'] = NORMAL
 
-         # TODO Prüfen ob schon zwei Zeiten vorhanden
+        # Prüfen ob schon zwei Zeiten vorhanden
         zeiten = self.durchgang_manager.check_beide_zeiten(durchgang)
         zeiten_a = zeiten[0]
         zeiten_b = zeiten[1]
@@ -483,57 +491,92 @@ class MainView(tb.Window):
         else:
             gruppen_start = self.durchgang_manager.lade_gruppen_von_durchgang(durchgang)
 
-            # self.checked_Bahn_1 = True
             self.lbl_bahn1_zeit.config(text='00:00:00')
             self.ent_bahn1_fehler['state'] = NORMAL
             self.lbl_bahn1_gruppe.config(text=gruppen_start[0])
 
             if gruppen_start[1] != '': 
-                # self.checked_Bahn_2 = True
                 self.lbl_bahn2_zeit.config(text='00:00:00')
                 self.ent_bahn2_fehler['state'] = NORMAL
                 self.lbl_bahn2_gruppe.config(text=gruppen_start[1])
             else: 
-                # self.checked_Bahn_2 = False
                 self.lbl_bahn2_zeit.config(text='')
                 self.ent_bahn2_fehler['state'] = DISABLED
                 self.lbl_bahn2_gruppe.config(text='')
 
             self.zeitnehmung_buttons_control(True, False, False, False, False, False, False, True, True)
+        
+        # Aktuelle Gruppen & Zeiten an Zweitfenster pushen
+        self._push_groups_to_auswertungsfenster()
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
+
+        # Nächste Gruppen ermitteln und ans Zweitfenster geben
+        next1, next2 = self._ermittle_naechste_gruppen(durchgang)
+        w = getattr(self, "win_auswertung", None)
+        if w and w.winfo_exists():
+            w.set_next_groups(next1, next2)
 
     def start(self):
         self.zeitnehmung_buttons_control(False, True, False, False, True, True, True, False, False)
-        if self.checked_Testzeiten.get() == True:
-            self.alles_stop()
-            gruppe_a = self.lbl_bahn1_gruppe.cget('text')
-            gruppe_b = self.lbl_bahn2_gruppe.cget('text')
 
-            if gruppe_a != '':
-                self.ent_bahn1_fehler['state'] = NORMAL
+        # aktive Bahnen (Gruppe gesetzt)?
+        g1 = (self.lbl_bahn1_gruppe.cget('text') or '').strip()
+        g2 = (self.lbl_bahn2_gruppe.cget('text') or '').strip()
+        lane1_active = (g1 != '')
+        lane2_active = (g2 != '')
+
+        # Labels / Eingaben vorbereiten
+        self.lbl_bahn1_zeit.config(text='00:00:00' if lane1_active else '')
+        self.lbl_bahn2_zeit.config(text='00:00:00' if lane2_active else '')
+        self.ent_bahn1_fehler['state'] = NORMAL if lane1_active else DISABLED
+        self.ent_bahn2_fehler['state'] = NORMAL if lane2_active else DISABLED
+
+        if self.checked_Testzeiten.get() == True:
+            # Testmodus: Zufallszeiten einmalig generieren
+            self.alles_stop()
+            if lane1_active:
                 zeit_a = self.durchgang_manager.generiere_zufallsszeit()
                 fehler_a = random.choice(range(0, 21, 5))
                 self.lbl_bahn1_zeit.config(text=zeit_a)
+                self.ent_bahn1_fehler.delete(0, END)
                 self.ent_bahn1_fehler.insert(0, fehler_a)
             else:
                 self.lbl_bahn1_zeit.config(text='')
                 self.ent_bahn1_fehler['state'] = DISABLED
 
-            if gruppe_b != '':
-                self.ent_bahn2_fehler['state'] = NORMAL
+            if lane2_active:
                 zeit_b = self.durchgang_manager.generiere_zufallsszeit()
                 fehler_b = random.choice(range(0, 21, 5))
                 self.lbl_bahn2_zeit.config(text=zeit_b)
+                self.ent_bahn2_fehler.delete(0, END)
                 self.ent_bahn2_fehler.insert(0, fehler_b)
             else:
                 self.lbl_bahn2_zeit.config(text='')
                 self.ent_bahn2_fehler['state'] = DISABLED
-        else:
-            pass
-            # TODO Start Zeitnehmung
+
+            # Zeiten sofort ins Zweitfenster
+            self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
+            return
+
+        # Echtbetrieb: ZeitManager starten (empfohlener Weg)
+        try:
+            self.zeit_manager.start(lane1_active, lane2_active)
+        except TypeError:
+            # Falls Signatur anders ist, hier ggf. anpassen
+            self.zeit_manager.start(lane1_active)
 
     def alles_stop(self):
-        # TODO Stop Zeitnehmung
+        # Echtbetrieb: alles stoppen
+        try:
+            self.zeit_manager.stop_all()
+        except Exception:
+            pass
+
+        # Buttons wie bei dir
         self.zeitnehmung_buttons_control(False, False, False, True, False, False, False, True, True)
+
+        # Zeiten aus Labels ins Zweitfenster pushen (Callback liefert evtl. schon final)
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
 
     def bahnwechsel(self):
         gruppe_a = self.lbl_bahn1_gruppe.cget('text')
@@ -556,8 +599,11 @@ class MainView(tb.Window):
             self.lbl_bahn2_zeit.config(text='')
             self.ent_bahn2_fehler['state'] = DISABLED
 
-
         self.zeitnehmung_buttons_control(True, False, True, False, False, False, False, True, True)
+
+        # Push Gruppen & Zeiten
+        self._push_groups_to_auswertungsfenster() 
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
 
     def zeit_uebertragen(self):
         durchgang = int(self.lbl_dg_number.cget('text'))
@@ -586,22 +632,41 @@ class MainView(tb.Window):
         elif count_zeit == 2:
             self.dg_naechster()
         else:
-            print('Es wurden zwei unerschiedliche Zeiten übertragen, zB: Bahn1 -> Zeit1 und Bahn2 -> Zeit2')
+            print('Es wurden zwei unterschiedliche Zeiten übertragen, zB: Bahn1 -> Zeit1 und Bahn2 -> Zeit2')
             # TODO Fehler Anzeige in App
 
+        # Nach Übertragen: Zeiten/ Gruppen nochmals pushen
+        self._push_groups_to_auswertungsfenster()
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
+
     def bahn1_stop(self):
-        # TODO Bahn 1 Stop
-        pass
+        try:
+            self.zeit_manager.stop_lane(1)
+        except Exception:
+            pass
+        # finalen Stand ins Zweitfenster drücken (Callback kommt evtl. schon)
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
 
     def bahn2_stop(self):
-        # TODO Bahn 2 Stop
-        pass
+        try:
+            self.zeit_manager.stop_lane(2)
+        except Exception:
+            pass
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
 
     def zeit_reset(self):
+        try:
+            self.zeit_manager.reset()
+        except Exception:
+            pass
+
         self.lbl_bahn1_zeit.config(text='00:00:00')
         self.ent_bahn1_fehler.delete(0, END)
         self.lbl_bahn2_zeit.config(text='00:00:00')
         self.ent_bahn2_fehler.delete(0, END)
+
+        # Zeiten nach Reset pushen
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
 
     def stop_und_reset(self):
         self.alles_stop()
@@ -667,9 +732,6 @@ class MainView(tb.Window):
         cb.pack(side=LEFT, padx=10, pady=10)
 
         cb = tb.Checkbutton(sub_frame, text="Rahmen ausblenden", variable=self.checked_Rahmen, bootstyle="round-toggle")
-        cb.pack(side=LEFT, padx=10, pady=10)
-
-        cb = tb.Checkbutton(sub_frame, text="Konsole", variable=self.checked_Konsole, bootstyle="round-toggle")
         cb.pack(side=LEFT, padx=10, pady=10)
 
         cb = tb.Checkbutton(sub_frame, text="Testgruppen", variable=self.checked_Test, command=self.testframe_anzeigen, bootstyle="round-toggle")
@@ -779,26 +841,19 @@ class MainView(tb.Window):
         btn = tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)
 
-        btnbar = tb.Frame(frame)
-        btnbar.pack(side=LEFT, padx=10)
-
-        tb.Button(btnbar, text="Zweitfenster: ZEIT", command=lambda: self.set_auswertung_modus("zeit"), takefocus=0).pack(side=LEFT, padx=2)
-        tb.Button(btnbar, text="Zweitfenster: RANGLISTE", command=lambda: self.set_auswertung_modus("rang"), takefocus=0).pack(side=LEFT, padx=2)
-
         return frame
     
     def testframe_anzeigen(self):
         if self.checked_Test.get():
             if not hasattr(self, "frame_test") or not self.frame_test.winfo_exists():
-                self.frame_test = tb.Frame(self.settings_tab)  # <--- sicherer Parent
-                # falls nötig: Controls hier wieder aufbauen
+                self.frame_test = tb.Frame(self.settings_tab)
             self.frame_test.pack(fill=X, padx=10, pady=10)
         else:
             if hasattr(self, "frame_test") and self.frame_test.winfo_exists():
                 self.frame_test.pack_forget()
 
     def testgruppen_hinzufuegen(self):     
-        """Erstellt die angemeldeteten Gruppen aufgrund der Anzahl"""
+        """Erstellt die angemeldeten Gruppen aufgrund der Anzahl"""
         anzahl = self.test_gruppen_anzahl.get()
         damenAnzahl = self.test_damen_anzahl.get()
         self.gruppen_manager.testgruppen_hinzufuegen(self, anzahl, damenAnzahl)
@@ -826,7 +881,6 @@ class MainView(tb.Window):
         return frame
 
     # Hilfsfunktionen Tables
-     
     def tbl_sort(self, bedingung1, bedingung2):
         """Kann die Tabellen grunddaten sortieren nach Bedingung 1  bzw Bedingung 2"""
         pass
@@ -846,7 +900,6 @@ class MainView(tb.Window):
 
     def update_tabelle_von_modus_gesamt(self):
          self.refresh_auswertung_if_visible() # Auswertungswindow updaten
-
          all_modus = self.durchgang_manager.lade_alle_Tabellen_modus()
          for modus in all_modus:
              self.update_tabelle_von_modus(modus)
@@ -858,23 +911,24 @@ class MainView(tb.Window):
         daten_rang = self.durchgang_manager.sort_tbl_rang_daten(modus)
         tbl_daten_rang = self.durchgang_manager.filter_tbl_rang_daten(daten_rang)
 
-        if modus ==self.durchgang_manager.TypGD:
+        if modus == self.durchgang_manager.TypGD:
             self.tbl_gd_bewerb.set_data(tbl_daten_bewerb)
             self.tbl_gd_rang.set_data(tbl_daten_rang)
-        elif modus ==self.durchgang_manager.TypKO16:
+        elif modus == self.durchgang_manager.TypKO16:
             self.tbl_ko16_bewerb.set_data(tbl_daten_bewerb)
             self.tbl_ko16_rang.set_data(tbl_daten_rang)
-        elif modus ==self.durchgang_manager.TypKO8:
+        elif modus == self.durchgang_manager.TypKO8:
             self.tbl_ko8_bewerb.set_data(tbl_daten_bewerb)
             self.tbl_ko8_rang.set_data(tbl_daten_rang)
-        elif modus ==self.durchgang_manager.TypKO4:
+        elif modus == self.durchgang_manager.TypKO4:
             self.tbl_ko4_bewerb.set_data(tbl_daten_bewerb)
             self.tbl_ko4_rang.set_data(tbl_daten_rang)
-        elif modus ==self.durchgang_manager.TypKF or modus ==self.durchgang_manager.TypF:
+        elif modus == self.durchgang_manager.TypKF or modus == self.durchgang_manager.TypF:
             self.tbl_finale_bewerb.set_data(tbl_daten_bewerb)
             self.tbl_finale_rang.set_data(tbl_daten_rang)
 
-    # Auswertungswindow
+    # ======== Auswertungswindow ========
+
     def open_auswertung_window(self, monitor_index=1, fullscreen=False):
         w = getattr(self, "win_auswertung", None)
         if w and w.winfo_exists():
@@ -893,6 +947,13 @@ class MainView(tb.Window):
             monitor_index, fullscreen=fullscreen, fallback_geometry="+1920+0"
         )
 
+        # Beim Öffnen initiale Werte pushen (falls schon da)
+        self._push_groups_to_auswertungsfenster()
+        self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
+        dg = int(self.lbl_dg_number.cget('text')) if self.lbl_dg_number.cget('text').isdigit() else 1
+        next1, next2 = self._ermittle_naechste_gruppen(dg)
+        self.win_auswertung.set_next_groups(next1, next2)
+
     def close_auswertung_window(self):
         w = getattr(self, "win_auswertung", None)
         if w and w.winfo_exists():
@@ -907,7 +968,7 @@ class MainView(tb.Window):
             self.open_auswertung_window(monitor_index=1, fullscreen=False)
 
     def refresh_auswertung_if_visible(self):
-        """Nach Zeit-/Fehler-Änderung aufrufen, damit Rangliste live mitzieht."""
+        """Nach Zeit-/Fehler-Änderung aufrufen, damit Rangliste/Anzeige live mitzieht."""
         w = self.win_auswertung
         if w and w.winfo_exists():
             try:
@@ -915,17 +976,44 @@ class MainView(tb.Window):
             except Exception:
                 pass
 
-    def set_auswertung_modus(self, modus: str):
-        """Von Buttons im Hauptfenster aufrufbar: 'zeit' oder 'rang'."""
+    def _push_groups_to_auswertungsfenster(self):
+        w = getattr(self, "win_auswertung", None)
+        if not (w and w.winfo_exists()):
+            return
+
+        # Texte holen
+        try:
+            g1 = self.lbl_bahn1_gruppe.cget("text")
+        except Exception:
+            g1 = None
+        try:
+            g2 = self.lbl_bahn2_gruppe.cget("text")
+        except Exception:
+            g2 = None
+
+        # Leere/Platzhalter filtern
+        g1 = g1 if g1 and g1.strip() and g1.strip() != "—" else None
+        g2 = g2 if g2 and g2.strip() and g2.strip() != "—" else None
+
+        w.set_current_groups(g1, g2)
+
+    def _push_times_to_auswertungsfenster(self, zeit1, zeit2):
+        """Push Zeiten 1:1 ins Zweitfenster (keine Fehlerwerte)."""
         w = getattr(self, "win_auswertung", None)
         if w and w.winfo_exists():
-            try:
-                w.set_mode(modus)
-            except Exception:
-                pass
-        
+            w.update_times(zeit1, zeit2)
 
-
-
-
-
+    def _ermittle_naechste_gruppen(self, aktueller_dg: int):
+        """
+        Liefert (next1, next2) für den DG nach 'aktueller_dg'.
+        Nutzt deine bestehende Funktion lade_gruppen_von_durchgang(n).
+        """
+        try:
+            next_tuple = self.durchgang_manager.lade_gruppen_von_durchgang(aktueller_dg + 1)
+        except Exception:
+            return None, None
+        if not next_tuple:
+            return None, None
+        n1 = next_tuple[0] if len(next_tuple) > 0 and next_tuple[0] else None
+        n2 = next_tuple[1] if len(next_tuple) > 1 and next_tuple[1] else None
+        return n1, n2
