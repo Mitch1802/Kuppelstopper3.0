@@ -6,6 +6,7 @@ from models import Gruppe
 from managers.gruppen_manager import GruppenManager
 from managers.durchgang_manager import DurchgangManager
 from managers.zeitnehmung_manager import ZeitManager
+from gui.auswertung_window import AuswertungWindow
 import random
 
 
@@ -16,6 +17,8 @@ class MainView(tb.Window):
         self.minsize(1600, 1000)
 
         #  TODO Icon App
+
+        # LAde Konfiguration wenn vorhanden (Anmeldung, Bewerb, ...)
 
         self.checked_Bahn_1 = BooleanVar()
         self.checked_Bahn_2 = BooleanVar()
@@ -56,6 +59,8 @@ class MainView(tb.Window):
         self.percent_widths_rang = [20, 50, 20]
 
         self.setup_ui()
+
+        self.after(300, lambda: self.open_auswertung_window(monitor_index=1, fullscreen=False))
 
     def setup_ui(self):
         # Container für die Buttons
@@ -832,6 +837,8 @@ class MainView(tb.Window):
         self.tbl_gruppen.set_data(daten_neu)
 
     def update_tabelle_von_modus_gesamt(self):
+         self.refresh_auswertung_if_visible() # Auswertungswindow updaten
+
          all_modus = self.durchgang_manager.lade_alle_Tabellen_modus()
          for modus in all_modus:
              self.update_tabelle_von_modus(modus)
@@ -858,3 +865,48 @@ class MainView(tb.Window):
         elif modus ==self.durchgang_manager.TypKF or modus ==self.durchgang_manager.TypF:
             self.tbl_finale_bewerb.set_data(tbl_daten_bewerb)
             self.tbl_finale_rang.set_data(tbl_daten_rang)
+
+    # Auswertungswindow
+    def open_auswertung_window(self, monitor_index=1, fullscreen=False):
+        # bereits offen?
+        if self.win_auswertung and self.win_auswertung.winfo_exists():
+            # nur in den Vordergrund bringen
+            self.win_auswertung.deiconify()
+            self.win_auswertung.lift()
+            return
+
+        # Fenster erzeugen
+        self.win_auswertung = AuswertungWindow(
+            self,
+            zeit_manager=self.zeit_manager,
+            durchgang_manager=self.durchgang_manager,
+            themename="litera",
+        )
+        # auf zweiten Monitor verschieben (index 1)
+        # Fallback "+1920+0" ggf. anpassen, wenn dein 2. Monitor anders steht:
+        self.win_auswertung.show_on_monitor(monitor_index, fullscreen=fullscreen, fallback_geometry="+1920+0")
+
+    def close_auswertung_window(self):
+        if self.win_auswertung and self.win_auswertung.winfo_exists():
+            self.win_auswertung.destroy()
+            self.win_auswertung = None
+
+    def toggle_auswertung_window(self):
+        if self.win_auswertung and self.win_auswertung.winfo_exists():
+            # Fenster ausblenden (oder destroy – Geschmackssache)
+            self.close_auswertung_window()
+        else:
+            # 1 = zweiter Monitor; fullscreen=True falls du echten Vollbildmodus willst
+            self.open_auswertung_window(monitor_index=1, fullscreen=False)
+
+    def refresh_auswertung_if_visible(self):
+        """Nach Zeit-/Fehler-Änderung aufrufen, damit Rangliste live mitzieht."""
+        w = self.win_auswertung
+        if w and w.winfo_exists():
+            try:
+                w.refresh()
+            except Exception:
+                pass
+
+
+        
