@@ -1,6 +1,6 @@
 import json, os, random
 from models import Gruppe
-from config.paths import ANMELDUNG_JSON
+from paths import ANMELDUNG_JSON
 
 class GruppenManager:
     """Verwaltet Gruppen: Hinzufügen, Speichern, Laden."""
