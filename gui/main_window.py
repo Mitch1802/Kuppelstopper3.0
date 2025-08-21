@@ -13,6 +13,8 @@ import random
 class MainView(tb.Window):
     def __init__(self):
         super().__init__(themename="litera")
+        self.win_auswertung = None
+
         self.title("Kuppelstopper 3.0")
         self.minsize(1600, 1000)
 
@@ -777,6 +779,12 @@ class MainView(tb.Window):
         btn = tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen)
         btn.pack(side=LEFT, padx=10, pady=10)
 
+        btnbar = tb.Frame(frame)
+        btnbar.pack(side=LEFT, padx=10)
+
+        tb.Button(btnbar, text="Zweitfenster: ZEIT", command=lambda: self.set_auswertung_modus("zeit"), takefocus=0).pack(side=LEFT, padx=2)
+        tb.Button(btnbar, text="Zweitfenster: RANGLISTE", command=lambda: self.set_auswertung_modus("rang"), takefocus=0).pack(side=LEFT, padx=2)
+
         return frame
     
     def testframe_anzeigen(self):
@@ -868,35 +876,34 @@ class MainView(tb.Window):
 
     # Auswertungswindow
     def open_auswertung_window(self, monitor_index=1, fullscreen=False):
-        # bereits offen?
-        if self.win_auswertung and self.win_auswertung.winfo_exists():
-            # nur in den Vordergrund bringen
-            self.win_auswertung.deiconify()
-            self.win_auswertung.lift()
+        w = getattr(self, "win_auswertung", None)
+        if w and w.winfo_exists():
+            w.deiconify()
+            w.lift()
             return
 
-        # Fenster erzeugen
+        from gui.auswertung_window import AuswertungWindow
         self.win_auswertung = AuswertungWindow(
             self,
             zeit_manager=self.zeit_manager,
             durchgang_manager=self.durchgang_manager,
             themename="litera",
         )
-        # auf zweiten Monitor verschieben (index 1)
-        # Fallback "+1920+0" ggf. anpassen, wenn dein 2. Monitor anders steht:
-        self.win_auswertung.show_on_monitor(monitor_index, fullscreen=fullscreen, fallback_geometry="+1920+0")
+        self.win_auswertung.show_on_monitor(
+            monitor_index, fullscreen=fullscreen, fallback_geometry="+1920+0"
+        )
 
     def close_auswertung_window(self):
-        if self.win_auswertung and self.win_auswertung.winfo_exists():
-            self.win_auswertung.destroy()
-            self.win_auswertung = None
+        w = getattr(self, "win_auswertung", None)
+        if w and w.winfo_exists():
+            w.destroy()
+        self.win_auswertung = None
 
     def toggle_auswertung_window(self):
-        if self.win_auswertung and self.win_auswertung.winfo_exists():
-            # Fenster ausblenden (oder destroy – Geschmackssache)
+        w = getattr(self, "win_auswertung", None)
+        if w and w.winfo_exists():
             self.close_auswertung_window()
         else:
-            # 1 = zweiter Monitor; fullscreen=True falls du echten Vollbildmodus willst
             self.open_auswertung_window(monitor_index=1, fullscreen=False)
 
     def refresh_auswertung_if_visible(self):
@@ -908,5 +915,17 @@ class MainView(tb.Window):
             except Exception:
                 pass
 
-
+    def set_auswertung_modus(self, modus: str):
+        """Von Buttons im Hauptfenster aufrufbar: 'zeit' oder 'rang'."""
+        w = getattr(self, "win_auswertung", None)
+        if w and w.winfo_exists():
+            try:
+                w.set_mode(modus)
+            except Exception:
+                pass
         
+
+
+
+
+
