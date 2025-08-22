@@ -24,7 +24,7 @@ class MainView(tb.Window):
         self.checked_Bahn_2 = BooleanVar(value=False)
         self.checked_Tastatur = BooleanVar(value=True)
         self.checked_GPIO = BooleanVar(value=False)
-        self.checked_Rahmen = BooleanVar(value=False)
+        self.checked_Fullscreen = BooleanVar(value=False)
         self.checked_Konsole = BooleanVar(value=True)
         self.checked_Test = BooleanVar(value=False)
         self.checked_Testzeiten = BooleanVar(value=False)
@@ -78,7 +78,13 @@ class MainView(tb.Window):
         self.after(50, self._setup_gpio_from_settings)
 
         # Zweitfenster
-        self.after(300, lambda: self.open_auswertung_window(monitor_index=1, fullscreen=False))
+        if self.checked_Fullscreen.get():
+            self.after(300, lambda: self.open_auswertung_window(monitor_index=1, fullscreen=True))
+        else:
+            self.after(300, lambda: self.open_auswertung_window(monitor_index=1, fullscreen=False))
+        
+        # Lade Konfiguration
+        self.lade_konfigurationen()
 
     # ========= Tabs-Grundgerüst =========
     def setup_ui(self):
@@ -313,15 +319,8 @@ class MainView(tb.Window):
         self.btn_naechster_dg = tb.Button(frame_zeitnehmung, text='>>>', bootstyle=WARNING, width=10, takefocus=0, command=self.dg_naechster)
         self.btn_naechster_dg.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
-        # NEU: Start (global) + je Bahn
-        self.btn_start_global = tb.Button(frame_zeitnehmung, text='Start (global)', width=15, takefocus=0, command=self.start_global)
+        self.btn_start_global = tb.Button(frame_zeitnehmung, text='Start', width=15, takefocus=0, command=self.start_global)
         self.btn_start_global.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
-
-        self.btn_start_b1 = tb.Button(frame_zeitnehmung, text='Start B1', width=10, takefocus=0, command=lambda: self.start_lane(1))
-        self.btn_start_b1.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
-
-        self.btn_start_b2 = tb.Button(frame_zeitnehmung, text='Start B2', width=10, takefocus=0, command=lambda: self.start_lane(2))
-        self.btn_start_b2.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
         self.btn_alles_stop = tb.Button(frame_zeitnehmung, text='Alles Stop', width=15, takefocus=0, command=self.alles_stop, state=DISABLED)
         self.btn_alles_stop.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
@@ -386,7 +385,7 @@ class MainView(tb.Window):
         tb.Checkbutton(sub_frame, text="Tastatur", variable=self.checked_Tastatur, bootstyle="round-toggle").pack(side=LEFT, padx=10, pady=10)
         tb.Checkbutton(sub_frame, text="GPIO", variable=self.checked_GPIO, bootstyle="round-toggle",
                        command=self._setup_gpio_from_settings).pack(side=LEFT, padx=10, pady=10)
-        tb.Checkbutton(sub_frame, text="Rahmen ausblenden", variable=self.checked_Rahmen, bootstyle="round-toggle").pack(side=LEFT, padx=10, pady=10)
+        tb.Checkbutton(sub_frame, text="Fullscreen", variable=self.checked_Fullscreen, bootstyle="round-toggle").pack(side=LEFT, padx=10, pady=10)
         tb.Checkbutton(sub_frame, text="Konsole", variable=self.checked_Konsole, bootstyle="round-toggle").pack(side=LEFT, padx=10, pady=10)
         tb.Checkbutton(sub_frame, text="Testgruppen", variable=self.checked_Test, command=self.testframe_anzeigen, bootstyle="round-toggle").pack(side=LEFT, padx=10, pady=10)
 
@@ -437,13 +436,13 @@ class MainView(tb.Window):
         label.pack(padx=10, pady=(20,10), anchor=W)
         sub_frame = tb.Frame(frame); sub_frame.pack(fill=X, padx=10, pady=10)
 
-        tb.Label(sub_frame, text="Schriftgröße Zeit").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
-        tb.Entry(sub_frame, width=5).pack(side=LEFT, padx=(5,10), pady=10)
+        # tb.Label(sub_frame, text="Schriftgröße Zeit").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+        # tb.Entry(sub_frame, width=5).pack(side=LEFT, padx=(5,10), pady=10)
 
-        tb.Label(sub_frame, text="Schriftgröße Gruppe").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
-        tb.Entry(sub_frame, width=5).pack(side=LEFT, padx=(5,10), pady=10)
+        # tb.Label(sub_frame, text="Schriftgröße Gruppe").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+        # tb.Entry(sub_frame, width=5).pack(side=LEFT, padx=(5,10), pady=10)
 
-        tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0).pack(side=LEFT, padx=10, pady=10)
+        tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0, command=self.change_font_size_from_window).pack(side=LEFT, padx=10, pady=10)
 
         # Testbereich (dein bestehendes UI)
         self.frame_test = tb.Frame(self.settings_tab)
@@ -460,6 +459,9 @@ class MainView(tb.Window):
         tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen).pack(side=LEFT, padx=10, pady=10)
 
         return frame
+    
+    def change_font_size_from_window(self):
+        self.win_auswertung.change_font_size_from_window()
 
     def testframe_anzeigen(self):
         if self.checked_Test.get():
@@ -489,8 +491,6 @@ class MainView(tb.Window):
         return frame
 
     # ========= Tabellen-Hilfen =========
-    def tbl_sort(self, bedingung1, bedingung2): pass
-
     def tbl_build(self, table_object):
         height = table_object.master.winfo_height()
         if height < 100:
@@ -503,6 +503,18 @@ class MainView(tb.Window):
         self.tbl_gruppen.set_data(daten_neu)
 
     # ========= Daten-Logik =========
+    def lade_konfigurationen(self):
+        # TODO Lade Konfiguration
+        self.ent_gpio_start1.insert(0, '17')
+        self.ent_gpio_stop1.insert(0, '27')
+        self.ent_gpio_start2.insert(0, '19')
+        self.ent_gpio_stop2.insert(0, '26')
+
+        self.ent_key_start1.insert(0, 'a')
+        self.ent_key_stop1.insert(0, 'q')
+        self.ent_key_start2.insert(0, 's')
+        self.ent_key_stop2.insert(0, 'w')
+
     def lade_grunddurchgang(self, testzeiten):
         self.durchgang_manager.lade_grunddurchgang(testzeiten)
         self.durchgang_manager.berechne_bestzeiten()
@@ -794,9 +806,6 @@ class MainView(tb.Window):
         ]
         for cond, button in mapping:
             button['state'] = NORMAL if cond else DISABLED
-        # Start je Bahn ist immer verfügbar
-        self.btn_start_b1['state'] = NORMAL
-        self.btn_start_b2['state'] = NORMAL
 
     def update_tabelle_von_modus_gesamt(self):
         self.refresh_auswertung_if_visible()
