@@ -17,7 +17,7 @@ class MainView(tb.Window):
         self.win_auswertung = None
 
         self.title("Kuppelstopper 3.0")
-        self.minsize(1600, 1000)
+        self.minsize(1400, 800)
 
         # ===== Flags =====
         self.checked_Bahn_1 = BooleanVar(value=False)
@@ -31,6 +31,7 @@ class MainView(tb.Window):
 
         # Sound-Pfad NUR aus paths.py
         self.start_sound_path = START_SOUND_PATH
+        self.stop_sound_path = STOP_SOUND_PATH
 
         # Manager
         self.gruppen_manager = GruppenManager()
@@ -307,16 +308,16 @@ class MainView(tb.Window):
         frame_zeitnehmung = tb.Frame(frame)
         frame_zeitnehmung.pack(fill=BOTH, side=LEFT)
 
-        btn = tb.Button(frame_zeitnehmung, text='Ansicht Wechsel', width=20, bootstyle=INFO, takefocus=0, command=self.ansicht_umschalten)
+        btn = tb.Button(frame_zeitnehmung, text='Ansicht', width=10, bootstyle=INFO, takefocus=0, command=self.ansicht_umschalten)
         btn.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
-        self.btn_dg_vorheriger = tb.Button(frame_zeitnehmung, text='<<<', width=10, bootstyle=WARNING, takefocus=0, command=self.dg_vorheriger)
+        self.btn_dg_vorheriger = tb.Button(frame_zeitnehmung, text='-', width=5, bootstyle=WARNING, takefocus=0, command=self.dg_vorheriger)
         self.btn_dg_vorheriger.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
         self.lbl_dg_number = tb.Label(frame_zeitnehmung, text="1", font=("Arial", 30))
         self.lbl_dg_number.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
-        self.btn_naechster_dg = tb.Button(frame_zeitnehmung, text='>>>', bootstyle=WARNING, width=10, takefocus=0, command=self.dg_naechster)
+        self.btn_naechster_dg = tb.Button(frame_zeitnehmung, text='+', bootstyle=WARNING, width=5, takefocus=0, command=self.dg_naechster)
         self.btn_naechster_dg.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
         self.btn_start_global = tb.Button(frame_zeitnehmung, text='Start', width=15, takefocus=0, command=self.start_global)
@@ -698,6 +699,9 @@ class MainView(tb.Window):
                 self._armed_lane2 = False
 
     def _external_stop_lane(self, lane: int):
+        # still ignorieren, wenn schon gestoppt
+        if hasattr(self.zeit_manager, "needs_reset") and self.zeit_manager.needs_reset(lane):
+            return
         if lane == 1:
             self.bahn1_stop()
         elif lane == 2:
@@ -710,22 +714,41 @@ class MainView(tb.Window):
             pass
         self.audio.stop()
         self._reset_arming()
+        self.audio.play(self.stop_sound_path)
         self.zeitnehmung_buttons_control(False, False, False, True, False, False, False, True, True)
         self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
 
     def bahn1_stop(self):
+        # still ignorieren, wenn schon gestoppt
         try:
+            if hasattr(self.zeit_manager, "needs_reset") and self.zeit_manager.needs_reset(1):
+                return
             self.zeit_manager.stop_lane(1)
+            self.audio.play(self.stop_sound_path)
+        except Exception:
+            pass
+        try:
+            self.btn_bahn1_stop['state'] = DISABLED
         except Exception:
             pass
         self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
+        self._update_after_lane_stop()  # <--- NEU
 
     def bahn2_stop(self):
+        # still ignorieren, wenn schon gestoppt
         try:
+            if hasattr(self.zeit_manager, "needs_reset") and self.zeit_manager.needs_reset(2):
+                return
             self.zeit_manager.stop_lane(2)
+            self.audio.play(self.stop_sound_path)
+        except Exception:
+            pass
+        try:
+            self.btn_bahn2_stop['state'] = DISABLED
         except Exception:
             pass
         self._push_times_to_auswertungsfenster(self.lbl_bahn1_zeit.cget('text'), self.lbl_bahn2_zeit.cget('text'))
+        self._update_after_lane_stop()  # <--- NEU
 
     def zeit_reset(self):
         try:
@@ -759,7 +782,7 @@ class MainView(tb.Window):
         self.update_tabelle_von_modus_gesamt()
 
         self.zeit_reset()
-        self.zeitnehmung_buttons_control(False, False, False, False, False, False, False, True, True)
+        self.zeitnehmung_buttons_control(True, False, True, False, False, False, False, True, True)
 
         if count_zeit == 1:
             self.bahnwechsel()
@@ -901,6 +924,21 @@ class MainView(tb.Window):
         w = getattr(self, "win_auswertung", None)
         if w and w.winfo_exists():
             w.update_times(zeit1, zeit2)
+
+    def _update_after_lane_stop(self):
+        # Ist die Bahn im aktuellen DG überhaupt aktiv?
+        g1_active = bool((self.lbl_bahn1_gruppe.cget('text') or '').strip())
+        g2_active = bool((self.lbl_bahn2_gruppe.cget('text') or '').strip())
+
+        # Wurde sie schon gestoppt? (ZeitManager setzt needs_reset(X) nach stop_lane(X))
+        needs1 = self.zeit_manager.needs_reset(1) if hasattr(self.zeit_manager, "needs_reset") else False
+        needs2 = self.zeit_manager.needs_reset(2) if hasattr(self.zeit_manager, "needs_reset") else False
+
+        # "Alle aktiv gewesenen Bahnen sind gestoppt" -> für inaktive Bahnen nicht warten
+        all_active_stopped = (not g1_active or needs1) and (not g2_active or needs2)
+
+        if all_active_stopped:
+            self.zeitnehmung_buttons_control(False, False, False, True, False, False, False, True, True)
 
     def _ermittle_naechste_gruppen(self, aktueller_dg: int):
         try:
