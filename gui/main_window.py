@@ -437,11 +437,15 @@ class MainView(tb.Window):
         label.pack(padx=10, pady=(20,10), anchor=W)
         sub_frame = tb.Frame(frame); sub_frame.pack(fill=X, padx=10, pady=10)
 
-        # tb.Label(sub_frame, text="Schriftgröße Zeit").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
-        # tb.Entry(sub_frame, width=5).pack(side=LEFT, padx=(5,10), pady=10)
+        tb.Label(sub_frame, text="Schriftgröße Zeit").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+        self.ent_font_size_time = tb.Spinbox(sub_frame, from_=0, to=500, width=5, command=self.change_font_size_time, takefocus=0)
+        self.ent_font_size_time.pack(side=LEFT, padx=(5,10), pady=10)
+        self.ent_font_size_time.set(36)
 
-        # tb.Label(sub_frame, text="Schriftgröße Gruppe").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
-        # tb.Entry(sub_frame, width=5).pack(side=LEFT, padx=(5,10), pady=10)
+        tb.Label(sub_frame, text="Schriftgröße Gruppe").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
+        self.ent_font_size_group = tb.Spinbox(sub_frame, from_=0, to=500, width=5, command=self.change_font_size_group, takefocus=0)
+        self.ent_font_size_group.pack(side=LEFT, padx=(5,10), pady=10)
+        self.ent_font_size_group.set(50)
 
         tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0, command=self.change_font_size_from_window).pack(side=LEFT, padx=10, pady=10)
 
@@ -451,18 +455,42 @@ class MainView(tb.Window):
         label.pack(padx=10, pady=(20,10), anchor=W)
 
         tb.Label(self.frame_test, text="Anzahl Testgruppen").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
-        self.test_gruppen_anzahl = tb.Entry(self.frame_test, width=5); self.test_gruppen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
+        self.test_gruppen_anzahl = tb.Entry(self.frame_test, width=5) 
+        self.test_gruppen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
         tb.Label(self.frame_test, text="Anzahl Damengruppen").pack(side=LEFT, padx=(10,0), pady=10, anchor=W)
-        self.test_damen_anzahl = tb.Entry(self.frame_test, width=5); self.test_damen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
+        self.test_damen_anzahl = tb.Entry(self.frame_test, width=5)
+        self.test_damen_anzahl.pack(side=LEFT, padx=(5,10), pady=10)
 
         tb.Checkbutton(self.frame_test, text="Testzeiten", variable=self.checked_Testzeiten, bootstyle="round-toggle").pack(side=LEFT, padx=10, pady=10)
         tb.Button(self.frame_test, text="Erstellen", takefocus=0, command=self.testgruppen_hinzufuegen).pack(side=LEFT, padx=10, pady=10)
 
         return frame
     
+    def change_font_size_group(self, event=None):
+        size = self.ent_font_size_group.get() or 0
+        self.win_auswertung.change_font_size_group(int(size))
+    
+    def change_font_size_time(self, event=None):
+        size = self.ent_font_size_time.get() or 0
+        self.win_auswertung.change_font_size_time(int(size))
+
     def change_font_size_from_window(self):
-        self.win_auswertung.change_font_size_from_window()
+        from screeninfo import get_monitors
+        mons = get_monitors()
+        if 0 <= 1 < len(mons):
+            m = mons[1]
+            h = m.height
+            
+            size_group = h / 14
+            size_time =  h / 7
+
+            self.ent_font_size_time.delete(0, END)
+            self.ent_font_size_group.delete(0, END)
+
+            self.ent_font_size_time.insert(0, int(size_time))
+            self.ent_font_size_group.insert(0, int(size_group))
+            self.win_auswertung.change_font_size_from_window(int(size_time), int(size_group))
 
     def testframe_anzeigen(self):
         if self.checked_Test.get():
@@ -526,6 +554,7 @@ class MainView(tb.Window):
         self.lade_durchgang_von_dgnumber(1)
 
     def change_durchgang_gruppe(self, data):
+        # TODO Change Werte
         self.durchgang_manager.change_werte(data)
         self.durchgang_manager.berechne_bestzeiten()
         self.durchgang_manager.top_gruppen_naechste_runde()

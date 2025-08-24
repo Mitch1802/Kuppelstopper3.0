@@ -126,17 +126,19 @@ class AuswertungWindow(tb.Toplevel):
         if fullscreen:
             self.after(200, lambda: self.attributes("-fullscreen", True))
     
-    def change_font_size_from_window(self):
+    def change_font_size_group(self, size):
+        self.lbl_b1.config(font=("Arial", size, "bold"))
+        self.lbl_b2.config(font=("Arial", size, "bold"))
 
-        from screeninfo import get_monitors
-        mons = get_monitors()
-        if 0 <= 1 < len(mons):
-            m = mons[1]
-            h = m.height
-            
-            self.size_group = h / 4
-            self.size_time =  h / 5
-            # TODO Auto Size Font Size Text Resize
+    def change_font_size_time(self, size):
+        self.lbl_t1.config(font=("Arial", size, "bold"))
+        self.lbl_t2.config(font=("Arial", size, "bold"))
+    
+    def change_font_size_from_window(self, time, group):
+        self.lbl_b1.config(font=("Arial", group, "bold"))
+        self.lbl_t1.config(font=("Arial", time, "bold"))
+        self.lbl_t2.config(font=("Arial", time, "bold"))
+        self.lbl_b2.config(font=("Arial", group, "bold"))
 
     # ========== intern ==========
 
