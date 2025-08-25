@@ -10,6 +10,7 @@ from managers.durchgang_manager import DurchgangManager
 from managers.zeitnehmung_manager import ZeitManager
 from managers.audio_manager import AudioManager
 from managers.gpio_manager import GpioManager
+from managers.setup_manager import SetupManager
 from paths import *
 
 
@@ -39,6 +40,7 @@ class MainView(tb.Window):
         self.gruppen_manager = GruppenManager()
         self.durchgang_manager = DurchgangManager()
         self.zeit_manager = ZeitManager()
+        self.setup_manager = SetupManager()
 
         # Zeitmanager -> UI live aktualisieren, wenn vorhanden
         if hasattr(self.zeit_manager, "on_tick"):
@@ -87,7 +89,7 @@ class MainView(tb.Window):
             self.after(300, lambda: self.open_auswertung_window(monitor_index=1, fullscreen=False))
         
         # Lade Konfiguration
-        self.lade_konfigurationen()
+        self.lade_basis_setup()
 
     # ========= Tabs-Grundgerüst =========
     def setup_ui(self):
@@ -167,6 +169,7 @@ class MainView(tb.Window):
         self.gruppen_manager.speichere_anmeldung()
         ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
         self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
+        # TODO Ang. Gruppen speichern in JSON
         anzahl_gruppen = len(ang_gruppen)
         self.update_tabs(anzahl_gruppen)
         self.lade_grunddurchgang(testzeiten)
@@ -451,6 +454,16 @@ class MainView(tb.Window):
 
         tb.Button(sub_frame, text="Schriftgröße Autoanpassung", takefocus=0, command=self.change_font_size_from_window).pack(side=LEFT, padx=10, pady=10)
 
+        # Konfiguration
+        label = tb.Label(frame, text="Konfiguration", font=("Arial", 15))
+        label.pack(padx=10, pady=(20,10), anchor=W)
+        sub_frame = tb.Frame(frame); sub_frame.pack(fill=X, padx=10, pady=10)
+
+        tb.Button(sub_frame, text="Lade Gruppen", takefocus=0, command=self.lade_gruppen).pack(side=LEFT, padx=10, pady=10)
+        tb.Button(sub_frame, text="Lade Bewerb", takefocus=0, command=self.lade_bewerb).pack(side=LEFT, padx=10, pady=10)
+        tb.Button(sub_frame, text="Lade Einstellungen", takefocus=0, command=self.lade_setup).pack(side=LEFT, padx=10, pady=10)
+        tb.Button(sub_frame, text="Einstellungen speichern", bootstyle=INFO , takefocus=0, command=self.setup_speichern).pack(side=LEFT, padx=10, pady=10)
+
         # Testbereich (dein bestehendes UI)
         self.frame_test = tb.Frame(self.settings_tab)
         label = tb.Label(self.frame_test, text="Test", font=("Arial", 15))
@@ -534,17 +547,52 @@ class MainView(tb.Window):
         self.tbl_gruppen.set_data(daten_neu)
 
     # ========= Daten-Logik =========
-    def lade_konfigurationen(self):
-        # TODO Lade Konfiguration
+    def lade_gruppen(self):
+        self.gruppen_manager.lade_gruppen(ANMELDUNG_JSON)
+        self.tbl_gruppen_update()
+        self.show_tab('Anmeldung')
+
+    def lade_bewerb(self):
+        self.durchgang_manager.lade_bewerb(BEWERB_JSON)
+        for modus in self.durchgang_manager.lade_alle_Tabellen_modus():
+            self.durchgang_manager.sort_tbl_rang_daten(modus)
+        self.durchgang_manager.top_gruppen_naechste_runde()
+        self.update_tabelle_von_modus_gesamt()
+        self.lade_durchgang_von_dgnumber(1)
+        self.show_tab('Bewerb')
+        self.show_bewerb_subtab('Grunddurchgang')
+
+    def lade_setup(self):
+        self.setup_manager.lade_setup(SETUP_JSON)
+        # TODO Setup befüllen
+
+    def lade_basis_setup(self):
+        self.ent_gpio_start1.delete(0, END)
+        self.ent_gpio_stop1.delete(0, END)
+        self.ent_gpio_start2.delete(0, END)
+        self.ent_gpio_stop2.delete(0, END)
+        
         self.ent_gpio_start1.insert(0, '17')
         self.ent_gpio_stop1.insert(0, '27')
         self.ent_gpio_start2.insert(0, '19')
         self.ent_gpio_stop2.insert(0, '26')
+        
+        self.ent_key_start1.delete(0, END)
+        self.ent_key_stop1.delete(0, END)
+        self.ent_key_start2.delete(0, END)
+        self.ent_key_stop2.delete(0, END)
 
         self.ent_key_start1.insert(0, 'a')
         self.ent_key_stop1.insert(0, 'q')
         self.ent_key_start2.insert(0, 's')
         self.ent_key_stop2.insert(0, 'w')
+
+    def setup_speichern(self):
+        data = {}
+
+        # TODO Setup auslesen und speichern
+
+        self.setup_manager.setup_speichern(SETUP_JSON, data)
 
     def lade_grunddurchgang(self, testzeiten):
         self.durchgang_manager.lade_grunddurchgang(testzeiten)
@@ -898,6 +946,7 @@ class MainView(tb.Window):
         all_modus = self.durchgang_manager.lade_alle_Tabellen_modus()
         for modus in all_modus:
             self.update_tabelle_von_modus(modus)
+        # TODO Bewerb speichern in JSON
 
     def update_tabelle_von_modus(self, modus):
         daten_bewerb = self.durchgang_manager.filter_bewerb(modus)

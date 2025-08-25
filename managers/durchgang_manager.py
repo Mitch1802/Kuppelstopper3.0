@@ -329,7 +329,6 @@ class DurchgangManager:
                 row[5] = data[4]
                 row[6] = data[5]
 
-
     def check_beide_zeiten(self, durchgang):
         zeiten_a = 0
         zeiten_b = 0

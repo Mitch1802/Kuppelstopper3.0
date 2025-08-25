@@ -1,8 +1,7 @@
 # Kuppelstopper3.0
 
 ## BUGS & TODOS 3.0
-- Change Werte mit Popup
-- die tabellen laden immer und resizen die Spaltengröße
+- die tabellen laden immer und resizen die Spaltengröße wenn das fenster zu klein ist
 - Damenwertung
 - Konfig über Setup laden
 - Icons
