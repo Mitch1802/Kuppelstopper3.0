@@ -2,6 +2,8 @@ from tkinter import *
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from gui.custom_table import CustomTable
+from gui.edit_popup import EditPopup
+from gui.auswertung_window import AuswertungWindow
 from models import Gruppe
 from managers.gruppen_manager import GruppenManager
 from managers.durchgang_manager import DurchgangManager
@@ -554,11 +556,43 @@ class MainView(tb.Window):
         self.lade_durchgang_von_dgnumber(1)
 
     def change_durchgang_gruppe(self, data):
-        # TODO Change Werte
-        self.durchgang_manager.change_werte(data)
-        self.durchgang_manager.berechne_bestzeiten()
-        self.durchgang_manager.top_gruppen_naechste_runde()
-        self.update_tabelle_von_modus_gesamt()
+        """
+        Wird von der CustomTable-Kommandospalte aufgerufen (z. B. Klick).
+        'data' sollte die Zeilendaten enthalten. Wir öffnen ein Popup,
+        lassen Werte bearbeiten und speichern danach alles wie gehabt.
+        """
+        # Bestmögliche Defaults aus der Zeile ziehen (Passe Keys an deine tatsächlichen Daten an!)
+        initial = {
+            "Durchgang": data[0],
+            "Gruppe": data[1],
+            "Zeit1": data[2],
+            "F1":    data[3],
+            "Zeit2": data[4],
+            "F2":    data[5],
+        }
+
+        # Welche Felder sollen editierbar sein?
+        fields = [
+            ("Durchgang", "ro-entry"),
+            ("Gruppe", "ro-entry"),
+            ("Zeit1",  "entry"),
+            ("F1",     "spin", (0, 100)),
+            ("Zeit2",  "entry"),
+            ("F2",     "spin", (0, 100)),
+        ]
+
+        def on_save(d):
+            # Neue Daten in die alte Struktur mergen, dann deinen bisherigen Ablauf verwenden
+            new_data = list(d.values())
+
+            # Deine bestehende Logik:
+            self.durchgang_manager.change_werte(new_data)
+            self.durchgang_manager.berechne_bestzeiten()
+            self.durchgang_manager.top_gruppen_naechste_runde()
+            self.update_tabelle_von_modus_gesamt()
+
+        # Popup öffnen (modal) – schließt sich nach Speichern automatisch
+        EditPopup(self, "Durchgang bearbeiten", fields, initial, on_save)
 
     def ansicht_umschalten(self):
         w = getattr(self, "win_auswertung", None)
@@ -895,7 +929,6 @@ class MainView(tb.Window):
             w.lift()
             return
 
-        from gui.auswertung_window import AuswertungWindow
         self.win_auswertung = AuswertungWindow(
             self,
             zeit_manager=self.zeit_manager,

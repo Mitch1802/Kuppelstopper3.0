@@ -7,6 +7,7 @@
 - Konfig über Setup laden
 - Icons
 - UI für Auswertungsdisplay
+- Testzeiten Auswertung Display Bug
 - Excel als Backup
 
 ## Features 4.0

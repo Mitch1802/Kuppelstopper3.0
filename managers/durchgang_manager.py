@@ -322,7 +322,13 @@ class DurchgangManager:
         return [gruppe_a, gruppe_b]
 
     def change_werte(self, data):
-        pass
+        for row in self.Bewerb:
+            if row[0] == int(data[0]) and row[2] == data[1]:
+                row[3] = data[2]
+                row[4] = data[3]
+                row[5] = data[4]
+                row[6] = data[5]
+
 
     def check_beide_zeiten(self, durchgang):
         zeiten_a = 0
