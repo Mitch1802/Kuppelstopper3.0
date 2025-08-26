@@ -77,20 +77,20 @@ class AuswertungWindow(tb.Toplevel):
 
     # ========== Öffentliche API (vom MainView aufrufen) ==========
 
-    def set_current_groups(self, bahn1: str | None, bahn2: str | None):
+    def set_current_groups(self, bahn1: str, bahn2: str):
         """Aktuelle Gruppen (Bahn 1 / Bahn 2) setzen."""
         self.curr_group_bahn1 = bahn1
         self.curr_group_bahn2 = bahn2
         self.lbl_b1.config(text=bahn1 or "—")
         self.lbl_b2.config(text=bahn2 or "—")
 
-    def set_next_groups(self, next1: str | None, next2: str | None):
+    def set_next_groups(self, next1: str, next2: str):
         """Nächster Durchgang oben im Label anzeigen (zwei Gruppennamen)."""
         self.next_group_1 = next1
         self.next_group_2 = next2
         self.lbl_next.config(text=f"{next1 or '—'}  vs  {next2 or '—'}")
 
-    def update_times(self, zeit1: str | None = None, zeit2: str | None = None):
+    def update_times(self, zeit1: str = None, zeit2: str = None):
         """Zeiten 1/2 direkt aus dem MainView übernehmen (push-basiert)."""
         if zeit1 is not None:
             self.lbl_t1.config(text=zeit1)

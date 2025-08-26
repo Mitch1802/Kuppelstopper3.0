@@ -1,4 +1,3 @@
-from managers.gruppen_manager import *
 from gui.main_window import MainView
 
 def main():

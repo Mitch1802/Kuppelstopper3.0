@@ -20,6 +20,10 @@ class DurchgangManager:
             data = json.load(f)
         self.Bewerb = [Durchgang(**dg) for dg in data['Bewerb']]
 
+    def export_bewerb(self, pfad):
+        with open(pfad, "w") as outfile:
+            json.dump(self.Bewerb, outfile)
+
     def berechne_bestzeiten(self):
         """Berechnet für jeden Durchgang die beste Zeit."""
         for dg in self.Bewerb:

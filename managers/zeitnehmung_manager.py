@@ -91,7 +91,7 @@ class ZeitManager:
         self._running = False
         self._stop_tick_thread()
 
-    def needs_reset(self, lane: int | None = None) -> bool:
+    def needs_reset(self, lane: int = None) -> bool:
         if lane is None:
             return self._needs_reset_b1 or self._needs_reset_b2
         if lane == 1:
@@ -103,7 +103,7 @@ class ZeitManager:
     def is_running(self) -> bool:
         return self._running
 
-    def get_elapsed_seconds(self) -> tuple[float | None, float | None]:
+    def get_elapsed_seconds(self) -> tuple[float, float]:
         now = time.perf_counter()
         sec1 = self._acc_b1 + (now - self._t0_b1) if self._t0_b1 is not None else (self._acc_b1 if self._acc_b1 > 0 else None)
         sec2 = self._acc_b2 + (now - self._t0_b2) if self._t0_b2 is not None else (self._acc_b2 if self._acc_b2 > 0 else None)
@@ -125,7 +125,7 @@ class ZeitManager:
         if not self._running:
             self._stop_tick_thread()
 
-    def _fmt_time(self, seconds: float | None) -> str:
+    def _fmt_time(self, seconds: float) -> str:
         if seconds is None:
             return "00:00:00"
         if seconds < 0:

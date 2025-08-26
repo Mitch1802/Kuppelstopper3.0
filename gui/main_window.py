@@ -784,7 +784,7 @@ class MainView(tb.Window):
     def _reset_arming(self):
         self._armed_global = self._armed_lane1 = self._armed_lane2 = False
 
-    def _external_start(self, lane: int | None):
+    def _external_start(self, lane: int):
         """Von Tastatur/GPIO getriggert. lane=None => globaler Start."""
         if not (self._armed_global or self._armed_lane1 or self._armed_lane2):
             return
@@ -946,7 +946,7 @@ class MainView(tb.Window):
         all_modus = self.durchgang_manager.lade_alle_Tabellen_modus()
         for modus in all_modus:
             self.update_tabelle_von_modus(modus)
-        # TODO Bewerb speichern in JSON
+        self.durchgang_manager.export_bewerb(BEWERB_JSON)
 
     def update_tabelle_von_modus(self, modus):
         daten_bewerb = self.durchgang_manager.filter_bewerb(modus)
