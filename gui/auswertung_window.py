@@ -25,6 +25,7 @@ class AuswertungWindow(tb.Toplevel):
         self.curr_group_bahn2 = None
         self.next_group_1 = None
         self.next_group_2 = None
+        self.size_next = 18
         self.size_group = 36
         self.size_time = 50
 
@@ -32,9 +33,10 @@ class AuswertungWindow(tb.Toplevel):
         top = tb.Frame(self)
         top.pack(fill=X, padx=12, pady=(12, 6))
 
-        tb.Label(top, text="Nächster Durchgang", font=("Arial", 14, "bold")).pack(anchor=W)
+        self.lbl_next_title = tb.Label(top, text="Nächster Durchgang", font=("Arial", self.size_next, "bold"))
+        self.lbl_next_title.pack(anchor=W)
 
-        self.lbl_next = tb.Label(top, text="—  vs  —", font=("Arial", 28, "bold"), anchor=CENTER)
+        self.lbl_next = tb.Label(top, text="—  vs  —", font=("Arial", self.size_next, "bold"), anchor=CENTER)
         self.lbl_next.pack(fill=X, pady=10)
 
         separator = tb.Separator(top, orient="horizontal")
@@ -139,6 +141,8 @@ class AuswertungWindow(tb.Toplevel):
         self.lbl_t1.config(font=("Arial", time, "bold"))
         self.lbl_t2.config(font=("Arial", time, "bold"))
         self.lbl_b2.config(font=("Arial", group, "bold"))
+        self.lbl_next_title.config(font=("Arial", int(group/2), "bold"))
+        self.lbl_next.config(font=("Arial", int(group/2), "bold"))
 
     # ========== intern ==========
 

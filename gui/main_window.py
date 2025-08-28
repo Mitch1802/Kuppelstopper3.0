@@ -495,17 +495,20 @@ class MainView(tb.Window):
         mons = get_monitors()
         if 0 <= 1 < len(mons):
             m = mons[1]
-            h = m.height
-            
-            size_group = h / 14
-            size_time =  h / 7
+        else:
+            m = mons[0]
 
-            self.ent_font_size_time.delete(0, END)
-            self.ent_font_size_group.delete(0, END)
+        h = m.height
+        
+        size_group = h / 14
+        size_time =  h / 7
 
-            self.ent_font_size_time.insert(0, int(size_time))
-            self.ent_font_size_group.insert(0, int(size_group))
-            self.win_auswertung.change_font_size_from_window(int(size_time), int(size_group))
+        self.ent_font_size_time.delete(0, END)
+        self.ent_font_size_group.delete(0, END)
+
+        self.ent_font_size_time.insert(0, int(size_time))
+        self.ent_font_size_group.insert(0, int(size_group))
+        self.win_auswertung.change_font_size_from_window(int(size_time), int(size_group))
 
     def testframe_anzeigen(self):
         if self.checked_Test.get():
