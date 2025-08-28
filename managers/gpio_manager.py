@@ -10,7 +10,7 @@ class GpioManager:
                 if pin is None:
                     self.buttons[key] = None
                     continue
-                b = Button(pin, pull_up=True, bounce_time=0.02)
+                b = Button(pin, pull_up=True, hold_time=0.02)
                 self.buttons[key] = b
                 cb = handlers.get(key)
                 if cb:
