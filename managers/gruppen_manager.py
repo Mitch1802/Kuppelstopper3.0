@@ -16,6 +16,11 @@ class GruppenManager:
         else:
             self.gruppen = []
 
+    def export_gruppen(self, pfad=ANMELDUNG_JSON):
+        """Speichert die Gruppenliste als JSON."""
+        with open(pfad, 'w', encoding='utf-8') as f:
+            json.dump([vars(g) for g in self.gruppen], f, indent=2, ensure_ascii=False)
+
     def gruppe_hinzufuegen(self, gruppe: Gruppe):
         """Fügt eine Gruppe zur Liste hinzu."""
         self.gruppen.append(gruppe)
@@ -63,11 +68,6 @@ class GruppenManager:
         for grp in self.gruppen:
             if grp.gruppenname == gruppe[0]:
                 self.gruppen.remove(grp)
-
-    def speichere_anmeldung(self, pfad=ANMELDUNG_JSON):
-        """Speichert die Gruppenliste als JSON."""
-        with open(pfad, 'w', encoding='utf-8') as f:
-            json.dump([vars(g) for g in self.gruppen], f, indent=2, ensure_ascii=False)
 
     def get_gruppen(self):
         """Gibt die Liste der angemeldeteten Gruppen zurück für Tabelleneinträge"""

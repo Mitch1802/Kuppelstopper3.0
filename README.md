@@ -3,9 +3,7 @@
 ## BUGS & TODOS 3.0
 - die tabellen laden immer und resizen die Spaltengröße wenn das fenster zu klein ist
 - Damenwertung
-- Konfig über Setup laden
 - Icons
-- UI für Auswertungsdisplay
 - Testzeiten Auswertung Display Bug
 - Excel als Backup
 

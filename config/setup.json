@@ -1,40 +1,18 @@
 {
-    "Style": {
-        "GlobalFontArt": "Arial",
-        "GlobalFontSizeText": 10,
-        "GlobalFontSizeTitle": 15,
-        "GlobalDGBackgroundColor": "#98CF8B",
-        "AnzeigeFontSizeGroup": 100,
-        "AnzeigeFontSizeTime": 300,
-        "AnzeigeFontSizeInfo": 25,
-        "AnzeigeFontSizeAuswertung": 20,
-        "AnzeigeBackgroundColor": "#6e6c6b",
-        "AnzeigeGroupColor": "#818ef0",
-        "AnzeigeGroup2Color": "#93ff8f",
-        "AnzeigeTimeColor": "#ffffff",
-        "AnzeigeNextColor": "#ff23ff"
-    },
-    "Buttons": {
-        "GPIO_Start_1": 17,
-        "GPIO_Stop_1": 27,
-        "GPIO_Start_2": 19,
-        "GPIO_Stop_2": 26,
-        "Taste_Start_1": "a",
-        "Taste_Stop_1": "q",
-        "Taste_Start_2": "s",
-        "Taste_Stop_2": "w"
-    },
-    "Files": {
-        "icon": "Kuppelstopper.ico",
-        "angriffsbefehl": "AngriffsbefehlWonie.wav",
-        "stopp": "HornHonk.wav",
-        "iconDelete": "delete.png"
-    },
-    "Setup": {
-        "Title": "KuppelStopper 4.0",
-        "TitleAnzeige": "KuppelStopper 4.0 Anzeige",
-        "ZeigeAlleZeiten": false,
-        "Testmodus": true,
-        "PlaySound": false
-    }
+    "checked_Tastatur": true,
+    "checked_GPIO": false,
+    "checked_Fullscreen": false,
+    "checked_Konsole": true,
+    "checked_Test": false,
+    "checked_Testzeiten": false,
+    "ent_key_start1": "a",
+    "ent_key_stop1": "q",
+    "ent_key_start2": "s",
+    "ent_key_stop2": "w",
+    "ent_gpio_start1": "17",
+    "ent_gpio_stop1": "27",
+    "ent_gpio_start2": "19",
+    "ent_gpio_stop2": "26",
+    "ent_font_size_time": "36",
+    "ent_font_size_group": "50"
 }

@@ -1,4 +1,4 @@
-import json, random
+import json, random, os
 from models import Durchgang
 
 class DurchgangManager:
@@ -16,9 +16,17 @@ class DurchgangManager:
 
     def lade_bewerb(self, pfad):
         """Lädt Durchgänge aus einer Datei im Bewerbsformat."""
-        with open(pfad, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        self.Bewerb = [Durchgang(**dg) for dg in data['Bewerb']]
+        if os.path.exists(pfad):
+            with open(pfad, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            self.Bewerb = data
+            filt_data = self.filter_bewerb(self.TypGD)
+            anzahl_gruppen = len(filt_data)
+        else:
+            self.Bewerb = []
+            anzahl_gruppen = 0
+        
+        return anzahl_gruppen
 
     def export_bewerb(self, pfad):
         with open(pfad, "w") as outfile:

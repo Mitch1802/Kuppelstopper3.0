@@ -462,7 +462,7 @@ class MainView(tb.Window):
         tb.Button(sub_frame, text="Lade Gruppen", takefocus=0, command=self.lade_gruppen).pack(side=LEFT, padx=10, pady=10)
         tb.Button(sub_frame, text="Lade Bewerb", takefocus=0, command=self.lade_bewerb).pack(side=LEFT, padx=10, pady=10)
         tb.Button(sub_frame, text="Lade Einstellungen", takefocus=0, command=self.lade_setup).pack(side=LEFT, padx=10, pady=10)
-        tb.Button(sub_frame, text="Einstellungen speichern", bootstyle=INFO , takefocus=0, command=self.setup_speichern).pack(side=LEFT, padx=10, pady=10)
+        tb.Button(sub_frame, text="Export Einstellungen", bootstyle=INFO , takefocus=0, command=self.export_setup).pack(side=LEFT, padx=10, pady=10)
 
         # Testbereich (dein bestehendes UI)
         self.frame_test = tb.Frame(self.settings_tab)
@@ -556,7 +556,9 @@ class MainView(tb.Window):
         self.show_tab('Anmeldung')
 
     def lade_bewerb(self):
-        self.durchgang_manager.lade_bewerb(BEWERB_JSON)
+        anzahl_gruppen = self.durchgang_manager.lade_bewerb(BEWERB_JSON)
+        self.update_tabs(anzahl_gruppen)
+        self.durchgang_manager.berechne_bestzeiten()
         for modus in self.durchgang_manager.lade_alle_Tabellen_modus():
             self.durchgang_manager.sort_tbl_rang_daten(modus)
         self.durchgang_manager.top_gruppen_naechste_runde()
@@ -590,10 +592,28 @@ class MainView(tb.Window):
         self.ent_key_start2.insert(0, 's')
         self.ent_key_stop2.insert(0, 'w')
 
-    def setup_speichern(self):
+    def export_setup(self):
         data = {}
 
-        # TODO Setup auslesen und speichern
+        data['checked_Tastatur'] = self.checked_Tastatur.get()
+        data['checked_GPIO'] = self.checked_GPIO.get()
+        data['checked_Fullscreen'] = self.checked_Fullscreen.get()
+        data['checked_Konsole'] = self.checked_Konsole.get()
+        data['checked_Test'] = self.checked_Test.get()
+        data['checked_Testzeiten'] = self.checked_Testzeiten.get()
+
+        data['ent_key_start1'] = self.ent_key_start1.get()
+        data['ent_key_stop1'] = self.ent_key_stop1.get()
+        data['ent_key_start2'] = self.ent_key_start2.get()
+        data['ent_key_stop2'] = self.ent_key_stop2.get()
+
+        data['ent_gpio_start1'] = self.ent_gpio_start1.get()
+        data['ent_gpio_stop1'] = self.ent_gpio_stop1.get()
+        data['ent_gpio_start2'] = self.ent_gpio_start2.get()
+        data['ent_gpio_stop2'] = self.ent_gpio_stop2.get()
+
+        data['ent_font_size_time'] = self.ent_font_size_time.get()
+        data['ent_font_size_group'] = self.ent_font_size_group.get()
 
         self.setup_manager.setup_speichern(SETUP_JSON, data)
 
