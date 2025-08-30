@@ -166,7 +166,7 @@ class MainView(tb.Window):
     def gruppen_uebernehmen(self):
         testzeiten = self.checked_Testzeiten.get()
         self.lbl_dg_number.config(text=1)
-        self.gruppen_manager.speichere_anmeldung()
+        self.gruppen_manager.export_gruppen(ANMELDUNG_JSON)
         ang_gruppen = self.gruppen_manager.gruppen_uebernehmen()
         self.durchgang_manager.uebernehme_angemeldete_gruppen(ang_gruppen)
         # TODO Ang. Gruppen speichern in JSON

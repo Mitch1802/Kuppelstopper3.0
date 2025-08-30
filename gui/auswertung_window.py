@@ -31,7 +31,7 @@ class AuswertungWindow(tb.Toplevel):
 
         # ========= OBERER BEREICH =========
         top = tb.Frame(self)
-        top.pack(fill=X, padx=12, pady=(12, 6))
+        top.pack(fill=X, padx=25, pady=(12, 6))
 
         self.lbl_next_title = tb.Label(top, text="Nächster Durchgang", font=("Arial", self.size_next, "bold"))
         self.lbl_next_title.pack(anchor=W)
@@ -44,7 +44,7 @@ class AuswertungWindow(tb.Toplevel):
 
         # ========= UNTERER BEREICH (ZEIT-ANSICHT) =========
         bottom = tb.Frame(self)
-        bottom.pack(fill=BOTH, expand=YES, padx=12, pady=12)
+        bottom.pack(fill=BOTH, expand=YES, padx=25, pady=12)
 
         self.frame_zeit = tb.Frame(bottom)
         self.frame_zeit.pack(fill=BOTH, expand=YES)

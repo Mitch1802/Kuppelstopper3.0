@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ANMELDUNG_JSON = os.path.join(BASE_DIR, "config/anmeldung.json")
 BEWERB_JSON = os.path.join(BASE_DIR, "config/bewerb.json")
 SETUP_JSON = os.path.join(BASE_DIR, "config/setup.json")
-START_SOUND_PATH = os.path.join(BASE_DIR, "Resources/angriffsbefehl-lflb.wav")
+START_SOUND_PATH = os.path.join(BASE_DIR, "Resources/AngriffsbefehlWonie.wav")
 STOP_SOUND_PATH = os.path.join(BASE_DIR, "Resources/HornHonk.wav")
 
 ANMELDUNG_JSON = ANMELDUNG_JSON.replace('\\', '/')
